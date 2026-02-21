@@ -1,2 +1,8 @@
 # Claude Code local settings (may contain sensitive data)
 .claude/settings.local.json
+
+# ChromaDB local data
+chroma-data/
+
+# Python virtual environment (for ChromaDB server)
+.venv/
