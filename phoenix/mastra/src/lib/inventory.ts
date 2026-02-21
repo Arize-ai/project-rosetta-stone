@@ -20,6 +20,7 @@ export interface Product {
     stars: number;
     numberOfRatings: number;
   };
+  image: string;
 }
 
 export const products: Product[] = [
@@ -27,6 +28,7 @@ export const products: Product[] = [
   {
     id: "toy-001",
     name: "Rainbow Stacking Rings",
+    image: "/product-images/toy-001.png",
     description: "Colorful wooden stacking rings that help develop hand-eye coordination and color recognition. Features 8 vibrant rings in graduated sizes.",
     marketingCopy: `Introduce your little one to a world of color, shape, and discovery with our Rainbow Stacking Rings — a timeless developmental toy handcrafted from sustainably sourced hardwood. Each of the eight rings is finished with water-based, non-toxic paint in a vibrant spectrum that naturally draws curious eyes and eager hands. The graduated sizing encourages babies and toddlers to experiment with order and sequence, building foundational problem-solving skills one ring at a time.
 
@@ -46,6 +48,7 @@ Safety is built into every detail: rounded edges, a tip-resistant base, and fini
   {
     id: "toy-002",
     name: "Musical Activity Cube",
+    image: "/product-images/toy-002.png",
     description: "Five-sided activity cube with spinning gears, bead maze, shape sorter, xylophone, and peek-a-boo doors. Encourages exploration and discovery.",
     marketingCopy: `Five sides of wonder await in our Musical Activity Cube — a sensory playground that keeps little explorers engaged for hours. Each face of this sturdy wooden cube offers a completely different activity: a bead maze that twists and turns across the top, interlocking gears that spin in satisfying synchrony, a shape-sorting challenge with four chunky blocks, a five-key xylophone that plays real musical notes, and peek-a-boo doors that reveal friendly animal illustrations underneath.
 
@@ -65,6 +68,7 @@ Pediatric occupational therapists recommend the Musical Activity Cube for its ab
   {
     id: "toy-003",
     name: "Baby's First Books (Set of 6)",
+    image: "/product-images/toy-003.png",
     description: "Soft fabric books with crinkle pages, bright patterns, and teething-safe corners. Topics include animals, colors, numbers, shapes, food, and vehicles.",
     marketingCopy: `Open the door to a lifelong love of reading with Baby's First Books — a curated set of six cloth books designed specifically for the youngest bookworms. Each soft, squeezable book explores a different foundational theme: friendly farm animals, bold primary colors, first numbers 1 through 5, basic shapes, yummy foods, and things that go. The pages crinkle enticingly when touched, rewarding tiny hands with instant sensory feedback that encourages repeated page-turning.
 
@@ -84,6 +88,7 @@ Compact enough to toss in a diaper bag or clip to a stroller with the built-in f
   {
     id: "toy-004",
     name: "Sensory Ball Set (10 pack)",
+    image: "/product-images/toy-004.png",
     description: "Ten uniquely textured balls in different sizes, shapes, and colors. BPA-free, easy to grip, perfect for tummy time and tactile exploration.",
     marketingCopy: `Unleash a rainbow of tactile adventure with our Sensory Ball Set — ten irresistibly squeezable balls, each boasting a completely unique texture, size, and color. From nubby spikes to smooth ridges, gentle bumps to honeycomb dimples, every ball delivers a distinct sensory experience that captivates developing minds. The soft, pliable BPA-free material makes them easy for even the tiniest fingers to grasp, squeeze, and roll.
 
@@ -103,6 +108,7 @@ The entire set is made from medical-grade silicone that withstands boiling, dish
   {
     id: "toy-005",
     name: "Shape Sorting Barn",
+    image: "/product-images/toy-005.png",
     description: "Red barn with chunky animal-shaped pieces that fit through matching doors. Teaches shapes, animals, and problem-solving. Solid hardwood construction.",
     marketingCopy: `Welcome to the friendliest farm in toyland! Our Shape Sorting Barn reimagines the classic shape sorter by replacing abstract geometric blocks with adorable, chunky animal silhouettes — a cow, pig, chicken, horse, sheep, and more — each one cut from solid hardwood and painted in cheerful, farm-authentic colors. Little farmers must match each animal to its uniquely shaped barn door, twisting and turning until the piece drops inside with a satisfying clunk.
 
@@ -122,6 +128,7 @@ Beyond shape recognition, this toy quietly teaches persistence, spatial reasonin
   {
     id: "toy-006",
     name: "Wobble Penguin Toy",
+    image: "/product-images/toy-006.png",
     description: "Weighted roly-poly penguin that wobbles, chimes, and always rights itself. Encourages reaching and batting. Smooth, baby-safe finish.",
     marketingCopy: `Meet Pippin the Wobble Penguin — a roly-poly pal whose cheerful chime and endless wobbling captivate babies from their very first swipe. Weighted at the base with a sealed steel ball bearing, Pippin sways dramatically when batted, nudged, or gently pushed, but always rights himself with a gentle, bell-like ring. The motion is mesmerizing for infants during tummy time, providing irresistible motivation to reach, bat, and eventually crawl toward their wobbly friend.
 
@@ -141,6 +148,7 @@ This is the toy that grandparents remember from their own childhoods, updated wi
   {
     id: "toy-007",
     name: "Nesting & Stacking Cups (12 pack)",
+    image: "/product-images/toy-007.png",
     description: "Twelve brightly colored cups that nest inside each other or stack into a tall tower. Numbers and drainage holes for bath play.",
     marketingCopy: `Twelve cups, infinite possibilities. Our Nesting & Stacking Cups are the Swiss Army knife of baby toys — equally at home on the living room floor, in the bathtub, or at the beach sandbox. Each cup is a different size and color, printed with a large numeral (1–12) on one side and a matching quantity of stars on the other, turning every play session into a stealth counting lesson.
 
@@ -160,6 +168,7 @@ Developmental scientists call nesting cups one of the most versatile learning to
   {
     id: "toy-008",
     name: "Peek-a-Boo Bear",
+    image: "/product-images/toy-008.png",
     description: "Interactive plush bear that plays peek-a-boo with a soft blanket. Giggles and talks in a friendly voice. Requires 2 AA batteries.",
     marketingCopy: `Get ready for giggles galore with our Peek-a-Boo Bear — an irresistibly cuddly companion who plays the world's most beloved baby game all by himself. Press his left paw and he lifts his velvety-soft blanket over his eyes, saying "Where's the bear?" in a gentle, warm voice. Press his right paw and he drops the blanket with a delighted "Peek-a-boo! I see you!" followed by an infectious giggle that makes babies — and adults — laugh every single time.
 
@@ -179,6 +188,7 @@ Parents regularly tell us that Peek-a-Boo Bear is the one toy that reliably stop
   {
     id: "toy-009",
     name: "First Words Learning Tablet",
+    image: "/product-images/toy-009.png",
     description: "Toy tablet with big colorful buttons for letters, numbers, and animals. Plays songs, sounds, and phrases. Volume control and auto-off.",
     marketingCopy: `Give your toddler their own screen-free "tablet" that actually teaches. Our First Words Learning Tablet features 30 oversized, brightly colored buttons — each one triggering a letter name, phonetic sound, animal name, or counting phrase spoken in a clear, friendly voice. Three learning modes (Explore, Quiz, and Music) keep the content fresh as your child grows, transitioning from simple sound exploration to interactive question-and-answer games that reinforce letter and number recognition.
 
@@ -198,6 +208,7 @@ Early-literacy researchers contributed to the content design, ensuring that lett
   {
     id: "toy-010",
     name: "Wooden Peg Puzzle – Animals",
+    image: "/product-images/toy-010.png",
     description: "Chunky wooden puzzle with 8 animal pieces and easy-grip pegs. Full-color pictures underneath each piece. Durable and splinter-free.",
     marketingCopy: `Our Wooden Peg Puzzle is the gateway puzzle — the very first jigsaw experience that builds the spatial confidence toddlers need for increasingly complex puzzles down the road. Eight friendly animal shapes (dog, cat, fish, bird, horse, frog, turtle, and butterfly) sit in precision-routed recesses on a sturdy plywood board. Each piece sports a chunky, lacquered wooden peg that tiny fingers can grip, twist, and lift with ease, eliminating the frustration that thinner puzzles often cause.
 
@@ -218,6 +229,7 @@ Crafted in a family-owned European workshop with FSC-certified birch plywood, th
   {
     id: "toy-011",
     name: "Soft Plush Elephant",
+    image: "/product-images/toy-011.png",
     description: "Ultra-soft cuddly elephant plush toy with crinkle ears and a squeaker. Machine washable and made with baby-safe materials.",
     marketingCopy: `There is something magical about the moment a baby wraps their arms around our Soft Plush Elephant for the first time — and refuses to let go. Crafted from premium microfiber plush that is impossibly soft to the touch, this 12-inch elephant features oversized floppy ears lined with crinkle fabric that rustles enticingly with every squeeze, and a hidden squeaker in the tummy that rewards curious presses with a cheerful chirp.
 
@@ -237,6 +249,7 @@ Our Soft Plush Elephant has become a social-media favorite, with thousands of pa
   {
     id: "toy-012",
     name: "Giant Teddy Bear (36 inch)",
+    image: "/product-images/toy-012.png",
     description: "Three-foot-tall ultra-plush teddy bear with velvety-soft fur and a big satin bow. Premium polyester fill. A classic cuddle companion.",
     marketingCopy: `Go big or go home — our Giant Teddy Bear stands a full three feet tall and delivers hugs on an epic scale. Covered in velvety-soft, dense-pile plush fabric in a warm honey-brown, this bear features a classic stitched nose, warm amber safety eyes, and a luxurious satin bow tied at the neck. The premium virgin polyester fill is distributed to create a satisfyingly squishy body, supportive arms perfect for leaning against, and a lap-sized tummy that doubles as a pillow.
 
@@ -256,6 +269,7 @@ Quality is sewn into every seam. The outer fabric passes 100,000-cycle Martindal
   {
     id: "toy-013",
     name: "Plush Unicorn with Rainbow Mane",
+    image: "/product-images/toy-013.png",
     description: "Sparkly unicorn with a flowing rainbow mane and tail. Shimmery horn and wings. 14 inches tall, surface washable.",
     marketingCopy: `Dreams really do come true with our Plush Unicorn — a dazzling, 14-inch companion whose flowing rainbow mane, shimmery golden horn, and iridescent wings make every child feel like they have their very own magical best friend. The body is crafted from cloud-soft white plush, while the mane and tail cascade in vibrant strands of red, orange, yellow, green, blue, and violet that children love to brush, braid, and style.
 
@@ -275,6 +289,7 @@ Our unicorn has become the go-to gift for unicorn-obsessed kids aged three and u
   {
     id: "toy-014",
     name: "Weighted Anxiety Buddy – Dinosaur",
+    image: "/product-images/toy-014.png",
     description: "2-lb weighted plush dinosaur designed to provide calming pressure. Lavender-scented insert. Removable weight for machine washing.",
     marketingCopy: `Meet Rex, the dinosaur who makes big feelings feel smaller. Our Weighted Anxiety Buddy is a huggable, 2-pound plush T-Rex designed with input from child psychologists to provide the deep-pressure sensory input that helps anxious, overstimulated, or restless children self-regulate. The evenly distributed weight — achieved through food-grade glass microbeads sealed in an inner pouch — mimics the comforting sensation of a warm hug, activating the parasympathetic nervous system to promote calm.
 
@@ -293,26 +308,28 @@ Practical design details make Rex a daily-use companion: the inner weight pod ve
   },
   {
     id: "toy-015",
-    name: "Jellycat Bashful Bunny",
+    name: "Bashful Bunny",
+    image: "/product-images/toy-015.png",
     description: "Irresistibly soft bunny with long floppy ears and a bobble tail. Suede-soft fabric in a warm beige. 12 inches from ear to toe.",
-    marketingCopy: `The Jellycat Bashful Bunny is, quite simply, the gold standard of cuddly companions — and one touch of its legendarily soft fur tells you exactly why. This 12-inch bunny is crafted from Jellycat's signature plush fabric, a proprietary polyester blend so velvety that adults find themselves absent-mindedly stroking it during conversation. The long, floppy ears are perfectly weighted to drape over a child's arm, and the round bobble tail adds a playful finishing touch.
+    marketingCopy: `The Bashful Bunny is, quite simply, the gold standard of cuddly companions — and one touch of its legendarily soft fur tells you exactly why. This 12-inch bunny is crafted from our signature plush fabric, a proprietary polyester blend so velvety that adults find themselves absent-mindedly stroking it during conversation. The long, floppy ears are perfectly weighted to drape over a child's arm, and the round bobble tail adds a playful finishing touch.
 
 In a warm, neutral beige that complements any nursery aesthetic, Bashful Bunny has a gently understated expression — two small brown eyes and a barely-there pink nose — that invites children to project their own emotions onto their friend. Psychologists note that this intentional design choice makes Bashful an ideal transitional object, helping children process feelings and develop empathy through imaginative dialogue with their bunny.
 
-Jellycat has been crafting premium plush toys in London since 1999, and the Bashful Bunny is their most beloved creation. Each bunny passes rigorous quality checks and meets EN-71, ASTM, and CPSIA safety standards. The polyester fill is 100% recycled, reflecting Jellycat's commitment to sustainability. Machine washable on a gentle cycle (air dry recommended to maintain maximum softness), this bunny is ready to be the constant companion through naps, road trips, first days of school, and every moment in between.`,
-    keywords: ["bunny", "rabbit", "soft", "jellycat", "plush"],
+Crafted by a premium London plush house, the Bashful Bunny is their most beloved creation. Each bunny passes rigorous quality checks and meets EN-71, ASTM, and CPSIA safety standards. The polyester fill is 100% recycled, reflecting a commitment to sustainability. Machine washable on a gentle cycle (air dry recommended to maintain maximum softness), this bunny is ready to be the constant companion through naps, road trips, first days of school, and every moment in between.`,
+    keywords: ["bunny", "rabbit", "soft", "plush"],
     ageRange: { min: 0, max: 6 },
     price: 22.99,
     inventory: 55,
     category: "plush",
     dimensions: { lengthInches: 12.0, widthInches: 5.0, heightInches: 5.0, weightLbs: 0.3 },
-    manufacturer: "Jellycat London",
+    manufacturer: "London Plush Co.",
     bestSellersRank: 7,
     rating: { stars: 4.9, numberOfRatings: 8934 },
   },
   {
     id: "toy-016",
     name: "Ocean Friends Plush Set (5 pack)",
+    image: "/product-images/toy-016.png",
     description: "Five sea creature plushies: whale, octopus, sea turtle, dolphin, and clownfish. Each 8 inches, bright colors, and embroidered details.",
     marketingCopy: `Dive into cuddly undersea adventures with our Ocean Friends Plush Set — five irresistible sea creatures that bring the magic of the ocean to bedrooms, bathtubs, and backyard pretend play. The collection includes a cobalt-blue whale with a spout of white plush, a coral-pink octopus with eight dangling tentacles, a sage-green sea turtle with a patterned shell, a silver-grey dolphin frozen mid-leap, and a bright orange-and-white clownfish with flowing fabric fins.
 
@@ -332,6 +349,7 @@ Marine biologists consulted on anatomical accuracy, so while these plushies are 
   {
     id: "toy-017",
     name: "Puppets – Woodland Animals (4 pack)",
+    image: "/product-images/toy-017.png",
     description: "Four hand puppets: fox, owl, bear, and raccoon. Detailed stitching, movable mouths, and perfect sizing for kids' and adults' hands.",
     marketingCopy: `Bring the forest to life with our Woodland Animals Hand Puppets — four beautifully crafted characters that turn any couch, table, or doorway into a stage. The cast includes a clever russet fox, a wise tawny owl, a friendly brown bear, and a mischievous grey raccoon, each one featuring a fully movable mouth, expressive embroidered eyes, and detailed touches like the fox's white-tipped tail and the raccoon's signature mask.
 
@@ -351,6 +369,7 @@ The puppets are constructed from high-quality plush and faux-fur fabrics with tr
   {
     id: "toy-018",
     name: "Plush Dragon – Glow-in-the-Dark",
+    image: "/product-images/toy-018.png",
     description: "Fierce yet huggable dragon plush with glow-in-the-dark wings and belly scales. Charges in light, glows for up to 20 minutes. 16 inches.",
     marketingCopy: `Guard your dreams with our Glow-in-the-Dark Dragon — a 16-inch plush beast that is fearsome by name but cuddly by nature, and whose wings and belly scales emit an ethereal green glow when the lights go out. The photoluminescent fabric charges under any light source (sunlight, lamp, or overhead) and glows for up to 20 minutes, providing just enough nighttime magic to ease children through the transition from wakefulness to sleep.
 
@@ -371,6 +390,7 @@ Parents of children with mild nyctophobia (fear of the dark) report that this dr
   {
     id: "toy-019",
     name: "Mega Block Builder Set (80 pieces)",
+    image: "/product-images/toy-019.png",
     description: "Large, chunky building blocks perfect for small hands. Includes 80 colorful interlocking pieces in a storage bag. Compatible with major brands.",
     marketingCopy: `Big ideas start with big blocks. Our Mega Block Builder Set puts 80 chunky, vibrantly colored interlocking blocks into the hands of toddlers and preschoolers, inviting them to build towers, houses, animals, vehicles, and anything else their imaginations can dream up. Each block is generously sized — the smallest piece is 3 inches long — making them perfectly graspable for little fingers that lack the dexterity for smaller construction systems.
 
@@ -389,13 +409,14 @@ Manufactured from premium ABS plastic that exceeds phthalate-free and heavy-meta
   },
   {
     id: "toy-020",
-    name: "LEGO-Compatible Robot Builder (450 pieces)",
+    name: "Robot Builder (450 pieces)",
+    image: "/product-images/toy-020.png",
     description: "Build your own motorized robot with this 450-piece construction set. Includes motor, LED lights, and step-by-step instructions for 3 different robot designs.",
-    marketingCopy: `Future engineers, meet your first real challenge. Our Robot Builder set packs 450 precision-molded, LEGO-compatible bricks, a battery-powered motor, red and blue LED light modules, and a detailed instruction booklet with step-by-step guides for three distinct robot designs: a walking biped, a rolling tank-bot, and a crab-like scuttler. But the real magic happens when builders go off-script, combining pieces in unexpected ways to create their own original robotic inventions.
+    marketingCopy: `Future engineers, meet your first real challenge. Our Robot Builder set packs 450 precision-molded, interlocking bricks, a battery-powered motor, red and blue LED light modules, and a detailed instruction booklet with step-by-step guides for three distinct robot designs: a walking biped, a rolling tank-bot, and a crab-like scuttler. But the real magic happens when builders go off-script, combining pieces in unexpected ways to create their own original robotic inventions.
 
 The motor unit features a geared output shaft that provides enough torque to animate legs, wheels, arms, and rotating turrets. The LED modules snap into standard brick studs and cast a satisfying glow through translucent elements, giving finished robots an authentic sci-fi presence. All electronic components run on 2 AA batteries (included) with a clearly accessible on/off switch, and every wire connection is snap-fit — no soldering, no tools, no adult intervention required.
 
-Each brick is manufactured to tolerances within 0.005mm, ensuring seamless compatibility with genuine LEGO elements and a tight, wobble-free fit that keeps even complex models structurally sound. The set arrives in a compartmentalized storage case with labeled bags for each build, an element inventory checklist, and a poster-sized inspiration sheet showing 20 additional models designed by our fan community. This is the set that turns a child's bedroom floor into a robotics lab — and might just spark a lifelong passion for engineering.`,
+Each brick is manufactured to tolerances within 0.005mm, ensuring seamless compatibility with major brick brands and a tight, wobble-free fit that keeps even complex models structurally sound. The set arrives in a compartmentalized storage case with labeled bags for each build, an element inventory checklist, and a poster-sized inspiration sheet showing 20 additional models designed by our fan community. This is the set that turns a child's bedroom floor into a robotics lab — and might just spark a lifelong passion for engineering.`,
     keywords: ["robot", "building", "construction", "STEM", "motor", "LED"],
     ageRange: { min: 7, max: 14 },
     price: 49.99,
@@ -409,6 +430,7 @@ Each brick is manufactured to tolerances within 0.005mm, ensuring seamless compa
   {
     id: "toy-021",
     name: "Marble Run Deluxe (120 pieces)",
+    image: "/product-images/toy-021.png",
     description: "Build incredible marble runs with 120 translucent pieces including funnels, spinners, and chutes. Includes 30 glass marbles.",
     marketingCopy: `Physics has never been this much fun. Our Marble Run Deluxe set contains 120 translucent, jewel-toned pieces — straight chutes, curved ramps, spiral funnels, paddle wheels, see-saw tippers, and multi-exit splitters — that snap together vertically to create gravity-powered marble highways limited only by a builder's imagination. Thirty brilliant glass marbles are included, each one catching and refracting light as it races through the translucent track, creating a mesmerizing visual spectacle.
 
@@ -428,6 +450,7 @@ Beyond the sheer entertainment value, marble runs are one of the most effective 
   {
     id: "toy-022",
     name: "Magnetic Tile Set (100 pieces)",
+    image: "/product-images/toy-022.png",
     description: "Translucent magnetic tiles in squares, triangles, and hexagons. Snap together to build 3D structures, castles, and vehicles. Strong magnets, beveled edges.",
     marketingCopy: `Click. Stack. Create. Our 100-piece Magnetic Tile Set has become the must-have construction toy in classrooms and playrooms across the country — and for good reason. Each translucent tile contains securely riveted neodymium magnets along every edge, allowing pieces to snap together with a deeply satisfying click that children find almost addictive. The set includes 40 squares, 30 equilateral triangles, 10 right triangles, 10 hexagons, and 10 specialty shapes (arches, doors, and windows), providing enormous creative versatility.
 
@@ -446,14 +469,15 @@ Every tile features ultrasonically welded seams and beveled edges that protect b
   },
   {
     id: "toy-023",
-    name: "Lincoln Logs – Frontier Cabin",
-    description: "Classic 150-piece Lincoln Logs set to build a frontier cabin, lookout tower, and more. Real wood logs with plastic roof and figures.",
-    marketingCopy: `An American classic since 1916, Lincoln Logs have been teaching children the fundamentals of architecture and construction for over a century — and our Frontier Cabin set carries that proud tradition forward with 150 pieces of genuine maple-stained hardwood logs, green plastic roof slabs, a chimney, a swinging door, and two frontier settler figures. The notched ends interlock precisely, allowing children to build walls that stand straight and true without glue or fasteners.
+    name: "Frontier Cabin Log Set",
+    image: "/product-images/toy-023.png",
+    description: "Classic 150-piece log building set to build a frontier cabin, lookout tower, and more. Real wood logs with plastic roof and figures.",
+    marketingCopy: `An American classic since 1916, log building sets have been teaching children the fundamentals of architecture and construction for over a century — and our Frontier Cabin set carries that proud tradition forward with 150 pieces of genuine maple-stained hardwood logs, green plastic roof slabs, a chimney, a swinging door, and two frontier settler figures. The notched ends interlock precisely, allowing children to build walls that stand straight and true without glue or fasteners.
 
 This set includes instructions for three distinct builds — a cozy frontier cabin with a working door, a tall lookout tower with a wraparound observation deck, and a stable with corral fence — but experienced builders will quickly move on to their own architectural designs. The logs come in four lengths (1.5, 3, 4.5, and 6 inches), enabling surprisingly sophisticated construction with windows, doorways, multi-room layouts, and even second stories.
 
 There is a tactile warmth to real wood that plastic can never replicate, and children respond to it instinctively — the smooth, rounded logs feel alive in their hands, smell faintly of natural wood, and produce a satisfying clack when stacked. Every piece is sanded, sealed, and inspected to be splinter-free, and the wood is sourced from sustainably managed North American forests. The set arrives in a classic cylindrical canister with a carrying handle that doubles as long-term storage, just like the original packaging that delighted children a century ago.`,
-    keywords: ["lincoln logs", "cabin", "wood", "classic", "building"],
+    keywords: ["log building", "cabin", "wood", "classic", "building"],
     ageRange: { min: 3, max: 8 },
     price: 34.99,
     inventory: 22,
@@ -465,26 +489,28 @@ There is a tactile warmth to real wood that plastic can never replicate, and chi
   },
   {
     id: "toy-024",
-    name: "K'NEX Roller Coaster Building Set",
-    description: "Build a working roller coaster over 3 feet tall with 500+ K'NEX pieces. Motorized chain lift and looping track. Engineering fun.",
-    marketingCopy: `Thrill-seekers, start your engines — our K'NEX Roller Coaster Building Set lets you construct a fully operational amusement park ride right on your bedroom floor. With over 500 rods, connectors, track pieces, and specialty elements, this set builds into a roller coaster that stands over three feet tall and features a motorized chain lift, a stomach-dropping first hill, a full vertical loop, and a banking turn that sends the included coaster car racing along the track at breathtaking speed.
+    name: "Rod & Connector Roller Coaster Building Set",
+    image: "/product-images/toy-024.png",
+    description: "Build a working roller coaster over 3 feet tall with 500+ rod-and-connector pieces. Motorized chain lift and looping track. Engineering fun.",
+    marketingCopy: `Thrill-seekers, start your engines — our Roller Coaster Building Set lets you construct a fully operational amusement park ride right on your bedroom floor. With over 500 rods, connectors, track pieces, and specialty elements, this set builds into a roller coaster that stands over three feet tall and features a motorized chain lift, a stomach-dropping first hill, a full vertical loop, and a banking turn that sends the included coaster car racing along the track at breathtaking speed.
 
-The battery-powered motor (2 AA batteries included) drives the chain lift with enough torque to haul the coaster car to the summit repeatedly, creating a mesmerizing cycle of climb, drop, loop, and return. The K'NEX rod-and-connector system teaches structural engineering principles organically: children quickly discover why triangular bracing prevents wobble, how counterweights stabilize tall structures, and what track angles produce the most thrilling rides. The 84-page instruction booklet includes diagrams for two additional ride designs — a pendulum swing and a Ferris wheel — using the same piece set.
+The battery-powered motor (2 AA batteries included) drives the chain lift with enough torque to haul the coaster car to the summit repeatedly, creating a mesmerizing cycle of climb, drop, loop, and return. The rod-and-connector system teaches structural engineering principles organically: children quickly discover why triangular bracing prevents wobble, how counterweights stabilize tall structures, and what track angles produce the most thrilling rides. The 84-page instruction booklet includes diagrams for two additional ride designs — a pendulum swing and a Ferris wheel — using the same piece set.
 
-K'NEX pieces are manufactured in the USA from glass-filled nylon rods and ABS connectors, delivering a snap-fit connection that is both secure and easily reversible. The color-coded pieces simplify assembly, and every element is compatible with the broader K'NEX ecosystem for limitless expansion. This set consistently ranks among the top STEM toys for kids aged 7-14, earning praise from parents, educators, and engineering professionals alike for making complex physics concepts accessible and wildly entertaining.`,
-    keywords: ["knex", "roller coaster", "engineering", "motorized", "building"],
+The pieces are manufactured in the USA from glass-filled nylon rods and ABS connectors, delivering a snap-fit connection that is both secure and easily reversible. The color-coded pieces simplify assembly, and every element is compatible with the broader rod-and-connector ecosystem for limitless expansion. This set consistently ranks among the top STEM toys for kids aged 7-14, earning praise from parents, educators, and engineering professionals alike for making complex physics concepts accessible and wildly entertaining.`,
+    keywords: ["rod connector", "roller coaster", "engineering", "motorized", "building"],
     ageRange: { min: 7, max: 14 },
     price: 44.99,
     inventory: 15,
     category: "building",
     dimensions: { lengthInches: 20.0, widthInches: 14.0, heightInches: 5.0, weightLbs: 3.5 },
-    manufacturer: "K'NEX Industries",
+    manufacturer: "ConnectBuild Inc.",
     bestSellersRank: 44,
     rating: { stars: 4.5, numberOfRatings: 1645 },
   },
   {
     id: "toy-025",
     name: "Wooden Block Set (100 pieces)",
+    image: "/product-images/toy-025.png",
     description: "Classic hardwood blocks in natural and primary colors. Arches, cylinders, rectangles, triangles, and columns. Sanded smooth, non-toxic finish.",
     marketingCopy: `Some toys are timeless because they are perfect — and our 100-Piece Wooden Block Set is exactly that. One hundred solid hardwood blocks in a rainbow of shapes — rectangles, squares, triangles, arches, cylinders, columns, half-circles, and bridges — arrive ready to become towers, cities, bridges, castles, zoos, and anything else a child's boundless imagination can conceive. Half the blocks are finished in rich primary colors (red, blue, yellow, green) while the other half showcase the natural grain of sustainably harvested beechwood, creating a warm, aesthetically pleasing palette.
 
@@ -504,6 +530,7 @@ Educators from Montessori, Waldorf, and Reggio Emilia traditions all place unit 
   {
     id: "toy-026",
     name: "Fort Building Kit (85 pieces)",
+    image: "/product-images/toy-026.png",
     description: "Snap-together rods and connectors to build indoor forts, tunnels, and castles. Drape blankets over the frame. Stores flat in a carry bag.",
     marketingCopy: `Every child deserves a secret hideout, and our Fort Building Kit makes it possible in minutes — no engineering degree required. Eighty-five lightweight but sturdy fiberglass rods and multi-angle ABS connectors snap together to create a skeletal framework that, once draped with bedsheets, blankets, or towels, transforms into a fort, castle, tunnel, tent, or spaceship large enough for two to three children to sit inside comfortably.
 
@@ -523,6 +550,7 @@ When playtime ends, the entire kit disassembles in minutes and packs flat into t
   {
     id: "toy-027",
     name: "Architecture Brick Set – City Skyline",
+    image: "/product-images/toy-027.png",
     description: "850-piece micro-brick set to build iconic city landmarks. Includes display base and nameplate. Detailed instructions for 5 buildings.",
     marketingCopy: `For builders who crave detail, precision, and display-worthy results, our Architecture Brick Set – City Skyline delivers a sophisticated building experience that bridges the gap between toy and art. Eight hundred and fifty micro-bricks — each one roughly half the size of standard construction bricks — assemble into five iconic urban landmarks: a soaring glass skyscraper, an art-deco theater, a modern museum, a brick-and-ivy townhouse, and a steel-arched bridge, all mounted on a shared display base with an engraved city nameplate.
 
@@ -542,6 +570,7 @@ Every micro-brick is injection-molded to precision tolerances from ABS plastic, 
   {
     id: "toy-028",
     name: "Gear & Chain Reaction Set",
+    image: "/product-images/toy-028.png",
     description: "Build chain-reaction machines with 60+ gears, levers, pulleys, and dominoes. Includes 10 challenge cards. STEM learning through play.",
     marketingCopy: `Cause meets effect in spectacular fashion with our Gear & Chain Reaction Set — a STEM toy that teaches mechanical engineering by letting kids build Rube Goldberg-style machines that are as hilarious as they are educational. The set includes over 60 components: interlocking gears in five sizes, lever arms, pulley wheels with string, ramps, chutes, a spring launcher, a pendulum, 20 wooden dominoes, and a bell that rings triumphantly at the end of a successful chain reaction.
 
@@ -562,6 +591,7 @@ This is engineering at its most joyful: the trial-and-error process of getting a
   {
     id: "toy-029",
     name: "Wooden Train Set",
+    image: "/product-images/toy-029.png",
     description: "32-piece wooden train set with tracks, bridges, trees, and two magnetic trains. Compatible with all major wooden railway systems.",
     marketingCopy: `All aboard for imagination! Our 32-Piece Wooden Train Set lays the foundation for countless hours of open-ended railway adventures. The set includes 20 track pieces (straights, curves, and a Y-switch), a graceful arched bridge, two magnetic-coupling train cars with rolling wheels, and scenic accessories — three evergreen trees, a station platform, and a crossing sign — all crafted from sustainably harvested beechwood with smooth, splinter-free finishes.
 
@@ -581,6 +611,7 @@ Wooden train play is a cornerstone of early-childhood education programs worldwi
   {
     id: "toy-030",
     name: "Remote Control Racing Car",
+    image: "/product-images/toy-030.png",
     description: "Sleek RC racing car with 2.4GHz remote control for interference-free racing. Reaches speeds up to 15mph with responsive steering.",
     marketingCopy: `Ready, set, go! Our Remote Control Racing Car delivers the adrenaline rush of high-speed racing in a package that is durable, intuitive, and interference-free. The sleek, low-profile body is aerodynamically designed with front and rear spoilers that provide genuine downforce at speed, while the 2.4GHz digital radio system ensures that up to six cars can race simultaneously without signal crosstalk — perfect for neighborhood competitions and birthday party showdowns.
 
@@ -600,6 +631,7 @@ The ergonomic pistol-grip controller fits comfortably in children's hands with a
   {
     id: "toy-031",
     name: "Dump Truck Sandbox Toy",
+    image: "/product-images/toy-031.png",
     description: "Oversized dump truck with a working tilting bed. Tough enough for sand, dirt, and outdoor play. BPA-free, UV-resistant plastic.",
     marketingCopy: `Built like the real thing — just a whole lot more fun. Our Dump Truck Sandbox Toy is an oversized, indestructible workhorse designed to haul sand, gravel, dirt, and whatever else young construction crews can load into its generous tilting bed. The hydraulic-style hinge lets children raise the bed with one hand and watch their payload cascade out the tailgate, mimicking the satisfying dump action of real construction vehicles.
 
@@ -619,6 +651,7 @@ Sandbox play is a multisensory developmental powerhouse, and having the right to
   {
     id: "toy-032",
     name: "Die-Cast Emergency Vehicles (5 pack)",
+    image: "/product-images/toy-032.png",
     description: "Five metal emergency vehicles: fire truck, ambulance, police car, helicopter, and rescue boat. Opening doors and rolling wheels.",
     marketingCopy: `When duty calls, this fleet answers. Our Die-Cast Emergency Vehicles set puts five authentically detailed first-responder vehicles into the hands of young heroes: a ladder fire truck with an extendable boom, an ambulance with opening rear doors, a police cruiser with a working light bar (press-activated LED), a rescue helicopter with spinning rotors, and a coast guard boat with a removable stretcher. Each vehicle is die-cast zinc alloy with plastic accents, delivering the satisfying weight and metallic sheen that makes die-cast vehicles a perennial collector favorite.
 
@@ -638,6 +671,7 @@ Emergency vehicle play is one of the most enduring forms of imaginative play, an
   {
     id: "toy-033",
     name: "Monster Truck Rally Set",
+    image: "/product-images/toy-033.png",
     description: "Two friction-powered monster trucks with a crush-car ramp and jump. Oversized tires and detailed suspension. No batteries needed.",
     marketingCopy: `Sunday! Sunday! Sunday! Bring the monster truck rally home with our two-truck set that includes everything needed for backyard (or bedroom floor) demolition derbies. Two beefy, friction-powered monster trucks — "Bonecrusher" in flame red and "Thunder Beast" in electric blue — feature oversized knobby rubber tires, detailed independent suspension that actually flexes over obstacles, and aggressive body kits with roll cages, headlight decals, and sponsor graphics.
 
@@ -657,6 +691,7 @@ Monster truck play taps into a visceral thrill that kids of all ages find irresi
   {
     id: "toy-034",
     name: "RC Helicopter",
+    image: "/product-images/toy-034.png",
     description: "Indoor/outdoor RC helicopter with gyro stabilization and LED lights. 3-channel control for up/down, left/right, forward/back. USB charging.",
     marketingCopy: `Take to the skies with our RC Helicopter — a gyro-stabilized indoor/outdoor flyer that turns beginners into confident pilots in minutes. The built-in 6-axis gyroscope continuously corrects for drift, tilt, and rotation, making this helicopter dramatically easier to fly than older RC designs. Three channels of control (throttle for altitude, rudder for rotation, and cyclic for forward/backward movement) provide genuine flight dynamics without overwhelming new pilots.
 
@@ -676,6 +711,7 @@ The 2.4GHz digital radio system supports up to four helicopters flying simultane
   {
     id: "toy-035",
     name: "Slot Car Racing Track",
+    image: "/product-images/toy-035.png",
     description: "Two-lane electric slot car racing set with 16 feet of track, two cars, and lap counter. Includes loops and crossover sections.",
     marketingCopy: `Experience the golden age of racing with our Slot Car Racing Track — a two-lane electric circuit that brings the roar of motorsport to your living room floor. Sixteen feet of precision-molded track snaps together in minutes, forming a figure-eight layout with a dramatic loop-the-loop, a crossover intersection where cars thread past each other at speed, and banked curves that let drivers carry maximum velocity through the turns.
 
@@ -695,6 +731,7 @@ Slot car racing is a tactile, analog thrill that screens simply cannot replicate
   {
     id: "toy-036",
     name: "Wooden Fire Engine Push Toy",
+    image: "/product-images/toy-036.png",
     description: "Solid wood fire engine with a working ladder, spinning wheels, and two firefighter peg people. Non-toxic water-based paint.",
     marketingCopy: `Nee-naw, nee-naw! Our Wooden Fire Engine Push Toy races to the rescue with classic charm and heirloom-quality construction. Carved from solid European beechwood, this fire engine features a rotating ladder that extends and retracts, four free-spinning wheels with rubber treads for smooth rolling, and two removable firefighter peg people who ride in the open cab, ready to respond to imaginary emergencies anywhere in the house.
 
@@ -714,6 +751,7 @@ Push-along vehicle play is a critical developmental milestone that bridges gross
   {
     id: "toy-037",
     name: "Build-Your-Own Car Kit (3 pack)",
+    image: "/product-images/toy-037.png",
     description: "Three take-apart vehicles with a kid-safe electric drill. 50+ interchangeable parts let kids customize each car, truck, and racer.",
     marketingCopy: `Vroom goes the drill! Our Build-Your-Own Car Kit gives young mechanics three take-apart vehicles — a sedan, a pickup truck, and a race car — along with a kid-safe battery-powered electric drill that lets them disassemble and reassemble each vehicle with realistic, hands-on satisfaction. Over 50 interchangeable parts (wheels, bumpers, spoilers, exhaust pipes, toolboxes, and light bars) snap on and off with the included drill bits, encouraging children to customize their rides in endless configurations.
 
@@ -733,6 +771,7 @@ The vehicles are made from rounded, impact-resistant ABS plastic in bright prima
   {
     id: "toy-038",
     name: "RC Submarine – Explorer",
+    image: "/product-images/toy-038.png",
     description: "Waterproof radio-controlled submarine that dives and surfaces in pools, tubs, and ponds. 6-channel control with LED headlights.",
     marketingCopy: `Dive deep with our RC Submarine Explorer — a fully waterproof, radio-controlled submersible that brings underwater adventures to swimming pools, bathtubs, and calm ponds. The six-channel controller manages forward, reverse, left turn, right turn, dive, and surface commands, giving pilots complete three-dimensional control of their vessel. Twin propellers provide forward thrust while a ballast-trim motor adjusts buoyancy, allowing the sub to cruise at any depth from surface to pool floor.
 
@@ -752,26 +791,28 @@ The controller communicates on 27MHz radio frequency, which penetrates water eff
   // ── ARTS & CRAFTS ──────────────────────────────────────────────────────
   {
     id: "toy-039",
-    name: "Play-Doh Mega Pack (24 colors)",
-    description: "24 cans of classic Play-Doh in a rainbow of colors. Non-toxic modeling compound that sparks creativity and imagination.",
-    marketingCopy: `Twenty-four cans of pure creative potential — our Play-Doh Mega Pack delivers the full rainbow and then some. From classic red, blue, and yellow to specialty shades like neon pink, metallic gold, and deep purple, this collection provides the palette for any project a young sculptor can envision. Each 3-ounce can is factory-fresh with the signature Play-Doh squish, smell, and satisfying moldability that has made this compound a childhood staple for over 65 years.
+    name: "Modeling Dough Mega Pack (24 colors)",
+    image: "/product-images/toy-039.png",
+    description: "24 cans of classic modeling dough in a rainbow of colors. Non-toxic modeling compound that sparks creativity and imagination.",
+    marketingCopy: `Twenty-four cans of pure creative potential — our Modeling Dough Mega Pack delivers the full rainbow and then some. From classic red, blue, and yellow to specialty shades like neon pink, metallic gold, and deep purple, this collection provides the palette for any project a young sculptor can envision. Each 3-ounce can is factory-fresh with the signature squish, smell, and satisfying moldability that has made modeling dough a childhood staple for decades.
 
-Play-Doh's unique wheat-based, non-toxic formula is soft enough for two-year-olds to squeeze yet firm enough for eight-year-olds to sculpt detailed figures and structures. The compound air-dries slowly, giving children ample working time, and can be refreshed with a few drops of water if left out overnight. The wide color range encourages color mixing experiments — blending yellow and blue to discover green is a science lesson and a magic trick rolled into one, and the resulting marbled effects are uniquely beautiful.
+This unique wheat-based, non-toxic formula is soft enough for two-year-olds to squeeze yet firm enough for eight-year-olds to sculpt detailed figures and structures. The compound air-dries slowly, giving children ample working time, and can be refreshed with a few drops of water if left out overnight. The wide color range encourages color mixing experiments — blending yellow and blue to discover green is a science lesson and a magic trick rolled into one, and the resulting marbled effects are uniquely beautiful.
 
-Occupational therapists recommend Play-Doh as one of the most effective tools for developing hand and finger strength, a prerequisite for pencil grip and handwriting readiness. Rolling, pinching, cutting, and stamping motions engage the small muscles of the hand in ways that screen-based activities simply cannot replicate. The 24-can format is ideal for classrooms, art stations, and families with multiple children, and the resealable cans keep unused colors fresh for months. Whether building a pizza shop, sculpting a menagerie, or just enjoying the meditative pleasure of squishing, this set delivers limitless creative mileage.`,
-    keywords: ["playdoh", "clay", "modeling", "creative", "art", "colors"],
+Occupational therapists recommend modeling dough as one of the most effective tools for developing hand and finger strength, a prerequisite for pencil grip and handwriting readiness. Rolling, pinching, cutting, and stamping motions engage the small muscles of the hand in ways that screen-based activities simply cannot replicate. The 24-can format is ideal for classrooms, art stations, and families with multiple children, and the resealable cans keep unused colors fresh for months. Whether building a pizza shop, sculpting a menagerie, or just enjoying the meditative pleasure of squishing, this set delivers limitless creative mileage.`,
+    keywords: ["modeling dough", "clay", "modeling", "creative", "art", "colors"],
     ageRange: { min: 2, max: 8 },
     price: 18.99,
     inventory: 70,
     category: "arts-crafts",
     dimensions: { lengthInches: 12.0, widthInches: 9.0, heightInches: 4.0, weightLbs: 3.2 },
-    manufacturer: "Hasbro Creative",
+    manufacturer: "Creative Compound Co.",
     bestSellersRank: 6,
     rating: { stars: 4.7, numberOfRatings: 8945 },
   },
   {
     id: "toy-040",
     name: "Watercolor Painting Kit",
+    image: "/product-images/toy-040.png",
     description: "Complete watercolor set with 36 colors, 3 brushes, mixing palette, and a pad of watercolor paper. Perfect for budding artists.",
     marketingCopy: `Unleash the artist within with our complete Watercolor Painting Kit — everything a budding painter needs to create beautiful, expressive artwork from their very first brushstroke. The set includes 36 vibrant watercolor cakes in a hinged tin palette, three professional-quality synthetic brushes (round sizes 2, 6, and 10), a ceramic mixing palette with six wells, and a 20-sheet pad of 140 lb cold-press watercolor paper sized at 9x12 inches.
 
@@ -791,6 +832,7 @@ Art educators praise watercolor as the ideal first painting medium because it fo
   {
     id: "toy-041",
     name: "Fashion Design Studio",
+    image: "/product-images/toy-041.png",
     description: "Design and create real fabric fashions with this complete studio set. Includes mannequin, fabric, pins, stencils, and a sketchbook.",
     marketingCopy: `Project Runway starts here. Our Fashion Design Studio gives aspiring designers everything they need to sketch, pattern, and create real wearable fashions — or to dress the included 12-inch mannequin in original couture creations. The kit contains a fully adjustable dress form mannequin, 10 fat quarters of coordinating fabrics (cotton, satin, and tulle), a pincushion with safety pins, 20 reusable stencils for bodices, skirts, and sleeves, a 60-page fashion sketchbook with figure templates, and a set of 24 fabric markers for custom prints and embellishments.
 
@@ -810,6 +852,7 @@ Fashion design engages a remarkable range of skills: visual-spatial reasoning (d
   {
     id: "toy-042",
     name: "Kinetic Sand Deluxe Set",
+    image: "/product-images/toy-042.png",
     description: "4 lbs of magical kinetic sand in 6 colors with molds, tools, and a sand tray. Mess-free sensory play that never dries out.",
     marketingCopy: `It flows through your fingers like a slow-motion waterfall, packs into shapes with satisfying precision, and somehow never makes a mess — welcome to the mesmerizing world of Kinetic Sand. Our Deluxe Set includes 4 pounds of this remarkable material in six vibrant colors (beach, blue, green, pink, purple, and white), plus a generous sand tray with raised edges, 10 detailed molds (castle, pyramid, starfish, shell, and more), and 5 sculpting tools for cutting, stamping, and shaping.
 
@@ -829,6 +872,7 @@ Therapists use kinetic sand extensively for sensory processing support, stress r
   {
     id: "toy-043",
     name: "Friendship Bracelet Maker",
+    image: "/product-images/toy-043.png",
     description: "Weave colorful friendship bracelets with the included loom, 120 skeins of thread, beads, and charms. Pattern book with 20 designs.",
     marketingCopy: `Craft, share, connect — our Friendship Bracelet Maker turns simple embroidery thread into wearable works of art that children create and exchange as tokens of friendship. The set includes a cushioned, rotating loom that holds threads taut and organized, 120 skeins of premium embroidery floss in 30 colors, a collection of alphabet beads, metallic charms (hearts, stars, peace signs, and butterflies), and a spiral-bound pattern book with step-by-step photo instructions for 20 designs ranging from simple three-strand braids to complex chevron and diamond patterns.
 
@@ -848,6 +892,7 @@ Friendship bracelet making is experiencing a massive resurgence among tweens and
   {
     id: "toy-044",
     name: "Scratch Art Kit (50 sheets)",
+    image: "/product-images/toy-044.png",
     description: "50 rainbow scratch-off sheets with wooden styluses and stencils. Scratch away the black coating to reveal vibrant colors beneath.",
     marketingCopy: `Reveal the rainbow hiding beneath the darkness with our Scratch Art Kit — 50 sheets of specially coated paper that conceal vivid, multicolored layers beneath a matte black surface. Using the included wooden styluses (one fine-tip for detail, one broad-edge for shading), children scratch away the black coating to reveal stunning rainbow, holographic, or solid-color patterns underneath. The result is artwork that looks almost professionally produced, delivering an instant sense of pride and accomplishment.
 
@@ -867,6 +912,7 @@ Scratch art is uniquely satisfying because the medium guarantees visually striki
   {
     id: "toy-045",
     name: "Pottery Wheel Studio",
+    image: "/product-images/toy-045.png",
     description: "Electric pottery wheel with air-dry clay, sculpting tools, and paints. Create real bowls, vases, and figurines. Foot pedal speed control.",
     marketingCopy: `Shape, sculpt, create — our Pottery Wheel Studio brings the ancient art of wheel-throwing to your kitchen table with a compact, electric pottery wheel and everything needed to produce real ceramic-style pieces. The studio includes a variable-speed motorized wheel with foot pedal control, 3 pounds of air-dry clay in natural terracotta and white, a set of 8 wire-loop and wooden sculpting tools, 6 acrylic paints, 2 brushes, a sponge, and a splash guard to keep the workspace contained.
 
@@ -886,6 +932,7 @@ Air-dry clay eliminates the need for a kiln entirely; finished pieces dry to har
   {
     id: "toy-046",
     name: "Tie-Dye Kit (18 colors)",
+    image: "/product-images/toy-046.png",
     description: "Everything needed to tie-dye up to 15 items. 18 squeeze bottles of non-toxic dye, rubber bands, gloves, and instruction booklet.",
     marketingCopy: `Groovy vibes guaranteed! Our Tie-Dye Kit puts 18 vibrant, non-toxic dye colors into squeeze bottles with precision applicator tips, giving young artists everything they need to transform plain white t-shirts, socks, tote bags, and pillowcases into one-of-a-kind wearable art. The included dye powder is pre-measured — just add water, shake, and start squeezing. Enough dye is included to treat approximately 15 items, making this kit perfect for birthday parties, summer camp activities, and family craft afternoons.
 
@@ -905,6 +952,7 @@ Tie-dye is a rare craft that appeals across the entire age spectrum: six-year-ol
   {
     id: "toy-047",
     name: "Bead Art Pegboard Set",
+    image: "/product-images/toy-047.png",
     description: "4000+ fusible beads in 30 colors with 6 pegboards, ironing paper, and tweezers. Create pixel-art characters, animals, and patterns.",
     marketingCopy: `Pixel art meets real-world crafting in our Bead Art Pegboard Set — a creative powerhouse that lets children design colorful mosaic creations bead by bead, then fuse them into permanent, display-worthy art pieces. The set includes over 4,000 precision-sized fusible beads in 30 colors (including glow-in-the-dark, glitter, and metallic), 6 interlocking pegboards in square, hexagon, circle, heart, star, and animal shapes, ironing paper, tweezers, and a pattern booklet with 30 designs from simple to advanced.
 
@@ -924,6 +972,7 @@ Fine motor skills, color theory, pattern recognition, patience, and spatial plan
   {
     id: "toy-048",
     name: "Rock Painting Kit",
+    image: "/product-images/toy-048.png",
     description: "Paint 12 smooth river rocks with acrylic paints, metallic markers, and googly eyes. Includes transfer designs and display stands.",
     marketingCopy: `Turn ordinary stones into extraordinary art with our Rock Painting Kit — a creative set that combines the tactile appeal of natural river rocks with the vibrant expression of acrylic painting. The kit includes 12 smooth, palm-sized river rocks, 12 pots of acrylic paint in vivid colors, 3 metallic paint markers (gold, silver, copper), 2 fine-tip brushes, a dotting tool, 24 googly eyes in assorted sizes, a sheet of water-transfer designs, a bottle of clear sealant spray, and 6 mini easel display stands.
 
@@ -943,6 +992,7 @@ Rock painting has become a global community phenomenon, with "kindness rocks" le
   {
     id: "toy-049",
     name: "Origami Paper & Book Set",
+    image: "/product-images/toy-049.png",
     description: "200 sheets of origami paper in 40 patterns plus a 64-page instruction book with 50 projects from easy to expert.",
     marketingCopy: `Fold your way to mastery with our Origami Paper & Book Set — a comprehensive kit that takes paper-folders from their first simple cup to breathtaking expert-level creations like modular stars, leaping frogs, and flapping cranes. The set includes 200 sheets of premium, pre-cut 6-inch origami paper in 40 stunning patterns (solids, metallics, florals, geometric, and traditional Japanese washi prints), plus a 64-page hardcover instruction book with crystal-clear diagrams for 50 projects across five difficulty levels.
 
@@ -962,6 +1012,7 @@ Origami is a uniquely powerful educational tool — it teaches geometric concept
   {
     id: "toy-050",
     name: "Canvas Painting Set – Easel Included",
+    image: "/product-images/toy-050.png",
     description: "Tabletop easel with 6 canvases, 24 acrylic paints, 10 brushes, and a palette. Everything a young artist needs in one box.",
     marketingCopy: `Set up a proper art studio anywhere in the house with our Canvas Painting Set — a comprehensive acrylic painting kit that includes everything from easel to brush and palette to canvas. The adjustable tabletop easel holds canvases securely at three different angles, six pre-stretched 8x10 inch canvases provide professional-quality painting surfaces, 24 tubes of richly pigmented acrylic paint cover the full color spectrum, and 10 brushes (rounds, flats, and a fan brush) give artists the right tool for every technique.
 
@@ -982,6 +1033,7 @@ This set is designed to make children feel like real artists — not craft-proje
   {
     id: "toy-051",
     name: "Dinosaur Explorer Kit",
+    image: "/product-images/toy-051.png",
     description: "12 realistic dinosaur figurines with a fold-out prehistoric playmat. Includes a field guide booklet with fun dinosaur facts.",
     marketingCopy: `Step back 65 million years with our Dinosaur Explorer Kit — a paleontologist's dream set that puts 12 scientifically accurate dinosaur figurines into the hands of young explorers. The collection spans the Mesozoic Era with a towering T-Rex, long-necked Brachiosaurus, armored Ankylosaurus, three-horned Triceratops, flying Pteranodon, swimming Plesiosaurus, and six more species, each one hand-painted with species-appropriate coloring and anatomically correct proportions based on current paleontological research.
 
@@ -1001,6 +1053,7 @@ Dinosaur play is one of the most powerful vehicles for developing scientific cur
   {
     id: "toy-052",
     name: "Safari Animals Tube (12 figurines)",
+    image: "/product-images/toy-052.png",
     description: "Twelve hand-painted safari animal figurines in a reusable tube. Lion, elephant, giraffe, zebra, hippo, and more. Detailed and durable.",
     marketingCopy: `Bring the Serengeti to your living room with our Safari Animals Tube — twelve hand-painted wildlife figurines that capture the majesty and diversity of the African savanna. The collection features the iconic "Big Five" (lion, elephant, Cape buffalo, leopard, and rhinoceros) plus a giraffe, zebra, hippopotamus, cheetah, gorilla, crocodile, and flamingo, each one sculpted with remarkable anatomical detail and painted in lifelike coloring that reflects each species' natural appearance.
 
@@ -1020,6 +1073,7 @@ Wildlife figurine play fosters empathy, environmental awareness, and narrative s
   {
     id: "toy-053",
     name: "Pirate Ship Playset",
+    image: "/product-images/toy-053.png",
     description: "Detailed pirate ship with working cannon, crow's nest, and anchor. Comes with 4 pirate figures, treasure chest, and island base.",
     marketingCopy: `Hoist the Jolly Roger and set sail for adventure! Our Pirate Ship Playset is a 16-inch detailed galleon that fires soft-foam cannonballs, drops anchor with a working winch, and features a crow's nest lookout, a captain's wheel that turns, a plank for reluctant prisoners, and rigging made from real cotton cord. The ship comes with a crew of four articulated pirate figures (captain, first mate, lookout, and prisoner), a treasure chest that opens to reveal gold coin accessories, and a palm-tree island base with a hidden treasure cave.
 
@@ -1039,6 +1093,7 @@ Pirate play taps into one of the most enduring themes in children's imaginative 
   {
     id: "toy-054",
     name: "Space Station Playset",
+    image: "/product-images/toy-054.png",
     description: "Multi-level space station with shuttle, rover, satellite dish, and 3 astronaut figures. Light-up command center and opening bay doors.",
     marketingCopy: `Houston, we have a playset! Our Space Station is a multi-level orbital outpost that brings the wonder of space exploration to bedroom floors everywhere. The station features a light-up command center with blinking LED consoles, opening bay doors that launch the included space shuttle, a rotating satellite dish, a robotic arm that swivels and extends, a docking port for incoming vehicles, and a detachable laboratory module. Three fully articulated astronaut figures (pilot, scientist, and commander) come equipped with removable helmets, tethering cables, and miniature tools.
 
@@ -1058,6 +1113,7 @@ Space play has experienced a renaissance as a new generation watches real-life m
   {
     id: "toy-055",
     name: "Farm Animals & Barn Set",
+    image: "/product-images/toy-055.png",
     description: "Wooden barn with 10 farm animal figurines, fences, hay bales, and a tractor. Barn doors swing open and roof lifts off.",
     marketingCopy: `Old MacDonald had a barn — and now your child can too. Our Farm Animals & Barn Set is a beautifully crafted wooden playset that includes a red barn with swinging double doors and a lift-off roof, 10 hand-painted farm animal figurines (cow, horse, pig, sheep, goat, chicken, rooster, duck, dog, and cat), a wooden tractor with rolling wheels, split-rail fences, and hay bale accessories. Every piece is made from sustainably harvested hardwood with non-toxic, water-based paint finishes.
 
@@ -1077,6 +1133,7 @@ Farm play is a foundational imaginative theme that introduces children to the na
   {
     id: "toy-056",
     name: "Medieval Knights & Castle Set",
+    image: "/product-images/toy-056.png",
     description: "Foldable castle playset with drawbridge, catapult, and 8 knight and dragon figures. Snap-together assembly, no tools needed.",
     marketingCopy: `Defend the realm! Our Medieval Knights & Castle Set transforms any tabletop into a battleground of chivalry and adventure. The snap-together castle features towering turrets with crenellated battlements, a working drawbridge on real chains, a spring-loaded catapult that launches soft projectiles up to 4 feet, a secret escape tunnel, and a throne room with a removable king figure. Eight additional figures include four knights in heraldic armor, two archers, a wizard, and a fearsome dragon with poseable wings.
 
@@ -1096,6 +1153,7 @@ Medieval play is a rich narrative genre that naturally introduces historical con
   {
     id: "toy-057",
     name: "Insect & Bug Collection (24 figurines)",
+    image: "/product-images/toy-057.png",
     description: "24 realistic insect and bug figurines including beetles, butterflies, spiders, and scorpions. Great for nature study and imaginative play.",
     marketingCopy: `Get up close and personal with the world's most fascinating creepy-crawlies — no bug spray required. Our Insect & Bug Collection features 24 realistically sculpted figurines spanning the major arthropod orders: beetles (stag, ladybug, rhinoceros), butterflies (monarch, swallowtail, morpho), arachnids (tarantula, scorpion, garden spider), flying insects (dragonfly, praying mantis, cicada), ants, grasshoppers, centipedes, and more. Each figurine is hand-painted with species-accurate coloring and measures 2 to 4 inches in length.
 
@@ -1114,14 +1172,14 @@ Insects represent over 80% of all known animal species, making entomology one of
   },
   {
     id: "toy-058",
-    name: "Superhero Action Figures (6 pack)",
-    description: "Six poseable superhero action figures with swappable accessories. Each 6 inches tall with 12 points of articulation.",
-    marketingCopy: `Assemble your ultimate hero squad with our Superhero Action Figures — six original, diverse characters that bring comic-book excitement to tabletop, bedroom-floor, and backyard adventures. The roster includes Volt (electric-powered speedster), Titan (super-strong powerhouse), Shadow Wing (stealth flyer), Blaze (fire controller), Frost Nova (ice specialist), and Terra (earth manipulator). Each 6-inch figure features 12 points of articulation — neck, shoulders, elbows, wrists, hips, and knees — enabling dynamic action poses and combat stances.
+    name: "Adventure Action Figures (6 pack)",
+    description: "Six poseable adventure action figures with swappable accessories. Each 6 inches tall with 12 points of articulation.",
+    marketingCopy: `Assemble your ultimate squad with our Adventure Action Figures — six original, diverse characters that bring excitement to tabletop, bedroom-floor, and backyard adventures. The roster includes Volt (electric-powered speedster), Titan (super-strong powerhouse), Shadow Wing (stealth flyer), Blaze (fire controller), Frost Nova (ice specialist), and Terra (earth manipulator). Each 6-inch figure features 12 points of articulation — neck, shoulders, elbows, wrists, hips, and knees — enabling dynamic action poses and combat stances.
 
 Every hero comes with two swappable accessories — alternate hands, energy effects, weapons, or shields — that pop on and off via universal 3mm pegs, allowing cross-character customization. Volt's lightning bolts look just as cool on Terra's fists, and Shadow Wing's cape clips to any figure's back. The figures are made from durable ABS and PVC with detailed paint applications that survive rough play without chipping. Each one includes a character bio card with backstory, powers, weakness, and team affiliation, fueling imaginative storytelling.
 
 Action figure play is one of the most studied and validated forms of creative play, consistently linked to narrative development, social skill building (when children negotiate roles and storylines with peers), and emotional processing (as children project complex feelings onto characters in dramatic scenarios). Our original character roster was deliberately designed to represent diverse body types, skin tones, and power archetypes, ensuring that every child can see themselves reflected in a hero. The universal accessory system encourages sharing, trading, and creative problem-solving across any size figure collection.`,
-    keywords: ["superhero", "action figures", "poseable", "comic", "heroes"],
+    keywords: ["adventure", "action figures", "poseable", "characters", "heroes"],
     ageRange: { min: 4, max: 10 },
     price: 29.99,
     inventory: 35,
@@ -1134,6 +1192,7 @@ Action figure play is one of the most studied and validated forms of creative pl
   {
     id: "toy-059",
     name: "Ocean Deep Sea Creatures Tube",
+    image: "/product-images/toy-059.png",
     description: "10 deep-sea creature figurines: anglerfish, giant squid, nautilus, and more. Glow-in-the-dark details. Comes with info cards.",
     marketingCopy: `Explore the alien world of the ocean abyss with our Deep Sea Creatures Tube — 10 extraordinary figurines depicting the bizarre and beautiful life forms that thrive in Earth's deepest waters. The collection includes an anglerfish with a glowing lure, a giant squid with 10 individually sculpted tentacles, a coiled nautilus, a vampire squid, a gulper eel, a dumbo octopus, a barreleye fish, a yeti crab, a giant isopod, and a bioluminescent jellyfish. Glow-in-the-dark pigments are worked into key features — the anglerfish's lure, the jellyfish's bell, and the squid's photophores — creating an eerie, authentic deep-sea effect in darkened rooms.
 
@@ -1153,6 +1212,7 @@ The deep ocean remains the least explored environment on Earth — more humans h
   {
     id: "toy-060",
     name: "Mythical Creatures Set (8 figurines)",
+    image: "/product-images/toy-060.png",
     description: "Eight detailed mythical creature figurines: dragon, phoenix, griffin, unicorn, pegasus, kraken, yeti, and thunderbird.",
     marketingCopy: `Legends come to life with our Mythical Creatures Set — eight meticulously sculpted figurines representing the most iconic beasts from mythology and folklore around the world. The collection spans cultures and continents: a Western dragon with outstretched wings, a blazing phoenix rising from flames, a lion-eagle griffin in mid-pounce, a rearing unicorn, a soaring pegasus, a tentacled kraken emerging from ocean waves, a snow-covered yeti, and a lightning-wreathed thunderbird from Native American tradition.
 
@@ -1173,6 +1233,7 @@ Mythological creatures are universal — every culture on Earth has imagined ext
   {
     id: "toy-061",
     name: "Princess Castle Playset",
+    image: "/product-images/toy-061.png",
     description: "Enchanted castle playset with two princess dolls, a unicorn, furniture, and magical accessories. Castle opens to reveal three floors of play space.",
     marketingCopy: `Once upon a time, in a castle made of dreams... Our Princess Castle Playset opens its hinged façade to reveal three floors of enchanted play space, each one decorated with printed murals of sparkling ballrooms, rose gardens, and starlit towers. Two fully articulated princess dolls (5 inches tall) live in the castle along with their loyal unicorn companion, and the 15-piece furniture collection includes a canopy bed, a vanity mirror, a throne, a dining table, and magical accessories like a crystal ball, a spell book, and a glowing (LED) chandelier.
 
@@ -1192,6 +1253,7 @@ Fairy-tale play is far more than frothy fantasy — developmental psychologists 
   {
     id: "toy-062",
     name: "Spy Gear Detective Kit",
+    image: "/product-images/toy-062.png",
     description: "Top-secret spy kit with night vision scope, fingerprint kit, invisible ink pen, walkie-talkies, and a decoder ring.",
     marketingCopy: `Your mission, should you choose to accept it: become the world's greatest junior detective with our Spy Gear Detective Kit. This classified equipment package includes a real working night-vision monocular with green LED illumination (see up to 15 feet in darkness), a forensic fingerprint dusting kit with powder, brush, and lift tape, an invisible-ink pen with UV light reveal, a pair of short-range walkie-talkies, a cipher decoder ring with 26 alphabet shifts, and a pocket-sized periscope for seeing around corners without being spotted.
 
@@ -1211,6 +1273,7 @@ Detective play exercises critical thinking, observational skills, deductive reas
   {
     id: "toy-063",
     name: "Play Kitchen Set – Deluxe",
+    image: "/product-images/toy-063.png",
     description: "Full-sized play kitchen with oven, microwave, fridge, and sink. Realistic sounds, lights, and running water feature. 30+ food accessories.",
     marketingCopy: `Welcome to the most popular restaurant on the block — your child's imagination. Our Deluxe Play Kitchen is a full-sized culinary command center standing 36 inches tall, featuring a four-burner stovetop with clicking knobs and light-up "flame" LEDs, an oven with a see-through door and interior light, a microwave with a spinning turntable, a French-door refrigerator with ice dispenser, and a sink with a hand-pump running-water feature that recirculates real water from a hidden reservoir.
 
@@ -1230,6 +1293,7 @@ Kitchen play is one of the richest domains of pretend play, naturally integratin
   {
     id: "toy-064",
     name: "Doctor's Kit – 20 Piece",
+    image: "/product-images/toy-064.png",
     description: "Realistic doctor's kit with stethoscope, blood pressure cuff, thermometer, syringe, and carrying case. All pieces sized for small hands.",
     marketingCopy: `The doctor is in! Our 20-Piece Doctor's Kit equips young medical professionals with everything they need to diagnose, treat, and comfort their patients — whether those patients are stuffed bears, willing siblings, or cooperative pets. The kit includes a stethoscope with a real working chest piece that amplifies heartbeat sounds, a blood pressure cuff with a squeeze bulb and Velcro strap, a digital-display thermometer (shows a random "temperature" when the button is pressed), a syringe with a retractable needle tip, a reflex hammer, bandages, an otoscope, and more.
 
@@ -1249,6 +1313,7 @@ Doctor play serves a uniquely important emotional function: it gives children a 
   {
     id: "toy-065",
     name: "Wooden Tool Bench",
+    image: "/product-images/toy-065.png",
     description: "Sturdy wooden workbench with hammer, saw, wrench, screwdriver, nuts, and bolts. Built-in storage shelf. Teaches tool recognition.",
     marketingCopy: `Every builder needs a proper workshop, and our Wooden Tool Bench provides exactly that — a sturdy, beautifully crafted workstation where young makers can hammer, saw, screw, and wrench to their heart's content. The bench stands 22 inches tall (perfect tabletop height for toddlers and preschoolers) and comes equipped with a wooden hammer, saw, wrench, screwdriver, pliers, a vise that actually clamps, wooden nuts and bolts that thread together, a pegboard backboard for tool organization, and a lower shelf for project storage.
 
@@ -1268,6 +1333,7 @@ Tool play is a powerful form of functional pretend play that builds fine motor s
   {
     id: "toy-066",
     name: "Dress-Up Costume Trunk (10 costumes)",
+    image: "/product-images/toy-066.png",
     description: "Trunk with 10 mix-and-match costumes: firefighter, astronaut, chef, doctor, pirate, fairy, superhero, police, wizard, and explorer.",
     marketingCopy: `Who do you want to be today? Our Dress-Up Costume Trunk answers that question ten different ways with a collection of mix-and-match costumes that transform children into firefighters, astronauts, chefs, doctors, pirates, fairies, superheroes, police officers, wizards, and jungle explorers — all stored in a sturdy fabric-covered trunk with reinforced handles and a pop-open lid. Each costume consists of a top or vest and one key accessory (helmet, hat, badge, wand, or tool), designed to slip on over regular clothes in seconds.
 
@@ -1287,6 +1353,7 @@ Dress-up play is one of the most researched and validated forms of imaginative p
   {
     id: "toy-067",
     name: "Cash Register & Shopping Set",
+    image: "/product-images/toy-067.png",
     description: "Toy cash register with working calculator, scanner, play money, credit card, and 30 grocery items. Teaches counting and money skills.",
     marketingCopy: `Open for business! Our Cash Register & Shopping Set turns any room into a bustling marketplace where children take turns as shopkeeper and customer, learning real-world money skills through vibrant, hands-on pretend play. The electronic cash register features a working solar-powered calculator, a beeping barcode scanner, a pop-open cash drawer, a built-in scale, and a microphone with speaker (for announcing "price check on aisle three!"). The set includes realistic play money (bills and coins), a pretend credit card with swipe slot, and 30 grocery items — boxes, cans, fruits, vegetables, and bottles — each marked with a barcode and price sticker.
 
@@ -1306,6 +1373,7 @@ Shopping play is a goldmine of developmental learning: counting, addition, subtr
   {
     id: "toy-068",
     name: "Puppet Theater – Tabletop",
+    image: "/product-images/toy-068.png",
     description: "Foldable wooden tabletop puppet theater with chalkboard marquee and fabric curtains. Fits standard hand and finger puppets.",
     marketingCopy: `The show must go on — and our Tabletop Puppet Theater ensures it does, anywhere, anytime. This beautifully crafted wooden theater folds flat for storage (just 2 inches thick) yet opens to reveal a proper proscenium stage with velvet-red fabric curtains that draw open and closed, a chalkboard marquee where young performers write the show title, and a sturdy stage opening sized to accommodate standard hand puppets and finger puppets alike. The theater stands 24 inches tall when set up on a table, creating a proper audience-facing performance space.
 
@@ -1325,6 +1393,7 @@ Puppet theater play is extraordinarily rich from a developmental perspective: ch
   {
     id: "toy-069",
     name: "Vet Clinic Playset",
+    image: "/product-images/toy-069.png",
     description: "Veterinary clinic with exam table, X-ray machine, and medical tools. Includes 3 plush pets with removable casts and bandages.",
     marketingCopy: `Calling all animal doctors! Our Vet Clinic Playset puts compassionate young veterinarians in charge of a fully equipped animal hospital complete with an examination table, a working X-ray viewer (insert the included X-ray transparency cards and illuminate with the built-in backlight), a medicine cabinet with labeled bottles, a pet scale, medical instruments (stethoscope, thermometer, syringe, bandage roll), and three adorable plush patients — a puppy with a removable leg cast, a kitten with a Velcro bandage wrap, and a bunny with a cone collar.
 
@@ -1344,6 +1413,7 @@ Veterinary play combines two of children's deepest interests — animals and car
   {
     id: "toy-070",
     name: "Tea Party Set – Porcelain Style",
+    image: "/product-images/toy-070.png",
     description: "15-piece tea set in a wicker basket. Floral porcelain-look plastic teapot, cups, saucers, and serving tray. Lightweight and durable.",
     marketingCopy: `You're cordially invited to the most charming tea party in town. Our Porcelain Style Tea Party Set brings the elegance of a traditional English tea service to the playroom with 15 exquisitely designed pieces: a teapot with lid, a creamer, a sugar bowl with lid, four cups, four saucers, and a serving tray — all nestled in a wicker carrying basket with a gingham liner and a hinged lid. The pieces are molded from lightweight, shatter-resistant melamine with a lustrous glaze finish that is virtually indistinguishable from real porcelain.
 
@@ -1363,26 +1433,28 @@ Tea party play is a deceptively sophisticated form of social pretend play that d
   // ── BOARD GAMES ────────────────────────────────────────────────────────
   {
     id: "toy-071",
-    name: "Junior Scrabble",
+    name: "Junior Word Builder",
+    image: "/product-images/toy-071.png",
     description: "Kid-friendly version of the classic word game with two difficulty levels. Features colorful tiles, a two-sided game board, and picture clues for beginners.",
-    marketingCopy: `Words become an adventure with Junior Scrabble — the kid-friendly gateway to the world's most beloved word game. The ingenious two-sided game board offers two distinct levels of play: the beginner side features pre-printed words with picture clues, so children simply match letter tiles to complete familiar words like "dog," "sun," and "tree." Flip the board over and the advanced side plays like classic Scrabble with a simplified scoring system, challenging young spellers to create their own words from a tile rack.
+    marketingCopy: `Words become an adventure with Junior Word Builder — the kid-friendly gateway to the world's most beloved word-building format. The ingenious two-sided game board offers two distinct levels of play: the beginner side features pre-printed words with picture clues, so children simply match letter tiles to complete familiar words like "dog," "sun," and "tree." Flip the board over and the advanced side plays like a classic word game with a simplified scoring system, challenging young spellers to create their own words from a tile rack.
 
 The oversized letter tiles are thick, colorful, and easy for small hands to grip and place, with a satisfying snap as they drop into the recessed board squares. The included tile bag, tile racks, and scoring track are all scaled for younger players, and the illustrated instruction booklet walks families through both game modes with clear examples and helpful tips. Games on the beginner side take about 15 minutes — perfect for short attention spans — while the advanced side extends to 25-30 minutes for more seasoned players.
 
-Literacy researchers consistently identify letter-tile games as among the most effective informal tools for building phonemic awareness, spelling fluency, and vocabulary breadth. Junior Scrabble sneaks this learning into a genuinely fun, competitive family game night experience. Children who start with Junior Scrabble develop the confidence and skills to graduate to the full adult game years ahead of their peers, making this not just a game but an investment in lifelong word-craft. For 2-4 players, recommended for ages 4-8.`,
-    keywords: ["scrabble", "word game", "letters", "spelling", "educational"],
+Literacy researchers consistently identify letter-tile games as among the most effective informal tools for building phonemic awareness, spelling fluency, and vocabulary breadth. Junior Word Builder sneaks this learning into a genuinely fun, competitive family game night experience. Children who start with Junior Word Builder develop the confidence and skills to graduate to the full adult word game years ahead of their peers, making this not just a game but an investment in lifelong word-craft. For 2-4 players, recommended for ages 4-8.`,
+    keywords: ["word builder", "word game", "letters", "spelling", "educational"],
     ageRange: { min: 4, max: 8 },
     price: 21.99,
     inventory: 38,
     category: "board-games",
     dimensions: { lengthInches: 10.5, widthInches: 10.5, heightInches: 2.0, weightLbs: 1.5 },
-    manufacturer: "Mattel Games",
+    manufacturer: "WonderPlay Games",
     bestSellersRank: 60,
     rating: { stars: 4.5, numberOfRatings: 2345 },
   },
   {
     id: "toy-072",
     name: "Strategy Board Game: Castle Siege",
+    image: "/product-images/toy-072.png",
     description: "Epic medieval strategy game where players build castles, train armies, and compete for the kingdom. For 2-4 players, games last 30-45 minutes.",
     marketingCopy: `Kingdoms rise and fall at your command in Castle Siege — an epic strategy board game that challenges players to build fortifications, recruit armies, manage resources, and outmaneuver opponents in a race to claim the crown. The beautifully illustrated game board depicts a medieval kingdom divided into contested territories, each one offering strategic advantages: forests provide lumber for building, farms generate food for armies, mountains yield gold for recruitment, and rivers create natural defensive barriers.
 
@@ -1401,83 +1473,88 @@ Castle Siege occupies the ideal niche for families seeking a game with genuine s
   },
   {
     id: "toy-073",
-    name: "Candy Land Classic",
+    name: "Sweet Path Classic",
+    image: "/product-images/toy-073.png",
     description: "The classic first board game for little ones. No reading required—just match colors and race to the Candy Castle. 2-4 players.",
-    marketingCopy: `For over 70 years, Candy Land has been the game that teaches children what board games are — and makes them fall in love with the experience. The rules could not be simpler: draw a card, find the matching color on the board, and move your gingerbread person to that space. No reading, no counting, no strategy required — just pure, sweet anticipation as players wind through Peppermint Forest, past Gumdrop Mountain, and over Lollipop Bridge on their way to King Kandy's Candy Castle.
+    marketingCopy: `For decades, Sweet Path has been the game that teaches children what board games are — and makes them fall in love with the experience. The rules could not be simpler: draw a card, find the matching color on the board, and move your gingerbread person to that space. No reading, no counting, no strategy required — just pure, sweet anticipation as players wind through Peppermint Forest, past Gumdrop Mountain, and over Lollipop Bridge on their way to King Kandy's Candy Castle.
 
 The board is a visual feast of candy-themed illustration that delights young eyes, and the four chunky gingerbread-person movers are sized perfectly for toddler grips. Special cards featuring beloved characters like Princess Lolly and Mr. Mint add exciting leaps forward (or disappointing slides backward) that teach children the emotional skills of handling both luck and setback — essential board-game social-emotional learning that they will draw upon for decades of game nights to come. Games last 10-15 minutes, perfectly calibrated for preschool attention spans.
 
-Candy Land is more than a game — it is a cultural rite of passage. Generations of families share fond memories of their first Candy Land sessions, and the game continues to serve as the universal entry point into the world of tabletop gaming. Learning to take turns, follow rules, win graciously, and lose without meltdowns are skills that Candy Land teaches gently, colorfully, and deliciously. This classic edition features the traditional art style that parents and grandparents remember from their own childhoods, creating a beautiful cross-generational connection.`,
-    keywords: ["candy land", "classic", "colors", "first game", "simple"],
+Sweet Path is more than a game — it is a family rite of passage. Generations of families share fond memories of their first sessions, and the game continues to serve as the universal entry point into the world of tabletop gaming. Learning to take turns, follow rules, win graciously, and lose without meltdowns are skills that Sweet Path teaches gently, colorfully, and deliciously. This classic edition features the traditional art style that parents and grandparents remember, creating a beautiful cross-generational connection.`,
+    keywords: ["sweet path", "classic", "colors", "first game", "simple"],
     ageRange: { min: 3, max: 6 },
     price: 12.99,
     inventory: 60,
     category: "board-games",
     dimensions: { lengthInches: 10.5, widthInches: 8.0, heightInches: 1.5, weightLbs: 0.9 },
-    manufacturer: "Hasbro Gaming",
+    manufacturer: "WonderPlay Games",
     bestSellersRank: 4,
     rating: { stars: 4.6, numberOfRatings: 12450 },
   },
   {
     id: "toy-074",
-    name: "Ticket to Ride: First Journey",
-    description: "Simplified version of the hit train-route game designed for younger players. Collect cards, claim routes across the map. 2-4 players, 20 minutes.",
-    marketingCopy: `All aboard the gaming express! Ticket to Ride: First Journey brings the beloved train-route strategy franchise to younger players with streamlined rules, a colorful new map, and games that play in just 20 minutes. Players collect train cards in six colors and use them to claim routes between cities on the beautiful illustrated board — but the simplified ticket system and shorter routes mean that children as young as six can play competitively without adult coaching.
+    name: "Train Routes: First Journey",
+    image: "/product-images/toy-074.png",
+    description: "Simplified version of the popular train-route game designed for younger players. Collect cards, claim routes across the map. 2-4 players, 20 minutes.",
+    marketingCopy: `All aboard the gaming express! Train Routes: First Journey brings the beloved train-route strategy format to younger players with streamlined rules, a colorful new map, and games that play in just 20 minutes. Players collect train cards in six colors and use them to claim routes between cities on the beautiful illustrated board — but the simplified ticket system and shorter routes mean that children as young as six can play competitively without adult coaching.
 
-The game preserves the core satisfaction of the original Ticket to Ride: the tension of watching your desired route get claimed by an opponent, the joy of completing a long-distance connection, and the strategic decision of when to collect more cards versus when to claim a route. Oversized train cards are easy for small hands to hold and sort, and the chunky plastic train pieces snap satisfyingly onto the board. Coast-to-coast bonus routes reward ambitious players who connect cities across the entire map.
+The game preserves the core satisfaction of the original game: the tension of watching your desired route get claimed by an opponent, the joy of completing a long-distance connection, and the strategic decision of when to collect more cards versus when to claim a route. Oversized train cards are easy for small hands to hold and sort, and the chunky plastic train pieces snap satisfyingly onto the board. Coast-to-coast bonus routes reward ambitious players who connect cities across the entire map.
 
-Ticket to Ride: First Journey is widely regarded as one of the best "gateway" strategy games for families — it teaches set collection, route planning, and competitive strategy without dice-based luck, giving children genuine agency over their success. The 20-minute play time means it fits easily into a busy weeknight, and the "one more game" factor is off the charts. Parents who introduce their children to this game often find themselves pleasantly surprised by the strategic thinking their kids demonstrate — and by how much fun they have playing alongside them.`,
-    keywords: ["ticket to ride", "trains", "routes", "strategy", "family"],
+Train Routes: First Journey is widely regarded as one of the best "gateway" strategy games for families — it teaches set collection, route planning, and competitive strategy without dice-based luck, giving children genuine agency over their success. The 20-minute play time means it fits easily into a busy weeknight, and the "one more game" factor is off the charts. Parents who introduce their children to this game often find themselves pleasantly surprised by the strategic thinking their kids demonstrate — and by how much fun they have playing alongside them.`,
+    keywords: ["train routes", "trains", "routes", "strategy", "family"],
     ageRange: { min: 6, max: 12 },
     price: 29.99,
     inventory: 25,
     category: "board-games",
     dimensions: { lengthInches: 11.0, widthInches: 11.0, heightInches: 3.0, weightLbs: 1.8 },
-    manufacturer: "Days of Wonder",
+    manufacturer: "RailQuest Games",
     bestSellersRank: 45,
     rating: { stars: 4.7, numberOfRatings: 2890 },
   },
   {
     id: "toy-075",
-    name: "Clue Junior",
+    name: "Mystery Mansion Junior",
+    image: "/product-images/toy-075.png",
     description: "Who ate the last piece of cake? Junior detectives search for clues around the mansion. Simpler gameplay, same deduction fun. 2-6 players.",
-    marketingCopy: `The mystery is afoot — and this time, it's delicious! In Clue Junior, players don't solve a murder; they solve the case of who ate the last piece of chocolate cake, and at what time, and what drink they had with it. The charming, kid-friendly mystery unfolds across a colorful game board depicting the rooms of a whimsical mansion, where junior detectives move from room to room discovering clues hidden under furniture pieces — a deduction mechanic that is refreshingly physical and interactive.
+    marketingCopy: `The mystery is afoot — and this time, it's delicious! In Mystery Mansion Junior, players don't solve a mystery crime; they solve the case of who ate the last piece of chocolate cake, and at what time, and what drink they had with it. The charming, kid-friendly mystery unfolds across a colorful game board depicting the rooms of a whimsical mansion, where junior detectives move from room to room discovering clues hidden under furniture pieces — a deduction mechanic that is refreshingly physical and interactive.
 
 The game supports 2-6 players and takes about 15-20 minutes to play, making it ideal for family game nights, playdates, and classroom game sessions. The streamlined deduction system uses a simplified suspect roster (six kid characters instead of adult suspects) and a reveal-by-elimination process that young minds can follow intuitively. The satisfaction of correctly identifying the cake thief, the time, and the drink produces triumphant moments that children remember and want to replay immediately.
 
 Deductive reasoning is one of the most valuable cognitive skills a child can develop, and Clue Junior introduces it in a context that feels like play rather than practice. Players must observe what is revealed, remember what has been eliminated, and synthesize available information into a logical conclusion — the same reasoning process used by scientists, diagnosticians, and yes, real detectives. The game naturally builds memory, logical thinking, and the ability to hold and manipulate multiple variables simultaneously, all while delivering the irresistible fun of a good whodunit.`,
-    keywords: ["clue", "mystery", "detective", "deduction", "junior"],
+    keywords: ["mystery", "mansion", "detective", "deduction", "junior"],
     ageRange: { min: 5, max: 8 },
     price: 18.99,
     inventory: 35,
     category: "board-games",
     dimensions: { lengthInches: 10.5, widthInches: 10.5, heightInches: 2.0, weightLbs: 1.2 },
-    manufacturer: "Hasbro Gaming",
+    manufacturer: "WonderPlay Games",
     bestSellersRank: 38,
     rating: { stars: 4.4, numberOfRatings: 2567 },
   },
   {
     id: "toy-076",
-    name: "Settlers of Catan: Family Edition",
+    name: "Island Settlers: Family Edition",
+    image: "/product-images/toy-076.png",
     description: "Family-friendly version of the beloved resource-trading game. Build settlements, trade goods, and settle the island. 3-4 players, 45 minutes.",
-    marketingCopy: `Welcome to Catan — the island where every family becomes a civilization. The Family Edition of the world's most popular strategy board game retains the core resource-trading, settlement-building, and road-expanding mechanics that have made Catan a phenomenon, while streamlining the setup and rules for players as young as eight. The modular hex-tile board creates a different island layout every game, ensuring that no two sessions unfold the same way and that strategies must adapt to the terrain.
+    marketingCopy: `Welcome to the island where every family becomes a civilization. The Family Edition of this beloved strategy board game retains the core resource-trading, settlement-building, and road-expanding mechanics that have made it a phenomenon, while streamlining the setup and rules for players as young as eight. The modular hex-tile board creates a different island layout every game, ensuring that no two sessions unfold the same way and that strategies must adapt to the terrain.
 
-Players collect five types of resources — lumber, brick, grain, ore, and wool — by building settlements adjacent to productive hexes, then trade resources with each other (or the bank) to fuel expansion. The trading mechanic is Catan's secret weapon: it transforms what could be a solitary puzzle into a dynamic, social negotiation game where deal-making, persuasion, and reading opponents become just as important as strategic planning. The family edition includes a quick-start guide that gets new players into their first game in under 10 minutes.
+Players collect five types of resources — lumber, brick, grain, ore, and wool — by building settlements adjacent to productive hexes, then trade resources with each other (or the bank) to fuel expansion. The trading mechanic is the game's secret weapon: it transforms what could be a solitary puzzle into a dynamic, social negotiation game where deal-making, persuasion, and reading opponents become just as important as strategic planning. The family edition includes a quick-start guide that gets new players into their first game in under 10 minutes.
 
-Catan has sold over 40 million copies worldwide because it hits the perfect intersection of strategy, social interaction, and replayability. The Family Edition maintains this magic while reducing game length from 90 minutes to approximately 45 minutes and simplifying the development card deck. Parents report that Catan becomes a weekly family tradition — a screen-free gathering that generates laughter, heated negotiations, and the kind of shared memories that define a childhood. The premium components — wooden roads and settlements, embossed resource cards, thick hex tiles — make every game feel like an event.`,
-    keywords: ["catan", "strategy", "trading", "settlers", "family"],
+This game has sold millions of copies worldwide because it hits the perfect intersection of strategy, social interaction, and replayability. The Family Edition maintains this magic while reducing game length from 90 minutes to approximately 45 minutes and simplifying the development card deck. Parents report that it becomes a weekly family tradition — a screen-free gathering that generates laughter, heated negotiations, and the kind of shared memories that define a childhood. The premium components — wooden roads and settlements, embossed resource cards, thick hex tiles — make every game feel like an event.`,
+    keywords: ["island", "strategy", "trading", "settlers", "family"],
     ageRange: { min: 8, max: 14 },
     price: 34.99,
     inventory: 20,
     category: "board-games",
     dimensions: { lengthInches: 11.5, widthInches: 11.5, heightInches: 3.0, weightLbs: 2.2 },
-    manufacturer: "Catan Studio",
+    manufacturer: "Hexland Games",
     bestSellersRank: 42,
     rating: { stars: 4.7, numberOfRatings: 3456 },
   },
   {
     id: "toy-077",
     name: "Cooperative Game: Forbidden Island",
+    image: "/product-images/toy-077.png",
     description: "Work together to capture treasures from a sinking island. A thrilling cooperative game where everyone wins or loses together. 2-4 players.",
     marketingCopy: `Sink or swim — together. Forbidden Island is a cooperative board game where 2-4 players work as a team of intrepid adventurers racing to capture four sacred treasures from a mysterious island that is sinking beneath the waves. There are no opponents at the table — the rising water level is the enemy, and only coordinated teamwork, strategic communication, and smart resource management will save the expedition from a watery grave.
 
@@ -1496,26 +1573,28 @@ Cooperative games represent a revolution in board gaming philosophy, and Forbidd
   },
   {
     id: "toy-078",
-    name: "Guess Who? Classic",
-    description: "The original face-guessing game. Ask yes-or-no questions to narrow down the mystery face. Two player deduction fun.",
-    marketingCopy: `Does your person have glasses? A hat? A big smile? Guess Who? is the brilliantly simple deduction game that has entertained two-player rivalries for over four decades. Each player selects a mystery character from a roster of 24 colorful faces, then takes turns asking yes-or-no questions to eliminate suspects and identify the opponent's character. The iconic flip-frame boards — with rows of hinged character cards that click down satisfyingly when eliminated — create a tactile, visual experience that digital versions simply cannot replicate.
+    name: "Face Guesser Classic",
+    image: "/product-images/toy-078.png",
+    description: "The classic face-guessing game. Ask yes-or-no questions to narrow down the mystery face. Two player deduction fun.",
+    marketingCopy: `Does your person have glasses? A hat? A big smile? Face Guesser is the brilliantly simple deduction game that has entertained two-player rivalries for over four decades. Each player selects a mystery character from a roster of 24 colorful faces, then takes turns asking yes-or-no questions to eliminate suspects and identify the opponent's character. The iconic flip-frame boards — with rows of hinged character cards that click down satisfyingly when eliminated — create a tactile, visual experience that digital versions simply cannot replicate.
 
-The game teaches deductive reasoning in its purest form: formulating questions that efficiently partition the remaining possibilities, processing binary information, and maintaining a mental model of eliminated options. Children who play Guess Who? regularly develop sharper categorical thinking and more strategic questioning skills — abilities that transfer to science, math, and everyday problem-solving. The 24-character roster is diverse in appearance, providing rich descriptive vocabulary practice ("Does your person have red hair?" "Are they wearing a hat?" "Do they have freckles?").
+The game teaches deductive reasoning in its purest form: formulating questions that efficiently partition the remaining possibilities, processing binary information, and maintaining a mental model of eliminated options. Children who play Face Guesser regularly develop sharper categorical thinking and more strategic questioning skills — abilities that transfer to science, math, and everyday problem-solving. The 24-character roster is diverse in appearance, providing rich descriptive vocabulary practice ("Does your person have red hair?" "Are they wearing a hat?" "Do they have freckles?").
 
-Games take about 5-10 minutes, making Guess Who? the perfect quick-play option for waiting rooms, restaurant tables, and rainy-afternoon entertainment. The compact, fold-closed design travels easily, and the robust plastic construction withstands years of enthusiastic flipping and clicking. This classic edition features the traditional character artwork that has become iconic in board-game culture, connecting today's players with a tradition that stretches back to 1979 and shows no signs of losing its addictive appeal.`,
-    keywords: ["guess who", "deduction", "faces", "two player", "classic"],
+Games take about 5-10 minutes, making Face Guesser the perfect quick-play option for waiting rooms, restaurant tables, and rainy-afternoon entertainment. The compact, fold-closed design travels easily, and the robust plastic construction withstands years of enthusiastic flipping and clicking. This classic edition features the traditional character artwork that has become iconic in board-game culture, connecting today's players with a tradition that spans decades and shows no signs of losing its addictive appeal.`,
+    keywords: ["face guesser", "deduction", "faces", "two player", "classic"],
     ageRange: { min: 5, max: 10 },
     price: 15.99,
     inventory: 45,
     category: "board-games",
     dimensions: { lengthInches: 10.0, widthInches: 8.0, heightInches: 2.5, weightLbs: 1.0 },
-    manufacturer: "Hasbro Gaming",
+    manufacturer: "WonderPlay Games",
     bestSellersRank: 22,
     rating: { stars: 4.5, numberOfRatings: 4567 },
   },
   {
     id: "toy-079",
     name: "Chess Set – Beginner's Wood",
+    image: "/product-images/toy-079.png",
     description: "Handsome wooden chess set with 15-inch folding board that doubles as storage. Includes a beginner's strategy booklet.",
     marketingCopy: `The game of kings, sized for young minds. Our Beginner's Chess Set combines the timeless elegance of a wooden chess board with a thoughtfully designed learning system that takes new players from "which way does the horsey go?" to confident, strategic play. The 15-inch folding board is crafted from walnut and maple inlays with a satin lacquer finish, and the 32 Staunton-style pieces are turned from weighted hardwood with felt bases that glide smoothly across the board.
 
@@ -1534,45 +1613,48 @@ Chess is perhaps the single most studied game in human history, with overwhelmin
   },
   {
     id: "toy-080",
-    name: "Apples to Apples Junior",
+    name: "Comparisons Junior",
+    image: "/product-images/toy-080.png",
     description: "The hilarious comparisons game for kids. Play a red card that best matches the green card—funniest answer wins. 4-8 players.",
-    marketingCopy: `Get ready to laugh until your sides hurt! Apples to Apples Junior takes the wildly popular party game formula — match a red noun card to a green adjective card — and fills the deck with kid-friendly, sidesplitting content that generates howling laughter around the table. When the judge plays "Scary," will the winning answer be "Thunderstorms," "Broccoli," or "Grandma's Kisses"? The beauty of Apples to Apples is that there is no objectively right answer — the judge decides, and persuasive (or hilarious) arguments carry the day.
+    marketingCopy: `Get ready to laugh until your sides hurt! Comparisons Junior takes the wildly popular party game formula — match a red noun card to a green adjective card — and fills the deck with kid-friendly, sidesplitting content that generates howling laughter around the table. When the judge plays "Scary," will the winning answer be "Thunderstorms," "Broccoli," or "Grandma's Kisses"? The beauty of the game is that there is no objectively right answer — the judge decides, and persuasive (or hilarious) arguments carry the day.
 
 The game plays 4-8 players in about 20 minutes, making it the ideal party game for birthday celebrations, family reunions, sleepovers, and classroom reward time. The 576 cards provide enormous replayability, and the kid-curated content ensures that every card is recognizable and relevant to players aged 7-12. No reading level above basic sight words is required, making the game accessible to a wide range of abilities within the recommended age range.
 
-Apples to Apples Junior is secretly one of the most effective vocabulary and creative-thinking games available: players must understand the nuance of adjective meanings, generate persuasive arguments, read their audience (the rotating judge), and think laterally about unexpected connections between concepts. All of this cognitive work happens under the cover of pure hilarity, making it the rare game that children beg to play and teachers love to assign. The compact box stores hundreds of cards neatly and fits easily on a game shelf.`,
-    keywords: ["apples", "comparisons", "funny", "party", "junior"],
+Comparisons Junior is secretly one of the most effective vocabulary and creative-thinking games available: players must understand the nuance of adjective meanings, generate persuasive arguments, read their audience (the rotating judge), and think laterally about unexpected connections between concepts. All of this cognitive work happens under the cover of pure hilarity, making it the rare game that children beg to play and teachers love to assign. The compact box stores hundreds of cards neatly and fits easily on a game shelf.`,
+    keywords: ["comparisons", "matching", "funny", "party", "junior"],
     ageRange: { min: 7, max: 12 },
     price: 14.99,
     inventory: 40,
     category: "board-games",
     dimensions: { lengthInches: 8.0, widthInches: 5.0, heightInches: 3.0, weightLbs: 0.9 },
-    manufacturer: "Mattel Games",
+    manufacturer: "WonderPlay Games",
     bestSellersRank: 28,
     rating: { stars: 4.5, numberOfRatings: 3890 },
   },
   {
     id: "toy-081",
-    name: "Jenga Classic",
-    description: "The original block-stacking, stack-crashing game. Pull out blocks and stack them on top without toppling the tower. All ages fun.",
-    marketingCopy: `Will it hold? The exquisite tension of Jenga — that moment when you slide a block from the middle of a wobbling tower and the whole room holds its breath — is one of the most universal and instantly accessible thrills in all of gaming. The rules take 10 seconds to explain: pull out a block, stack it on top, don't let the tower fall. Yet this simplicity belies a game of surprising skill, strategy, and nerve that captivates players from age six to ninety-six.
+    name: "Tower Tumble Classic",
+    image: "/product-images/toy-081.png",
+    description: "The classic block-stacking, stack-crashing game. Pull out blocks and stack them on top without toppling the tower. All ages fun.",
+    marketingCopy: `Will it hold? The exquisite tension of Tower Tumble — that moment when you slide a block from the middle of a wobbling tower and the whole room holds its breath — is one of the most universal and instantly accessible thrills in all of gaming. The rules take 10 seconds to explain: pull out a block, stack it on top, don't let the tower fall. Yet this simplicity belies a game of surprising skill, strategy, and nerve that captivates players from age six to ninety-six.
 
 The 54 precision-cut hardwood blocks create a tower that begins 18 stories tall and can grow to over 35 stories before its spectacular, crashing collapse. Each block is sanded smooth with slightly rounded edges and manufactured to exacting dimensional tolerances — the slight natural variations between blocks are what create the shifting weight distribution that makes every game unpredictable. The included stacking sleeve makes setup fast and ensures a perfectly aligned starting tower every time.
 
-Jenga is the rare game that needs no opponent — a single player can test their nerve against the tower — yet scales effortlessly to any group size. It has become a staple of family game nights, college dorm rooms, office break rooms, and outdoor barbecues precisely because it transcends age, language, and gaming experience. The physical, tactile nature of the game exercises fine motor control, spatial reasoning, and risk assessment, while the inevitable crash produces a cathartic release of tension that players immediately want to experience again. Jenga is not just a game — it is a shared experience that creates stories.`,
-    keywords: ["jenga", "stacking", "blocks", "dexterity", "classic"],
+Tower Tumble is the rare game that needs no opponent — a single player can test their nerve against the tower — yet scales effortlessly to any group size. It has become a staple of family game nights, college dorm rooms, office break rooms, and outdoor barbecues precisely because it transcends age, language, and gaming experience. The physical, tactile nature of the game exercises fine motor control, spatial reasoning, and risk assessment, while the inevitable crash produces a cathartic release of tension that players immediately want to experience again. Tower Tumble is not just a game — it is a shared experience that creates stories.`,
+    keywords: ["tower tumble", "stacking", "blocks", "dexterity", "classic"],
     ageRange: { min: 6, max: 14 },
     price: 14.99,
     inventory: 55,
     category: "board-games",
     dimensions: { lengthInches: 8.0, widthInches: 3.0, heightInches: 3.0, weightLbs: 1.5 },
-    manufacturer: "Hasbro Gaming",
+    manufacturer: "WonderPlay Games",
     bestSellersRank: 10,
     rating: { stars: 4.7, numberOfRatings: 9876 },
   },
   {
     id: "toy-082",
     name: "Labyrinth – Moving Maze Game",
+    image: "/product-images/toy-082.png",
     description: "Slide the maze walls to create paths and reach your treasures before opponents. A classic strategy maze game. 2-4 players.",
     marketingCopy: `The walls are moving — can you find your way? Labyrinth is a brilliantly engineered strategy game where the maze itself shifts and changes every turn. The board is a grid of fixed and sliding tiles that form a network of corridors and dead ends. On your turn, you push an extra tile into a row or column, physically shifting the maze walls and opening (or closing) paths across the board. Then you move your pawn through the newly configured labyrinth, trying to reach your assigned treasure.
 
@@ -1593,6 +1675,7 @@ With over 15 million copies sold worldwide since its 1986 release, Labyrinth has
   {
     id: "toy-083",
     name: "1000-Piece Space Puzzle",
+    image: "/product-images/toy-083.png",
     description: "Stunning 1000-piece jigsaw puzzle featuring a detailed illustration of our solar system. Finished size is 27x20 inches.",
     marketingCopy: `Journey through the cosmos one piece at a time with our 1000-Piece Space Puzzle — a breathtaking jigsaw featuring a scientifically accurate, richly illustrated panorama of our solar system. Planets are depicted at relative-brightness scale with accurate surface features (Jupiter's Great Red Spot, Saturn's Cassini Division, Mars's Olympus Mons), set against a deep-field background of galaxies, nebulae, and star clusters. The finished puzzle measures 27x20 inches and makes a stunning wall display when preserved with puzzle glue.
 
@@ -1612,6 +1695,7 @@ Jigsaw puzzles are increasingly recognized as one of the most effective screen-f
   {
     id: "toy-084",
     name: "Floor Puzzle – World Map (48 pieces)",
+    image: "/product-images/toy-084.png",
     description: "Giant 3-foot floor puzzle of the world map. Thick, durable pieces sized for small hands. Learn continents, oceans, and landmarks.",
     marketingCopy: `Explore the whole world without leaving your living room! Our Floor Puzzle – World Map is a giant, 3-foot-long jigsaw that assembles into a vibrant, illustrated map of the seven continents and five oceans. Each of the 48 extra-thick pieces is sized for small hands (approximately 4x4 inches) and features a portion of the world map with colorful illustrations of regional landmarks, animals, and cultural icons — the Eiffel Tower in Europe, kangaroos in Australia, penguins in Antarctica, the Great Wall in Asia.
 
@@ -1631,6 +1715,7 @@ Geography educators endorse floor puzzles as one of the most effective tools for
   {
     id: "toy-085",
     name: "3D Crystal Puzzle – Dragon",
+    image: "/product-images/toy-085.png",
     description: "56-piece translucent crystal puzzle that assembles into a gleaming dragon. Challenging and beautiful display piece when complete.",
     marketingCopy: `Assemble a dragon from pure crystal light. Our 3D Crystal Puzzle challenges builders to fit 56 translucent, jewel-cut acrylic pieces into a stunning three-dimensional dragon sculpture that gleams like a precious gem when placed near a light source. Unlike flat jigsaw puzzles, this is a true spatial puzzle — pieces interlock in three dimensions, requiring builders to think about the dragon's form from multiple angles simultaneously.
 
@@ -1650,6 +1735,7 @@ Each piece is injection-molded from optically clear acrylic with prismatic facet
   {
     id: "toy-086",
     name: "Puzzle Box – Secret Compartment",
+    image: "/product-images/toy-086.png",
     description: "Intricately crafted wooden puzzle box that opens only when you discover the secret sequence of moves. Hides small treasures inside.",
     marketingCopy: `Can you unlock the secret? Our Puzzle Box is a masterfully crafted wooden cube that conceals an interior compartment accessible only to those who discover the correct sequence of slides, twists, and pushes required to open it. Crafted from alternating strips of walnut and maple with precision-fitted sliding panels, this puzzle box requires 7 sequential moves to open — a challenge that typically takes first-time solvers 15-30 minutes of delightful frustration before the satisfying "click" of the final panel sliding free.
 
@@ -1669,6 +1755,7 @@ Puzzle boxes have a centuries-long tradition in Japanese woodworking (known as "
   {
     id: "toy-087",
     name: "Progressive Puzzle Set (4 puzzles)",
+    image: "/product-images/toy-087.png",
     description: "Four puzzles of increasing difficulty: 12, 24, 36, and 48 pieces. Animal themes. Grows with your child's skill level.",
     marketingCopy: `Start small, dream big! Our Progressive Puzzle Set contains four animal-themed jigsaw puzzles that grow in complexity alongside your child's developing skills: a 12-piece farm puzzle for beginners, a 24-piece ocean puzzle for builders gaining confidence, a 36-piece jungle puzzle for intermediate puzzlers, and a 48-piece Arctic puzzle for young experts ready for a real challenge. Each puzzle is printed on thick, durable cardboard with vibrant, age-appropriate illustrations featuring friendly, expressive animal characters.
 
@@ -1687,26 +1774,28 @@ Puzzle-solving is one of the most heavily researched areas of child development,
   },
   {
     id: "toy-088",
-    name: "Rubik's Cube – Original 3x3",
+    name: "Twist Puzzle Cube – 3x3",
+    image: "/product-images/toy-088.png",
     description: "The classic brain-twisting puzzle. Over 43 quintillion combinations, only one solution. Includes a beginner's solution guide.",
-    marketingCopy: `43,252,003,274,489,856,000 combinations. One solution. Zero batteries. The Rubik's Cube is the best-selling puzzle in human history, and this original 3x3 edition delivers the same maddeningly addictive challenge that has captivated over 450 million solvers since 1974. Six faces, six colors, and a deceptively simple goal — return each face to a single solid color — conceal a mathematical labyrinth that has humbled geniuses and delighted beginners in equal measure.
+    marketingCopy: `43,252,003,274,489,856,000 combinations. One solution. Zero batteries. The twist puzzle cube is the best-selling puzzle in human history, and this original 3x3 edition delivers the same maddeningly addictive challenge that has captivated over 450 million solvers since 1974. Six faces, six colors, and a deceptively simple goal — return each face to a single solid color — conceal a mathematical labyrinth that has humbled geniuses and delighted beginners in equal measure.
 
-This edition features the updated mechanism with smoother, faster turning, reduced friction, and the signature "Rubik's" logo on the white center square. The stickers are replaced with embedded color tiles that will never peel, fade, or chip, and the internal core uses a modern ball-bearing design that allows finger-tricking speeds while remaining forgiving of rough turning. The included beginner's solution guide teaches a layer-by-layer method that gets first-time solvers to a complete cube in 20-30 minutes — a genuine accomplishment that builds confidence for increasingly advanced speed-solving techniques.
+This edition features the updated mechanism with smoother, faster turning, reduced friction, and a logo on the white center square. The stickers are replaced with embedded color tiles that will never peel, fade, or chip, and the internal core uses a modern ball-bearing design that allows finger-tricking speeds while remaining forgiving of rough turning. The included beginner's solution guide teaches a layer-by-layer method that gets first-time solvers to a complete cube in 20-30 minutes — a genuine accomplishment that builds confidence for increasingly advanced speed-solving techniques.
 
-The Rubik's Cube is experiencing a massive global renaissance: speedcubing competitions draw tens of thousands of competitors, online tutorials have millions of views, and collecting limited-edition cubes has become a worldwide hobby. Learning to solve the cube develops algorithmic thinking, spatial reasoning, pattern recognition, muscle memory, and the growth mindset that comes from tackling an initially "impossible" challenge and conquering it through systematic effort. Whether you're a first-time solver, a casual fidgeter, or an aspiring speedcuber, this is the original and best.`,
-    keywords: ["rubiks", "cube", "brain teaser", "classic", "logic"],
+The twist puzzle cube is experiencing a massive global renaissance: speedcubing competitions draw tens of thousands of competitors, online tutorials have millions of views, and collecting limited-edition cubes has become a worldwide hobby. Learning to solve the cube develops algorithmic thinking, spatial reasoning, pattern recognition, muscle memory, and the growth mindset that comes from tackling an initially "impossible" challenge and conquering it through systematic effort. Whether you're a first-time solver, a casual fidgeter, or an aspiring speedcuber, this is the original and best.`,
+    keywords: ["twist cube", "cube", "brain teaser", "classic", "logic"],
     ageRange: { min: 8, max: 14 },
     price: 9.99,
     inventory: 70,
     category: "puzzles",
     dimensions: { lengthInches: 2.25, widthInches: 2.25, heightInches: 2.25, weightLbs: 0.3 },
-    manufacturer: "Rubik's Brand",
+    manufacturer: "CubePuzzle Co.",
     bestSellersRank: 13,
     rating: { stars: 4.7, numberOfRatings: 7890 },
   },
   {
     id: "toy-089",
     name: "Tangram Set – Wooden",
+    image: "/product-images/toy-089.png",
     description: "Classic Chinese tangram puzzle with 7 wooden pieces and 100 pattern cards from beginner to expert. Teaches geometry and spatial thinking.",
     marketingCopy: `Seven simple shapes, infinite possibilities. The tangram is an ancient Chinese puzzle consisting of seven flat pieces — two large triangles, one medium triangle, two small triangles, one square, and one parallelogram — that can be arranged to form hundreds of recognizable silhouettes: animals, people, letters, vehicles, buildings, and abstract geometric designs. Our set features seven precision-cut hardwood pieces with a satin finish, presented in a wooden tray with a slide-on lid, plus 100 double-sided pattern cards ranging from easy (5+ solutions visible) to expert (requires exact placement and rotation).
 
@@ -1726,6 +1815,7 @@ Tangrams have been used in mathematics education for over 200 years, and modern 
   {
     id: "toy-090",
     name: "1500-Piece Puzzle – Enchanted Forest",
+    image: "/product-images/toy-090.png",
     description: "1500-piece jigsaw puzzle featuring a magical forest scene with hidden animals and fairies. Finished size 33x24 inches. Premium matte pieces.",
     marketingCopy: `Lose yourself in the magic of the Enchanted Forest — a 1500-piece jigsaw puzzle that reveals new wonders with every piece placed. The lush, detailed illustration depicts a sun-dappled ancient forest populated by hidden creatures: deer peering through ferns, foxes curled in hollow logs, owls watching from branches, and tiny fairies dancing among the wildflowers. The artist has embedded over 40 hidden details throughout the scene, turning the assembly process into a treasure hunt that keeps builders engaged even during the challenging monochromatic sections.
 
@@ -1746,6 +1836,7 @@ This is a puzzle for dedicated puzzlers who crave a multi-session challenge that
   {
     id: "toy-091",
     name: "Science Lab Chemistry Set",
+    image: "/product-images/toy-091.png",
     description: "Safe and exciting chemistry set with 50+ experiments. Includes test tubes, goggles, and all chemicals needed. Real science for curious minds.",
     marketingCopy: `Real science. Real experiments. Real wow. Our Science Lab Chemistry Set puts genuine laboratory equipment and safe, pre-measured chemicals into the hands of young scientists, enabling over 50 hands-on experiments that produce color changes, gas bubbles, crystal formations, pH reactions, and even a miniature volcanic eruption. The set includes 10 test tubes with a rack, safety goggles, a graduated beaker, an Erlenmeyer flask, litmus papers, a stirring rod, a pipette, and sealed packets of citric acid, sodium bicarbonate, calcium chloride, and other kid-safe reagents.
 
@@ -1765,6 +1856,7 @@ This chemistry set is designed by science educators to be genuinely educational 
   {
     id: "toy-092",
     name: "Coding Robot Buddy",
+    image: "/product-images/toy-092.png",
     description: "Programmable robot that teaches coding basics through play. Use the included coding cards or the free app to program dance moves, sounds, and light shows.",
     marketingCopy: `Meet your child's first programming partner — a charming, expressive robot that learns to dance, sing, flash, and navigate obstacle courses based entirely on code that your child writes. Coding Robot Buddy introduces computational thinking through two input methods: a set of 40 physical coding cards that slide into the robot's card reader (no screen required), and a free companion app (iOS/Android) that provides a block-based visual programming environment for more advanced coders.
 
@@ -1784,6 +1876,7 @@ Computer science educators developed our curriculum ladder, which takes children
   {
     id: "toy-093",
     name: "Telescope Starter Kit",
+    image: "/product-images/toy-093.png",
     description: "70mm refractor telescope with tripod, 2 eyepieces, and a star map. See the moon's craters and Saturn's rings from your backyard.",
     marketingCopy: `The universe is waiting — and it's closer than you think. Our Telescope Starter Kit puts a genuine 70mm refractor telescope into the hands of young astronomers, delivering views of the Moon's craters, Jupiter's moons, Saturn's rings, star clusters, and the Andromeda galaxy from the comfort of a backyard or balcony. The kit includes the telescope with fully coated glass optics, a lightweight aluminum tripod with smooth altitude-azimuth controls, two eyepieces (20mm for wide views, 10mm for close-ups), a 2x Barlow lens for doubled magnification, a red-dot finderscope, and a laminated star map showing the seasonal constellations.
 
@@ -1803,6 +1896,7 @@ There is a moment — usually the first time a child sees the Moon's craters and
   {
     id: "toy-094",
     name: "Microscope Lab – 1200x",
+    image: "/product-images/toy-094.png",
     description: "Student microscope with 100x, 400x, and 1200x magnification. Kit includes prepared slides, blank slides, cover slips, and specimen tools.",
     marketingCopy: `Discover the invisible world hiding in plain sight with our Microscope Lab — a genuine optical microscope that reveals the astonishing complexity of everyday objects at 100x, 400x, and 1200x magnification. The kit includes the microscope with three precision-ground glass objective lenses, a rack-and-pinion focus mechanism, a built-in LED illuminator with adjustable brightness, 10 prepared specimen slides, 10 blank slides with cover slips, a specimen collection toolkit (tweezers, pipette, petri dish, and micro-slicer), and a 48-page experiment guide.
 
@@ -1822,6 +1916,7 @@ Microscopy is a threshold experience in scientific development — the moment wh
   {
     id: "toy-095",
     name: "Solar System Model Kit",
+    image: "/product-images/toy-095.png",
     description: "Build and paint a motorized solar system model. Planets orbit the sun at scaled speeds. Includes glow-in-the-dark paint for night display.",
     marketingCopy: `Build the entire solar system on your desk — then watch it come to life. Our Solar System Model Kit provides everything needed to construct a motorized orrery (solar system model) where all eight planets orbit the central Sun at scaled relative speeds: Mercury zips around in seconds while Neptune takes a leisurely minute to complete its journey. The kit includes unpainted planet spheres in accurate relative sizes, a motorized central hub, wire orbit arms, acrylic paints in astronomically accurate colors, glow-in-the-dark paint for night display, and a detailed assembly and painting guide.
 
@@ -1841,6 +1936,7 @@ This kit sits at the beautiful intersection of STEM education, arts and crafts, 
   {
     id: "toy-096",
     name: "Snap Circuits – Pro (500 experiments)",
+    image: "/product-images/toy-096.png",
     description: "Build 500+ electronic projects with snap-together components. Learn about circuits, LEDs, motors, and sensors. No soldering required.",
     marketingCopy: `Welcome to the electronics lab of the future — no soldering iron required. Snap Circuits Pro is the ultimate hands-on electronics education system, featuring over 75 snap-together components that connect on a grid board to create 500+ working electronic projects: AM radio receivers, burglar alarms, doorbells, lie detectors, voice recorders, digital music generators, strobe lights, and hundreds more. Each component — resistors, capacitors, transistors, LEDs, switches, speakers, motors, solar cells, and integrated circuits — snaps into place with color-coded connectors that make correct assembly intuitive and incorrect connections impossible.
 
@@ -1860,6 +1956,7 @@ Snap Circuits has won more education awards than any other electronics toy on th
   {
     id: "toy-097",
     name: "Crystal Growing Kit",
+    image: "/product-images/toy-097.png",
     description: "Grow 7 vibrant crystals in different colors and shapes. Includes growing powder, display domes, and a geology learning guide.",
     marketingCopy: `Watch science sparkle before your eyes with our Crystal Growing Kit — a seven-experiment set that transforms ordinary powder and water into dazzling, gemstone-like crystals over 7-10 days. Each experiment produces a distinct crystal structure in a different color (amethyst purple, emerald green, sapphire blue, ruby red, citrine yellow, diamond clear, and rose quartz pink), teaching the principles of supersaturation, nucleation, and crystal lattice formation through the most visually stunning science experiment a child can perform at home.
 
@@ -1879,6 +1976,7 @@ Watching crystals grow is a uniquely powerful science experience because it make
   {
     id: "toy-098",
     name: "Weather Station Kit",
+    image: "/product-images/toy-098.png",
     description: "Build a real weather station with thermometer, barometer, rain gauge, wind vane, and anemometer. Record data in the included weather journal.",
     marketingCopy: `Become your neighborhood's meteorologist with our Weather Station Kit — a hands-on science project that puts real weather-monitoring instruments into your backyard. The kit includes five functional instruments: a mercury-free spirit thermometer, an aneroid barometer with a calibration dial, a graduated rain gauge, a wind vane with directional compass, and a cup anemometer with a Beaufort scale readout. Each instrument is assembled from the included components (30 minutes total), then mounted outdoors on the provided stake or fence bracket.
 
@@ -1898,6 +1996,7 @@ Weather is the most accessible branch of earth science because it is literally h
   {
     id: "toy-099",
     name: "Anatomy Model – Human Body",
+    image: "/product-images/toy-099.png",
     description: "12-inch human body model with 24 removable organs and bones. Comes with an illustrated anatomy guide. Medical-grade accuracy.",
     marketingCopy: `Look inside yourself — literally. Our Human Body Anatomy Model is a 12-inch standing figure with 24 removable organs and skeletal elements that teach children the remarkable architecture of the human body through hands-on exploration. Remove the chest plate to reveal the heart, lungs, and ribcage. Lift out the stomach and intestines to see the kidneys and spine behind them. The brain lifts out of the skull in two hemispheres. Every organ is painted in anatomically accurate colors and labeled with tiny text that matches the entries in the included 32-page illustrated anatomy guide.
 
@@ -1917,6 +2016,7 @@ Anatomy exploration is a profoundly engaging learning experience for children, c
   {
     id: "toy-100",
     name: "Electricity & Magnetism Lab",
+    image: "/product-images/toy-100.png",
     description: "Hands-on experiments with electromagnets, generators, and motors. Build a working compass, telegraph, and electric quiz game.",
     marketingCopy: `Harness the invisible force that powers the modern world. Our Electricity & Magnetism Lab provides hands-on experiments that demystify the fundamental physics of electromagnetism — the same force that drives every motor, generator, and electronic device on Earth. The kit includes copper wire, iron cores, bar magnets, a compass, batteries with holders, LED bulbs, switches, a buzzer, iron filings, and all the components needed to build 20 working devices: an electromagnet, a simple motor, a generator, a telegraph, an electric quiz game, and more.
 
@@ -1936,6 +2036,7 @@ Electricity and magnetism are notoriously abstract concepts for students at ever
   {
     id: "toy-101",
     name: "Robotics Engineering Kit",
+    image: "/product-images/toy-101.png",
     description: "Build 10 different motorized machines from 230+ pieces. Includes motors, gears, and axles. Learn mechanical engineering principles.",
     marketingCopy: `Design. Build. Motorize. Our Robotics Engineering Kit contains over 230 precision-engineered pieces — beams, gears, axles, wheels, connectors, and two battery-powered motors — that assemble into 10 different motorized machines: a walking robot, a crane with a working winch, a race car, a spinning top launcher, a conveyor belt, and five more mechanical marvels. Each build teaches specific engineering principles: gear ratios, torque, mechanical advantage, cam mechanisms, and power transmission.
 
@@ -1955,6 +2056,7 @@ The pieces are compatible with other leading construction systems (Meccano, Erec
   {
     id: "toy-102",
     name: "Bug Catcher & Observation Kit",
+    image: "/product-images/toy-102.png",
     description: "Catch-and-release bug kit with magnifying jar, tweezers, net, and field guide. Ventilated observation chamber for safe insect study.",
     marketingCopy: `Go on a safari — in your own backyard! Our Bug Catcher & Observation Kit equips young entomologists with everything they need to safely catch, observe, and release insects and other small creatures. The kit includes a pop-up butterfly net with a telescoping handle, a ventilated observation chamber with a built-in 4x magnifying lid, soft-grip tweezers for gentle handling, a headlamp for nighttime collecting, a specimen jar with a magnifying base, and a 48-page illustrated field guide covering 100 common North American insects and spiders.
 
@@ -1974,6 +2076,7 @@ Nature observation is one of the most powerful catalysts for environmental aware
   {
     id: "toy-103",
     name: "Coding Board Game – Robot Turtles",
+    image: "/product-images/toy-103.png",
     description: "Board game that teaches programming fundamentals without a computer. Write 'code' with cards to navigate your turtle to the jewel. 2-4 players.",
     marketingCopy: `Teach your kids to code before they can read — no screen required. Robot Turtles is the most-backed board game in Kickstarter history, and it earns that distinction by making programming concepts tangible, social, and hilarious for children as young as four. Each player controls a turtle on a gridded game board, playing instruction cards (Forward, Turn Left, Turn Right) to navigate through obstacles (ice walls and stone walls) to reach a jewel. The adult "Turtle Mover" executes the code physically, moving the turtle exactly as programmed — including into walls when the code has a bug.
 
@@ -1993,6 +2096,7 @@ The genius of Robot Turtles is that it teaches computational thinking — decomp
   {
     id: "toy-104",
     name: "3D Pen – Kid-Safe",
+    image: "/product-images/toy-104.png",
     description: "Low-temperature 3D pen that uses kid-safe biodegradable filament. Draw in the air and create 3D sculptures. Includes stencils and 10 filament colors.",
     marketingCopy: `Draw in three dimensions — literally. Our Kid-Safe 3D Pen extrudes warm, biodegradable filament that hardens within seconds of leaving the pen tip, allowing children to draw structures, sculptures, and decorations that stand up, stick together, and exist in real three-dimensional space. The pen operates at a low temperature (PCL filament melts at just 70°C/158°F versus 200°C+ for standard 3D printer filament), making it safe for direct finger contact with freshly drawn lines — a critical safety feature for young creators.
 
@@ -2013,6 +2117,7 @@ The pen is USB rechargeable with an ergonomic triangular grip that promotes prop
   {
     id: "toy-105",
     name: "Outdoor Explorer Binoculars",
+    image: "/product-images/toy-105.png",
     description: "Kid-tough binoculars with 8x magnification, rubber-coated body, and neck strap. Comes with a bird-watching guide and nature journal.",
     marketingCopy: `See the world up close with our Outdoor Explorer Binoculars — real optics engineered for the rough-and-tumble life of a young adventurer. These aren't toy binoculars with plastic lenses and blurry views; they feature genuine BAK-4 prism glass optics with fully multi-coated lenses delivering crisp, bright, 8x21 magnification that brings distant birds, wildlife, and landscapes into sharp focus. The rubber-armored body absorbs drops and impacts, and the compact fold-down design fits comfortably in small hands.
 
@@ -2032,6 +2137,7 @@ Bird-watching is one of the fastest-growing hobbies in the world, and it starts 
   {
     id: "toy-106",
     name: "Kick Scooter Pro",
+    image: "/product-images/toy-106.png",
     description: "Adjustable-height kick scooter with light-up wheels and a wide deck. Folds flat for easy storage. Supports up to 110 lbs.",
     marketingCopy: `Glide, cruise, and glow with our Kick Scooter Pro — a premium two-wheel scooter that grows with your child from kindergarten through middle school. The handlebars adjust through four height positions (24 to 34 inches), accommodating riders from about 42 to 60 inches tall. The extra-wide aluminum deck provides stable footing, the rear friction brake delivers reliable stopping power, and the 120mm polyurethane wheels are embedded with motion-activated LEDs that create a dazzling light show with every ride — no batteries required.
 
@@ -2051,6 +2157,7 @@ Scootering is a gateway to active outdoor play that meets children where they ar
   {
     id: "toy-107",
     name: "Stomp Rocket Launcher",
+    image: "/product-images/toy-107.png",
     description: "Jump on the air pad and launch foam rockets up to 200 feet in the air. No batteries needed. Includes 6 rockets and adjustable launch angle.",
     marketingCopy: `3... 2... 1... STOMP! Our Stomp Rocket Launcher harnesses the most powerful energy source available — a child's enthusiasm — to send foam rockets screaming up to 200 feet into the air. The concept is beautifully simple: connect the air pad to the launch tube via the flexible hose, place a foam rocket on the tube, and stomp on the pad as hard as you can. The displaced air fires the rocket skyward at impressive velocity, and the adjustable launch angle lets rocketeers dial in anything from straight-up altitude shots to long-distance trajectory arcs.
 
@@ -2070,6 +2177,7 @@ The physics of rocket flight — thrust, drag, angle of attack, parabolic trajec
   {
     id: "toy-108",
     name: "Archery Set – Suction Cup",
+    image: "/product-images/toy-108.png",
     description: "Safe archery set with fiberglass bow, 6 suction-cup arrows, and a freestanding target. Indoor/outdoor use. Adjustable draw weight.",
     marketingCopy: `Take aim and let fly with our Suction Cup Archery Set — a genuine archery experience scaled for young archers with all the thrill and none of the danger. The 36-inch fiberglass bow features an adjustable draw weight (10-20 lbs) that accommodates beginners and intermediate shooters, a contoured grip with finger rest, and a real bowstring with a nocking point. Six foam-shaft arrows tipped with rubber suction cups fly straight and true, sticking satisfyingly to the included freestanding target board with a bullseye-and-ring scoring system.
 
@@ -2089,6 +2197,7 @@ Archery is one of the oldest sports in human history, and its appeal to children
   {
     id: "toy-109",
     name: "Slip-N-Slide Mega Wave",
+    image: "/product-images/toy-109.png",
     description: "25-foot water slide with built-in splash pool at the end. Connects to any garden hose. Includes repair patches.",
     marketingCopy: `Summer just got 25 feet longer! Our Slip-N-Slide Mega Wave turns any lawn into a water park with a quarter-inch-thick vinyl slide surface, built-in side bumpers that keep sliders on track, a continuous-spray water channel that keeps the surface slippery from start to finish, and a splash pool at the end that catches sliders in a cushion of cool water. Simply connect to any standard garden hose, turn on the water, and the fun begins — no inflating, no setup tools, no complicated assembly.
 
@@ -2108,6 +2217,7 @@ Water slide play is the essence of summer childhood — the anticipation of the 
   {
     id: "toy-110",
     name: "Pogo Stick – Adjustable",
+    image: "/product-images/toy-110.png",
     description: "Steel-frame pogo stick with adjustable spring for riders 40-90 lbs. Non-slip foot pads and foam-covered handles. Builds balance and coordination.",
     marketingCopy: `Bounce your way to adventure with our Adjustable Pogo Stick — a steel-frame bouncer that turns driveways, sidewalks, and backyards into springboard playgrounds. The heavy-duty internal spring is adjustable to three tension settings, accommodating riders from 40 to 90 pounds and allowing the pogo experience to grow with your child. The wide, non-slip foot pads provide secure footing, the foam-padded handlebar grips absorb impact and prevent blisters, and the durable rubber tip grips pavement, concrete, and packed dirt without slipping.
 
@@ -2127,6 +2237,7 @@ Pogo sticking is one of those rare activities that is simultaneously nostalgic (
   {
     id: "toy-111",
     name: "Frisbee Golf Disc Set",
+    image: "/product-images/toy-111.png",
     description: "Three disc set (driver, mid-range, putter) sized for kids. Includes portable basket target and course setup guide.",
     marketingCopy: `Par for the fun! Our Frisbee Golf Disc Set brings the fastest-growing sport in America to your backyard with three professional-style discs scaled for young arms and a portable chain-basket target that sets up in seconds. The set includes a driver (long, flat, and fast for tee shots), a mid-range disc (versatile for approach shots), and a putter (rounded and stable for short-range accuracy) — each one lighter and smaller than adult discs, with softer edges for comfortable catching and safe near-miss impacts.
 
@@ -2146,6 +2257,7 @@ Disc golf is uniquely accessible — the basic throwing motion is intuitive, the
   {
     id: "toy-112",
     name: "Slackline Kit – Beginner",
+    image: "/product-images/toy-112.png",
     description: "50-foot slackline with training line, tree protectors, and ratchet tensioner. Teaches balance and core strength. Holds up to 250 lbs.",
     marketingCopy: `Walk the line — literally. Our Beginner Slackline Kit provides everything needed to set up a 50-foot balance challenge between two trees: a 2-inch-wide webbing slackline rated to 4,000 lbs, a ratchet tensioner with a protective cover, two tree-protector wraps that prevent bark damage, and — the feature that makes our kit uniquely beginner-friendly — an overhead training line with handles that gives new slackliners a confidence-building assist while they develop their balance.
 
@@ -2165,6 +2277,7 @@ Slacklining is one of the most effective balance-training activities available �
   {
     id: "toy-113",
     name: "Kite – Rainbow Delta",
+    image: "/product-images/toy-113.png",
     description: "Easy-flying 5-foot delta kite with rainbow panels and a 10-foot streamer tail. Flies in light winds. Includes 200 feet of line on a winder.",
     marketingCopy: `Paint the sky with color! Our Rainbow Delta Kite is a showstopping 5-foot-wide delta design that soars effortlessly in winds as light as 5 mph, making it the ideal kite for beginners and experienced flyers alike. The ripstop nylon sail features vivid rainbow panels that catch the sunlight dramatically, and the 10-foot rainbow streamer tail adds graceful, undulating movement that mesmerizes from the ground. The kite launches in seconds — hold it up, let the wind catch it, and watch it climb.
 
@@ -2184,6 +2297,7 @@ Kite flying is one of the simplest, most joyful outdoor activities available —
   {
     id: "toy-114",
     name: "Giant Bubble Wand Kit",
+    image: "/product-images/toy-114.png",
     description: "Create enormous bubbles with the tri-string wand and 32 oz of concentrated bubble solution (makes 2 gallons). Bubbles up to 6 feet long.",
     marketingCopy: `Prepare for astonishment — bubbles this big shouldn't be possible, but here they are. Our Giant Bubble Wand Kit produces impossibly enormous, shimmering bubbles up to 6 feet long that float, wobble, and drift across the sky like iridescent jellyfish. The tri-string wand consists of two lightweight wooden handles connected by a cotton cord loop with an absorbent wick section that holds enough solution for massive bubble formation. Dip, lift, and sweep — a single motion launches a bubble larger than most children.
 
@@ -2203,6 +2317,7 @@ Giant bubbles create instant community magic — when a six-foot bubble drifts a
   {
     id: "toy-115",
     name: "Camping Set – Pretend Play",
+    image: "/product-images/toy-115.png",
     description: "Kids' camping set with pop-up tent, sleeping bag, lantern, compass, and binoculars. Perfect for backyard adventures or indoor camping.",
     marketingCopy: `The great outdoors starts in your backyard — or your living room. Our Pretend Play Camping Set puts everything a young adventurer needs for an overnight expedition into a single backpack: a pop-up tent sized for two children (42x42x36 inches), a kid-sized sleeping bag with a flannel lining, a battery-powered LED lantern with two brightness settings, a working compass, toy binoculars, a water bottle, and a nature journal with observation prompts and camping activity ideas.
 
@@ -2222,6 +2337,7 @@ Backyard camping is a rite of childhood passage that builds independence, self-r
   {
     id: "toy-116",
     name: "Croquet Set – Junior",
+    image: "/product-images/toy-116.png",
     description: "6-player junior croquet set with colorful mallets, balls, wickets, and stakes. Comes in a carry bag. Great family lawn game.",
     marketingCopy: `Wickets, mallets, and lazy summer afternoons — our Junior Croquet Set brings the quintessential lawn game to families with an accessible, kid-friendly design. The set includes six 24-inch wooden mallets with cushioned grips, six matching colored balls, nine wire wickets with colored crown tops, two end stakes, and a durable canvas carry bag. Everything is scaled for young players: the mallets are lighter, the balls are slightly smaller, and the wicket spacing recommended in the instruction card creates a course that fits comfortably in most backyards.
 
@@ -2241,6 +2357,7 @@ Croquet is a deceptively strategic game that rewards precision, planning, and a 
   {
     id: "toy-117",
     name: "Balance Bike – No Pedals",
+    image: "/product-images/toy-117.png",
     description: "Lightweight aluminum balance bike with adjustable seat and handlebars. Teaches balance before transitioning to a pedal bike. Air tires.",
     marketingCopy: `Skip the training wheels — our Balance Bike teaches children to ride the natural way. This lightweight aluminum-frame bike has no pedals, no chain, and no training wheels; children straddle the seat and propel themselves by walking, then running, then gliding with their feet off the ground. This intuitive progression builds the balance and steering skills that allow most balance-bike graduates to transition to pedal bikes in minutes rather than the weeks required by the training-wheel method.
 
@@ -2260,6 +2377,7 @@ The balance bike revolution has transformed how children learn to ride, and the 
   {
     id: "toy-118",
     name: "Bocce Ball Set – Junior",
+    image: "/product-images/toy-118.png",
     description: "Smaller-sized bocce ball set perfect for kids. 8 colorful balls, pallino, and measuring rope in a carry case.",
     marketingCopy: `Roll, aim, and celebrate with our Junior Bocce Ball Set — the timeless Italian lawn game scaled perfectly for young arms. The set includes eight brightly colored resin bocce balls in four team colors (two balls per team), one white pallino (target ball), a measuring rope for close calls, and a zippered canvas carry case. The balls are smaller (3 inches diameter) and lighter (8 ounces each) than standard adult bocce, making them comfortable and controllable for children ages 4-12.
 
@@ -2280,6 +2398,7 @@ Bocce is one of the world's oldest games, with roots stretching back to ancient 
   {
     id: "toy-119",
     name: "Magic Trick Master Kit",
+    image: "/product-images/toy-119.png",
     description: "Professional-quality magic set with 75 tricks including card tricks, disappearing acts, and illusions. Includes instructional DVD and secret compartment props.",
     marketingCopy: `Prepare to amaze, astonish, and mystify with our Magic Trick Master Kit — a professional-grade collection of 75 magic tricks that transforms aspiring magicians into confident performers. The kit includes a marked deck of cards, a cups-and-balls set, linking rings, a magic wand with a hidden compartment, a disappearing coin box, a color-changing scarf set, a floating card gimmick, a mind-reading number pad, and dozens more props and gimmicks, all organized in a compartmentalized magician's case.
 
@@ -2299,6 +2418,7 @@ Magic is a performing art that builds an extraordinary range of skills: fine mot
   {
     id: "toy-120",
     name: "Kids Ukulele – Soprano",
+    image: "/product-images/toy-120.png",
     description: "Real wood soprano ukulele sized for kids. Nylon strings, geared tuners, and a colorful finish. Comes with a chord chart and picks.",
     marketingCopy: `Strum your first chord and feel the magic of making music with our Kids Soprano Ukulele — a real musical instrument, not a toy approximation, sized perfectly for young hands. The solid basswood body produces a warm, resonant tone that sounds genuinely beautiful, the nylon strings are gentle on small fingertips, and the geared machine-head tuners hold pitch reliably through extended play sessions. Available in six vibrant color finishes that make this ukulele as fun to look at as it is to play.
 
@@ -2318,6 +2438,7 @@ Music education research consistently shows that learning an instrument develops
   {
     id: "toy-121",
     name: "Drum Set – Junior (5 piece)",
+    image: "/product-images/toy-121.png",
     description: "Complete 5-piece junior drum kit with bass drum, snare, 2 toms, cymbal, throne, and sticks. Real wood shells and tunable heads.",
     marketingCopy: `Rock on! Our Junior Drum Set is a genuine 5-piece kit that delivers the full drumming experience in a package sized for young percussionists. The kit includes a 16-inch bass drum with a foot pedal, a 10-inch snare drum, two rack toms (8 and 10 inch), a 10-inch crash cymbal on a height-adjustable stand, a padded drum throne with height adjustment, and a pair of junior-sized 5A drumsticks. Every drum features a real wood shell with wrapped finish, chrome lugs, and tunable Mylar heads that produce genuine drum tones.
 
@@ -2337,6 +2458,7 @@ Learning drums develops rhythm, coordination, bilateral independence, and listen
   {
     id: "toy-122",
     name: "Karaoke Machine – Bluetooth",
+    image: "/product-images/toy-122.png",
     description: "Portable karaoke machine with Bluetooth connectivity, LED disco lights, and two microphones. Records performances. Built-in speaker.",
     marketingCopy: `Tonight, your living room becomes Madison Square Garden! Our Bluetooth Karaoke Machine turns any gathering into a concert event with powerful sound, dazzling lights, and dual microphones that let performers duet, harmonize, or compete for the crowd's adoration. The built-in 10-watt speaker delivers room-filling volume with clear vocal reproduction, and the Bluetooth connectivity streams backing tracks wirelessly from any smartphone, tablet, or laptop — access millions of karaoke tracks through free apps and streaming services.
 
@@ -2356,6 +2478,7 @@ The machine includes a recording function that captures performances to an SD ca
   {
     id: "toy-123",
     name: "Xylophone – 25 Note Chromatic",
+    image: "/product-images/toy-123.png",
     description: "Professional-quality 25-note chromatic xylophone with metal keys and two mallets. Full two-octave range with sharps and flats.",
     marketingCopy: `Make real music from day one with our 25-Note Chromatic Xylophone — a professional-quality percussion instrument that produces clear, bell-like tones across a full two-octave range including all sharps and flats. The precisely tuned aluminum keys are arranged in piano-keyboard layout (naturals in front, sharps/flats raised behind), making this xylophone a genuine melodic instrument capable of playing any song in any key, not just a pentatonic toy limited to simple melodies.
 
@@ -2375,6 +2498,7 @@ The xylophone is one of the most rewarding first instruments because it provides
   {
     id: "toy-124",
     name: "Ventriloquist Puppet – Charlie",
+    image: "/product-images/toy-124.png",
     description: "Classic boy ventriloquist puppet with moving mouth and eyebrows controlled by a hand lever. 30 inches tall. Includes a beginner's guide.",
     marketingCopy: `Say hello to Charlie — your new comedy partner! This professional-quality ventriloquist puppet stands 30 inches tall and features a moving mouth controlled by a hand lever inside the head, independently movable eyebrows (also lever-controlled) that create hilarious facial expressions, and a soft body dressed in a classic suit with bow tie. Charlie's head is sculpted from lightweight rigid foam with a hand-painted face that projects personality and charm to audiences near and far.
 
@@ -2394,6 +2518,7 @@ The included beginner's guide teaches the fundamentals of ventriloquism: lip con
   {
     id: "toy-125",
     name: "Kids Keyboard – 61 Keys",
+    image: "/product-images/toy-125.png",
     description: "Full-size 61-key electronic keyboard with 200 tones, 100 rhythms, and a record/playback function. Includes music stand and AC adapter.",
     marketingCopy: `From first notes to first compositions — our 61-Key Kids Keyboard is a full-featured electronic instrument that grows with your child's musical ambitions. The 61 full-size keys span five octaves, providing enough range for classical pieces, pop songs, and creative exploration. Two hundred built-in tones (piano, organ, strings, brass, synths, and more) and 100 rhythm patterns (rock, pop, jazz, Latin, classical) transform a single keyboard into an entire orchestra, while the record/playback function lets young composers capture and review their creations.
 
@@ -2413,6 +2538,7 @@ Electronic keyboards are the most versatile entry point into music education: th
   {
     id: "toy-126",
     name: "Musical Instruments Starter Pack (6 instruments)",
+    image: "/product-images/toy-126.png",
     description: "Tambourine, harmonica, recorder, egg shakers, triangle, and castanets in a canvas bag. Perfect for music exploration and rhythm games.",
     marketingCopy: `Discover your instrument with our Musical Instruments Starter Pack — six real, playable instruments that let children explore rhythm, melody, and musical expression across a range of timbres and techniques. The pack includes a 6-inch wooden tambourine with metal jingles, a 10-hole diatonic harmonica in key of C, a soprano recorder with fingering chart, a pair of egg shakers, a 6-inch steel triangle with striker, and wooden castanets on a handle. Every instrument is real, functional, and capable of producing genuinely musical sounds.
 
@@ -2432,6 +2558,7 @@ Early exposure to multiple instrument families is a cornerstone of Orff and Kod�
   {
     id: "toy-127",
     name: "DJ Turntable Mixer Toy",
+    image: "/product-images/toy-127.png",
     description: "Electronic DJ turntable with scratch disc, crossfader, sound effects, and built-in tracks. Headphone jack and record function.",
     marketingCopy: `Drop the beat! Our DJ Turntable Mixer puts the tools of electronic music creation into the hands of young DJs with a feature-packed mixing station that looks, feels, and sounds like the real thing. The turntable features a touch-sensitive scratch disc that produces authentic vinyl-scratch sounds, a crossfader that blends between two music channels, a bank of 8 sound-effect buttons (air horn, siren, laser, record scratch, crowd cheer, and more), a tempo slider, and a beat-loop function that isolates and repeats a rhythmic pattern for live remixing.
 
@@ -2452,6 +2579,7 @@ DJing develops an extraordinary range of skills: musical ear training (beat-matc
   {
     id: "toy-128",
     name: "Baby Doll – Soft Body (14 inch)",
+    image: "/product-images/toy-128.png",
     description: "Soft-bodied baby doll with vinyl head and limbs. Closes eyes when laid down. Comes with a bottle, bib, and onesie.",
     marketingCopy: `Every child needs a baby to love, and our 14-inch Soft Body Baby Doll is ready to be that baby. With a sweet vinyl face featuring painted lashes, rosy cheeks, and realistic blue eyes that close when laid down for a nap, this doll invites the nurturing play that is so essential to social-emotional development. The soft, huggable body is filled with a cuddly polyester stuffing that makes this doll perfect for carrying, rocking, and snuggling, while the vinyl hands and feet have individually sculpted fingers and toes.
 
@@ -2471,6 +2599,7 @@ Doll play is one of the most extensively researched areas of child development, 
   {
     id: "toy-129",
     name: "Fashion Doll – Career Collection (3 pack)",
+    image: "/product-images/toy-129.png",
     description: "Three 11.5-inch fashion dolls dressed as a scientist, pilot, and chef. Fully articulated with career-themed accessories.",
     marketingCopy: `Who will she be today? A scientist discovering a new element, a pilot commanding a 747, or a chef running a five-star kitchen? Our Career Collection Fashion Dolls present three empowering role models, each one a fully articulated 11.5-inch doll dressed in detailed career attire with profession-specific accessories. The scientist wears a lab coat over a smart blouse and holds a flask and safety goggles; the pilot wears a tailored uniform with captain's wings and carries a flight bag and headset; the chef wears a double-breasted jacket and toque and comes with a rolling pin and mixing bowl.
 
@@ -2490,6 +2619,7 @@ Research consistently shows that children who play with career-themed dolls show
   {
     id: "toy-130",
     name: "Dollhouse – Victorian Mansion",
+    image: "/product-images/toy-130.png",
     description: "Three-story wooden dollhouse with 8 rooms, working doors, and a staircase. Includes 30 pieces of furniture. Assembly required.",
     marketingCopy: `Welcome to the most exquisite residence in toyland — our Victorian Mansion Dollhouse is a three-story, eight-room architectural masterpiece crafted from premium birch plywood with hand-painted details that bring the Victorian era to vivid life. The mansion features a grand staircase connecting all three floors, hinged room dividers that allow open-plan or enclosed play, nine working doors with tiny brass knobs, four arched windows with printed curtains, and a decorative mansard roof with a widow's walk viewing platform.
 
@@ -2509,6 +2639,7 @@ Dollhouse play is extraordinarily rich developmentally: it exercises spatial rea
   {
     id: "toy-131",
     name: "Rag Doll – Handmade Style",
+    image: "/product-images/toy-131.png",
     description: "Classic rag doll with yarn hair, button eyes, and a gingham dress. 18 inches tall. Machine washable. Nostalgic and huggable.",
     marketingCopy: `Some toys capture the heart with their simplicity — our Rag Doll is one of those toys. Standing 18 inches tall with a soft cotton body, brown yarn pigtails tied with gingham ribbons, embroidered button-style eyes, a sweet stitched smile, and a removable gingham dress with a lace-trimmed petticoat, this doll channels the warmth and charm of handmade heirlooms while being produced with modern safety standards and machine-washable convenience.
 
@@ -2528,6 +2659,7 @@ Rag dolls hold a special place in the pantheon of childhood companions — they 
   {
     id: "toy-132",
     name: "Doll Stroller – Foldable",
+    image: "/product-images/toy-132.png",
     description: "Realistic doll stroller with adjustable canopy, storage basket, and safety harness. Fits dolls up to 20 inches. Folds flat.",
     marketingCopy: `Every doll parent needs a way to take their baby on the go, and our Foldable Doll Stroller provides the perfect ride — a realistic, full-featured stroller that looks and functions just like the real thing, scaled down for young caregivers and their beloved dolls. The stroller features a padded seat with a working three-point safety harness, an adjustable sun canopy, a storage basket underneath for doll accessories, and smooth-rolling double wheels that navigate carpet, tile, and outdoor sidewalks with ease.
 
@@ -2547,6 +2679,7 @@ Stroller play extends doll-care scenarios beyond the home environment, encouragi
   {
     id: "toy-133",
     name: "Paper Doll Fashion Design Kit",
+    image: "/product-images/toy-133.png",
     description: "Magnetic paper dolls with over 100 mix-and-match outfits, shoes, and accessories. Comes with a tin carry case for travel.",
     marketingCopy: `Design the ultimate wardrobe — no sewing required! Our Paper Doll Fashion Design Kit features two magnetic paper dolls and over 100 mix-and-match magnetic clothing pieces, shoes, and accessories that cling to the dolls' surfaces for instant outfit creation. The collection includes casual wear, formal attire, sportswear, costumes, seasonal outfits, and fantasy fashion, giving young designers an enormous palette of style options. Mix a tutu with rain boots, pair a lab coat with a tiara, or create a runway-ready ensemble — there are no wrong combinations, only creative expression.
 
@@ -2566,6 +2699,7 @@ Fashion design play develops aesthetic sensibility, color coordination, personal
   {
     id: "toy-134",
     name: "Fairy Garden Dolls (4 pack)",
+    image: "/product-images/toy-134.png",
     description: "Four poseable fairy dolls with glittery wings and nature-themed outfits. Each 5 inches tall. Perfect for fairy garden play.",
     marketingCopy: `Invite magic into your garden — or your bedroom — with our Fairy Garden Dolls, a quartet of enchanting 5-inch fairies with glittery translucent wings, nature-inspired outfits, and poseable bodies that bring fairy-tale adventures to miniature life. The four fairies represent the seasons: Spring wears a flower-petal dress in pink and green, Summer shimmers in golden sunshine yellow, Autumn glows in russet and amber leaves, and Winter sparkles in icy blue and silver snowflakes. Each fairy's wings are embedded with fine glitter that catches light beautifully without shedding.
 
@@ -2586,6 +2720,7 @@ Fairy play combines elements of fantasy, nature appreciation, and miniature-worl
   {
     id: "toy-135",
     name: "Walkie-Talkies – Long Range (2 pack)",
+    image: "/product-images/toy-135.png",
     description: "Durable walkie-talkies with 3-mile range, 22 channels, and built-in flashlight. Belt clips and wrist straps. Requires 3 AAA batteries each.",
     marketingCopy: `Breaker, breaker — adventure is calling! Our Long Range Walkie-Talkies give children the thrilling freedom of wireless communication with a 3-mile range that covers entire neighborhoods, campgrounds, and shopping malls. Operating on 22 FRS channels with 121 privacy codes, these radios provide clear, static-free communication even in crowded RF environments. The intuitive push-to-talk operation requires zero setup — turn them on, select the same channel, and start talking.
 
@@ -2605,6 +2740,7 @@ Walkie-talkie play builds independence, responsibility, and communication skills
   {
     id: "toy-136",
     name: "Kids Digital Camera – 12MP",
+    image: "/product-images/toy-136.png",
     description: "Shockproof 12MP digital camera with video mode, selfie lens, and fun photo frames/filters. 2-inch screen, USB charging, 32GB card included.",
     marketingCopy: `Say cheese! Our Kids Digital Camera puts genuine 12-megapixel photography into small hands with a shockproof, brightly colored camera designed specifically for young photographers. The 2-inch LCD screen provides instant review of photos and videos, the front-facing selfie lens encourages creative self-portraiture, and 28 built-in photo frames and filters (bunny ears, pirate hat, rainbow border, vintage sepia, and more) add playful creativity to every shot.
 
@@ -2624,6 +2760,7 @@ Photography is an exceptional creative medium for children: it teaches compositi
   {
     id: "toy-137",
     name: "Voice-Changing Megaphone",
+    image: "/product-images/toy-137.png",
     description: "Handheld megaphone with 10 voice effects: robot, alien, chipmunk, echo, and more. Built-in siren and record/playback. Loud and fun.",
     marketingCopy: `Attention, earthlings! Our Voice-Changing Megaphone amplifies and transforms your child's voice with 10 hilarious effects that turn ordinary speech into extraordinary performances. Toggle through robot, alien, chipmunk, deep monster, echo canyon, underwater, space radio, ghost, megaphone PA, and normal amplified voice modes — each one producing instant laughter and creative play scenarios. The built-in siren button adds three emergency sounds (police, fire, ambulance) for pretend-play first-responder scenarios.
 
@@ -2643,6 +2780,7 @@ Voice play is a surprisingly valuable developmental activity: children experimen
   {
     id: "toy-138",
     name: "LED Light-Up Terrarium Kit",
+    image: "/product-images/toy-138.png",
     description: "Grow a miniature garden inside a glass jar with LED lid. Includes seeds, soil, figurines, and decorative stones. Self-sustaining ecosystem.",
     marketingCopy: `Create a living world in a jar with our LED Light-Up Terrarium Kit — a hands-on botany project that produces a beautiful, self-sustaining miniature garden illuminated by a warm LED light built into the mason jar lid. The kit includes a large glass mason jar, a bag of nutrient-rich potting soil, a drainage layer of decorative pebbles, packets of wheatgrass and chia seeds (fast-growing for quick gratification), miniature figurines (bunny, mushroom, fairy, and hedgehog), decorative moss, colored sand for layering, and a spray bottle for watering.
 
@@ -2662,6 +2800,7 @@ Terrariums teach the water cycle (evaporation, condensation, precipitation), pho
   {
     id: "toy-139",
     name: "Night Vision Goggles",
+    image: "/product-images/toy-139.png",
     description: "Real working night vision goggles with green LED illumination. See up to 25 feet in total darkness. Adjustable head strap.",
     marketingCopy: `See in the dark like a real special-ops agent with our Night Vision Goggles — genuine working night-vision devices that use infrared LED illumination and optical amplification to reveal what hides in total darkness. The goggles project a focused IR beam (invisible to the naked eye) that reflects off objects up to 25 feet away, and the amplified image is displayed on the internal screen with the classic green-tint night-vision aesthetic that children recognize from movies and video games.
 
@@ -2681,6 +2820,7 @@ Night vision goggles transform ordinary backyard evenings into extraordinary adv
   {
     id: "toy-140",
     name: "Electronic Piggy Bank – ATM Style",
+    image: "/product-images/toy-140.png",
     description: "ATM-style piggy bank with PIN code, auto bill feeder, and coin counter. LCD screen shows balance. Teaches saving and basic banking.",
     marketingCopy: `Make saving money as fun as spending it! Our ATM-Style Electronic Piggy Bank transforms the mundane piggy bank into an interactive banking experience that teaches children financial literacy through hands-on play. The unit features a personal PIN code (4 digits, set by the child), an automatic bill feeder that pulls paper bills into the vault with a motorized roller, a coin slot with an electronic counter that tracks deposits, an LCD screen displaying the running balance, and a secure access door that opens only with the correct PIN.
 
@@ -2700,6 +2840,7 @@ Financial literacy experts recommend giving children ownership over their own sa
   {
     id: "toy-141",
     name: "Drone – Mini Beginner",
+    image: "/product-images/toy-141.png",
     description: "Palm-sized indoor drone with altitude hold, one-key takeoff, and 360-degree flips. 3 speed settings. USB rechargeable, 7-minute flight time.",
     marketingCopy: `Take flight — right in your living room! Our Mini Beginner Drone is a palm-sized quadcopter designed specifically for first-time pilots, with smart features that make flying fun instead of frustrating. Altitude hold automatically maintains hover height, one-key takeoff and landing puts the drone in the air and back on the ground with a single button press, and headless mode ensures the drone always responds correctly to directional inputs regardless of which way it's facing — the three most common pain points for new drone pilots, all solved.
 
@@ -2719,6 +2860,7 @@ The rechargeable lithium-polymer battery provides approximately 7 minutes of fli
   {
     id: "toy-142",
     name: "LED Drawing Pad – Glow Art",
+    image: "/product-images/toy-142.png",
     description: "Illuminated drawing pad with 4 neon markers and 30 stencils. Draw glowing pictures in the dark. Battery or USB powered.",
     marketingCopy: `Light up the night with your imagination! Our LED Drawing Pad creates a mesmerizing glow-art experience: draw on the illuminated surface with the included neon markers, turn off the room lights, and watch your creation glow with vibrant, otherworldly luminescence. The edge-lit LED panel evenly distributes light across the drawing surface, making every line, swirl, and detail radiate with uniform brightness. Four neon markers (blue, green, pink, and orange) are included, each one producing vivid, highly visible lines on the illuminated surface.
 
@@ -2739,6 +2881,7 @@ The glow-art experience is uniquely captivating because it inverts the normal re
   {
     id: "toy-143",
     name: "World Globe – Interactive Talking",
+    image: "/product-images/toy-143.png",
     description: "10-inch globe with a smart pen that speaks 1000+ facts about countries, capitals, languages, and populations. Quiz mode with 3 difficulty levels.",
     marketingCopy: `The world is at your fingertips — literally. Our Interactive Talking Globe combines a beautifully detailed 10-inch physical globe with a wireless smart pen that speaks over 1,000 facts about countries, capitals, populations, languages, currencies, national anthems, and geographic features. Touch the pen to any country and hear its name, capital, population, official language, and a fascinating cultural fact, all spoken in a clear, engaging voice. Touch an ocean, mountain range, or river and learn its name, length, depth, and ecological significance.
 
@@ -2758,6 +2901,7 @@ Interactive globe play develops geographic literacy, cultural awareness, and glo
   {
     id: "toy-144",
     name: "Math Flash Cards – Multiplication",
+    image: "/product-images/toy-144.png",
     description: "169 self-checking flash cards covering all multiplication facts 0-12. Color-coded by difficulty. Rounded corners and durable lamination.",
     marketingCopy: `Master multiplication one fact at a time with our self-checking Flash Cards — 169 laminated cards covering every multiplication fact from 0×0 through 12×12. Each card displays the problem on the front and the answer on the back, enabling independent practice that builds fluency and confidence. The cards are color-coded by difficulty level: green for facts most children learn first (×0, ×1, ×2, ×5, ×10), yellow for intermediate facts (×3, ×4, ×6, ×9), and red for the challenging facts (×7, ×8, ×11, ×12) that require the most practice.
 
@@ -2777,6 +2921,7 @@ Multiplication fluency is the single most important mathematical milestone in el
   {
     id: "toy-145",
     name: "Magnetic World Map Puzzle",
+    image: "/product-images/toy-145.png",
     description: "92-piece magnetic puzzle of the world map on a wooden board. Each piece is a country or region with its name and flag.",
     marketingCopy: `Build the world, one country at a time. Our Magnetic World Map Puzzle transforms geography learning into a hands-on, tactile experience with 92 magnetic wooden pieces — each one shaped like a country or geographic region — that snap onto a beautiful illustrated wooden board. Every piece displays the country's name, flag, and a tiny iconic illustration (the Eiffel Tower for France, a kangaroo for Australia, the Taj Mahal for India), creating a rich, information-dense learning tool disguised as a gorgeous puzzle.
 
@@ -2796,6 +2941,7 @@ Geographic puzzle play engages multiple learning modalities simultaneously: visu
   {
     id: "toy-146",
     name: "Sight Words Board Game",
+    image: "/product-images/toy-146.png",
     description: "Fast-paced board game that helps kids learn 220 Dolch sight words. Spin, read, and race to the finish. 2-4 players.",
     marketingCopy: `Race to read! Our Sight Words Board Game transforms the essential (but often tedious) task of memorizing sight words into a fast-paced, competitive adventure that children beg to play. The game covers all 220 Dolch sight words — the high-frequency words that make up 50-75% of all English text — organized across a colorful game board with spaces themed as different reading environments: library, classroom, bookstore, and park. Players spin the spinner, draw a sight-word card, read the word aloud, and advance if correct — or stay put and practice if they need another try.
 
@@ -2815,6 +2961,7 @@ Sight-word fluency is the gateway to reading independence — when children can 
   {
     id: "toy-147",
     name: "Solar System Floor Mat",
+    image: "/product-images/toy-147.png",
     description: "5-foot cushioned floor mat with detailed solar system illustration. Planet facts around the border. Water-resistant and easy to clean.",
     marketingCopy: `Step into the cosmos every morning when you get out of bed. Our Solar System Floor Mat is a 5-foot-diameter cushioned play mat featuring a scientifically accurate, gorgeously illustrated map of our solar system, surrounded by a border packed with fascinating planet facts. Each planet is depicted at accurate relative size with surface detail based on NASA imagery, positioned along its orbital path with distance labels from the Sun. The asteroid belt, dwarf planets (including Pluto), and major moons are all represented.
 
@@ -2834,6 +2981,7 @@ Floor mats serve a unique educational function: because they live on the floor o
   {
     id: "toy-148",
     name: "Alphabet Learning Robot",
+    image: "/product-images/toy-148.png",
     description: "Interactive robot that teaches ABCs, phonics, and spelling. Voice recognition responds to kids' answers. 3 learning modes plus games.",
     marketingCopy: `Meet Alpha — the friendliest teacher your child will ever have. Our Alphabet Learning Robot is an interactive, voice-responsive companion that teaches letter recognition, phonics, and early spelling through conversation, games, and enthusiastic encouragement. Alpha's LED face displays expressive emotions (happy, thinking, surprised, celebrating), and the built-in voice-recognition system listens to children's responses and provides immediate, personalized feedback: "That's right! B says 'buh'! Great job!"
 
@@ -2853,6 +3001,7 @@ Interactive robots represent the frontier of educational toy design — they pro
   {
     id: "toy-149",
     name: "Fraction Pizza Math Game",
+    image: "/product-images/toy-149.png",
     description: "Hands-on fraction learning with pizza-slice manipulatives. Match, compare, add, and subtract fractions. Includes game board and cards.",
     marketingCopy: `Fractions finally make sense — because who doesn't understand pizza? Our Fraction Pizza Math Game uses the universally beloved pizza as a visual and tactile model for fraction concepts, turning abstract mathematical notation into concrete, delicious reality. The game includes 6 foam pizza pies in different "flavors" (colors), each divided into slices representing halves, thirds, quarters, fifths, sixths, and eighths — 51 pizza-slice manipulatives in total, plus a game board, fraction cards, and a spinner.
 
@@ -2872,6 +3021,7 @@ Fractions are consistently identified as the most difficult elementary math conc
   {
     id: "toy-150",
     name: "Bilingual Learning Tablet – English/Spanish",
+    image: "/product-images/toy-150.png",
     description: "Electronic learning tablet with 100+ activities in English and Spanish. Covers letters, numbers, music, and logic. Touch-sensitive screen.",
     marketingCopy: `Two languages, one incredible learning tool. Our Bilingual Learning Tablet provides over 100 educational activities in both English and Spanish, seamlessly switching between languages at the touch of a button. The touch-sensitive screen displays colorful graphics with large, child-friendly interface elements, while a clear, expressive bilingual voice guides children through activities covering letter recognition, phonics, number concepts, basic vocabulary, music, and logic puzzles. Every activity is available in both languages, allowing children to learn a concept in English and immediately reinforce it in Spanish — or vice versa.
 
@@ -2891,6 +3041,7 @@ Bilingual education research overwhelmingly supports early dual-language exposur
   {
     id: "toy-151",
     name: "History Timeline Card Game",
+    image: "/product-images/toy-151.png",
     description: "Place historical events in chronological order to win. 300 event cards spanning ancient history to modern times. 2-6 players.",
     marketingCopy: `When did humans land on the Moon — before or after the first email was sent? Did the Great Wall of China come before or after the Roman Colosseum? Our History Timeline Card Game challenges players to place historical events in correct chronological order, building a shared timeline across the table one card at a time. With 300 event cards spanning from the Big Bang to the 21st century, every game is a fresh journey through the sweep of human history.
 
@@ -2910,6 +3061,7 @@ This game is sneakily one of the most effective history-education tools availabl
   {
     id: "toy-152",
     name: "Counting Bears & Cups Set",
+    image: "/product-images/toy-152.png",
     description: "100 rainbow counting bears with 6 matching cups. Activity cards for sorting, counting, patterns, and basic math. Great classroom manipulative.",
     marketingCopy: `Count, sort, pattern, and play with our Rainbow Counting Bears — 100 adorable bear figurines in six colors and three sizes, paired with six matching sorting cups and a deck of 30 activity cards that turn mathematical concepts into hands-on, bear-powered fun. The bears are made from smooth, tactile plastic in vivid rainbow colors (red, orange, yellow, green, blue, and purple), with each color available in small, medium, and large sizes for multi-attribute sorting activities.
 
@@ -2929,45 +3081,48 @@ This set is a staple of preschool and kindergarten classrooms worldwide, valued 
   // ── CARD GAMES ─────────────────────────────────────────────────────────
   {
     id: "toy-153",
-    name: "Uno – Classic",
-    description: "The world's #1 card game. Match colors and numbers, play action cards, and shout 'UNO!' 2-10 players. 108 cards.",
-    marketingCopy: `UNO! The single word that has launched a billion family arguments and cemented a billion family memories. The world's number-one card game needs no introduction — match cards by color or number, deploy action cards (Skip, Reverse, Draw Two) to thwart opponents, and remember to shout "UNO!" when you're down to one card or face the dreaded two-card penalty. The 108-card deck includes number cards in four colors, action cards that change the flow of play, and wild cards that let you dictate the color of play — including the feared Wild Draw Four.
+    name: "Color Match – Classic",
+    image: "/product-images/toy-153.png",
+    description: "The world's #1 matching card game. Match colors and numbers, play action cards, and shout when you're down to one card! 2-10 players. 108 cards.",
+    marketingCopy: `One card left! The moment that has launched a billion family arguments and cemented a billion family memories. The world's number-one card game needs no introduction — match cards by color or number, deploy action cards (Skip, Reverse, Draw Two) to thwart opponents, and remember to shout "One card!" when you're down to your last or face the dreaded two-card penalty. The 108-card deck includes number cards in four colors, action cards that change the flow of play, and wild cards that let you dictate the color of play — including the feared Wild Draw Four.
 
 The genius of UNO lies in its accessibility: the rules take 60 seconds to learn, reading is not required (color and number matching only), and the game accommodates 2-10 players, making it equally suited for intimate two-player duels and raucous ten-player tournaments. Game length scales naturally with player count (10-15 minutes for 2-3 players, 20-30 for larger groups), and the luck-strategy balance ensures that everyone — from five-year-olds to grandparents — has a genuine chance of winning.
 
-UNO has sold over 150 million copies worldwide because it delivers three things that every great game must: social connection, dramatic tension, and joyful surprise. The moment when you play a Draw Four on the person who just played one on you, or when a well-timed Reverse saves you from elimination, creates shared emotional peaks that families remember and reference for years. The compact card deck travels anywhere — restaurants, airplanes, camping trips, waiting rooms — making UNO the universal game that's always ready when fun is needed.`,
-    keywords: ["uno", "card game", "classic", "family", "matching"],
+This game has sold over 150 million copies worldwide because it delivers three things that every great game must: social connection, dramatic tension, and joyful surprise. The moment when you play a Draw Four on the person who just played one on you, or when a well-timed Reverse saves you from elimination, creates shared emotional peaks that families remember and reference for years. The compact card deck travels anywhere — restaurants, airplanes, camping trips, waiting rooms — making UNO the universal game that's always ready when fun is needed.`,
+    keywords: ["color match", "card game", "classic", "family", "matching"],
     ageRange: { min: 5, max: 14 },
     price: 7.99,
     inventory: 80,
     category: "card-games",
     dimensions: { lengthInches: 5.5, widthInches: 3.5, heightInches: 1.0, weightLbs: 0.3 },
-    manufacturer: "Mattel Games",
+    manufacturer: "WonderPlay Games",
     bestSellersRank: 2,
     rating: { stars: 4.8, numberOfRatings: 15678 },
   },
   {
     id: "toy-154",
-    name: "Exploding Kittens – Family Edition",
-    description: "Family-friendly version of the wildly popular card game. Draw cards, avoid exploding kittens, and use action cards to survive. 2-5 players.",
-    marketingCopy: `Will you survive — or will you explode? Exploding Kittens is the card game phenomenon that has sold over 10 million copies worldwide, and this Family Edition brings all the strategic mayhem to younger players with kid-friendly artwork and simplified rules. The concept is deliciously simple: take turns drawing cards from the deck, and if you draw an Exploding Kitten card, you're out — unless you have a Defuse card to save yourself. The rest of the deck is filled with action cards that let you skip turns, peek at the deck, shuffle the deck, and force opponents to draw extra cards.
+    name: "Exploding Cats – Family Edition",
+    image: "/product-images/toy-154.png",
+    description: "Family-friendly version of the wildly popular card game. Draw cards, avoid exploding cats, and use action cards to survive. 2-5 players.",
+    marketingCopy: `Will you survive — or will you explode? Exploding Cats is the card game phenomenon that has sold millions of copies worldwide, and this Family Edition brings all the strategic mayhem to younger players with kid-friendly artwork and simplified rules. The concept is deliciously simple: take turns drawing cards from the deck, and if you draw an Exploding Cat card, you're out — unless you have a Defuse card to save yourself. The rest of the deck is filled with action cards that let you skip turns, peek at the deck, shuffle the deck, and force opponents to draw extra cards.
 
-The brilliance of Exploding Kittens is in the escalating tension: as the game progresses, Defuse cards get used up and Exploding Kittens become an increasingly large proportion of the remaining deck. Every card draw becomes a nail-biting gamble, and the action cards provide just enough control to create genuine strategic decisions — do you play your Skip now or save it for later when the odds are worse? The hilarious artwork by The Oatmeal cartoonist Matthew Inman adds visual comedy that keeps the tone light even as the tension builds.
+The brilliance of Exploding Cats is in the escalating tension: as the game progresses, Defuse cards get used up and Exploding Cat cards become an increasingly large proportion of the remaining deck. Every card draw becomes a nail-biting gamble, and the action cards provide just enough control to create genuine strategic decisions — do you play your Skip now or save it for later when the odds are worse? The hilarious artwork adds visual comedy that keeps the tone light even as the tension builds.
 
 Games last 15 minutes, making this the perfect palette cleanser between longer games or a quick-hit entertainment option when time is limited. The strategic depth-to-rules-complexity ratio is remarkable: the rules fit on a single card, yet experienced players develop genuine tactical approaches that increase their survival rate. The Family Edition content is fully appropriate for players 7+, with none of the adult-humor elements from the original edition. For 2-5 players who enjoy equal parts strategy and chaos.`,
-    keywords: ["exploding kittens", "card game", "funny", "strategy", "family"],
+    keywords: ["exploding cats", "card game", "funny", "strategy", "family"],
     ageRange: { min: 7, max: 14 },
     price: 19.99,
     inventory: 30,
     category: "card-games",
     dimensions: { lengthInches: 5.0, widthInches: 4.0, heightInches: 1.5, weightLbs: 0.4 },
-    manufacturer: "Exploding Kittens LLC",
+    manufacturer: "Boom Cat Games",
     bestSellersRank: 17,
     rating: { stars: 4.6, numberOfRatings: 4567 },
   },
   {
     id: "toy-155",
     name: "Go Fish – Illustrated",
+    image: "/product-images/toy-155.png",
     description: "Beautifully illustrated Go Fish card deck featuring ocean animals. Classic gameplay for young card game players. 2-6 players.",
     marketingCopy: `Got any seahorses? Our Illustrated Go Fish deck takes the classic matching game and immerses it in a gorgeous underwater world with 13 sets of four beautifully painted ocean animals: clownfish, seahorse, octopus, sea turtle, dolphin, whale, pufferfish, jellyfish, starfish, crab, manta ray, narwhal, and orca. Each card is a miniature work of art, with detailed watercolor illustrations that children study and admire while playing — learning marine biology vocabulary and species recognition as a natural byproduct of game play.
 
@@ -2986,14 +3141,15 @@ Go Fish teaches turn-taking, social communication (making requests, responding t
   },
   {
     id: "toy-156",
-    name: "Sushi Go! Card Game",
+    name: "Sushi Dash Card Game",
+    image: "/product-images/toy-156.png",
     description: "Fast-playing card-drafting game where you score points by building the best sushi combos. Adorable illustrations. 2-5 players, 15 minutes.",
-    marketingCopy: `Pick and pass — the sushi is spinning! Sushi Go! is a lightning-fast card-drafting game where players simultaneously select cards from a hand, reveal their choices, and pass the remaining cards to the next player — mimicking the experience of grabbing dishes from a conveyor-belt sushi restaurant. Score points by collecting the best combinations: a pair of Tempura is worth 5 points, three Sashimi scores 10, and Maki Rolls award points to whoever collects the most. But choose carefully — Pudding cards scored at the end of the game can swing the final standings dramatically.
+    marketingCopy: `Pick and pass — the sushi is spinning! Sushi Dash is a lightning-fast card-drafting game where players simultaneously select cards from a hand, reveal their choices, and pass the remaining cards to the next player — mimicking the experience of grabbing dishes from a conveyor-belt sushi restaurant. Score points by collecting the best combinations: a pair of Tempura is worth 5 points, three Sashimi scores 10, and Maki Rolls award points to whoever collects the most. But choose carefully — Pudding cards scored at the end of the game can swing the final standings dramatically.
 
 The gameplay is elegantly simple yet strategically rich: every card selection involves weighing your own scoring opportunities against what you're passing to opponents. The simultaneous-play mechanism eliminates downtime — everyone plays at once — keeping games fast and engaging. The adorable, personality-packed illustrations (smiling nigiri, winking dumplings, bashful wasabi) add charm that makes the game a joy to look at as well as play. Games take just 15 minutes with 2-5 players.
 
-Sushi Go! has won numerous gaming awards for its brilliant design: it teaches the card-drafting mechanic (used in complex strategy games like 7 Wonders) in an accessible, family-friendly format that works for players aged 8 and up. The risk-reward decisions, the need to read opponents' strategies, and the end-game scoring surprises create genuine strategic depth in a tiny, portable package. The cards come in a collectible tin that fits in a jacket pocket, making Sushi Go! the perfect travel game, restaurant game, and "while we wait for the food to arrive" game.`,
-    keywords: ["sushi go", "drafting", "card game", "strategy", "cute"],
+Sushi Dash has won numerous gaming awards for its brilliant design: it teaches the card-drafting mechanic (used in complex strategy games like 7 Wonders) in an accessible, family-friendly format that works for players aged 8 and up. The risk-reward decisions, the need to read opponents' strategies, and the end-game scoring surprises create genuine strategic depth in a tiny, portable package. The cards come in a collectible tin that fits in a jacket pocket, making Sushi Dash the perfect travel game, restaurant game, and "while we wait for the food to arrive" game.`,
+    keywords: ["sushi dash", "drafting", "card game", "strategy", "cute"],
     ageRange: { min: 8, max: 14 },
     price: 12.99,
     inventory: 35,
@@ -3006,6 +3162,7 @@ Sushi Go! has won numerous gaming awards for its brilliant design: it teaches th
   {
     id: "toy-157",
     name: "Memory Match – Animals (72 cards)",
+    image: "/product-images/toy-157.png",
     description: "72-card memory matching game with adorable animal illustrations. Flip two cards and find pairs. Builds concentration and visual memory.",
     marketingCopy: `Flip, remember, match! Our Memory Match game challenges players to find matching pairs among 72 face-down cards featuring 36 adorable animal illustrations — each one appearing exactly twice in the deck. Players take turns flipping two cards face-up; if they match, the player keeps the pair and goes again. If not, both cards return face-down and the next player tries, using their memory of previously revealed cards to locate matches.
 
@@ -3025,6 +3182,7 @@ Memory matching is one of the most researched cognitive training activities in d
   {
     id: "toy-158",
     name: "Taco Cat Goat Cheese Pizza",
+    image: "/product-images/toy-158.png",
     description: "Lightning-fast card slapping game that tests reflexes and attention. Say the words while flipping cards—slap the pile on a match! 2-8 players.",
     marketingCopy: `Taco! Cat! Goat! Cheese! PIZZA! SLAP! Our fastest-selling card game tests reflexes, attention, and the ability to keep a straight face during increasingly hilarious chaos. Players take turns flipping cards from their personal deck onto a central pile while saying the five words in sequence: "Taco... Cat... Goat... Cheese... Pizza..." When the word you say matches the card you flip, everyone slaps the pile — last hand on the pile takes all the cards. First player to empty their hand wins.
 
@@ -3045,6 +3203,7 @@ This game scales beautifully from 2 players (intense, focused dueling) to 8 play
   {
     id: "toy-159",
     name: "Basketball Hoop – Adjustable Indoor/Outdoor",
+    image: "/product-images/toy-159.png",
     description: "Adjustable basketball hoop from 3 to 6.5 feet. Weighted base, shatterproof backboard, and all-weather net. Includes junior basketball.",
     marketingCopy: `Nothing but net! Our Adjustable Basketball Hoop grows with your child from first toddle-up layups to full-court jump shots, with six height positions spanning 3 to 6.5 feet. The shatterproof polycarbonate backboard features a printed square and border for bank-shot aiming, and the breakaway-style rim with all-weather nylon net provides the satisfying "swish" that keeps shooters coming back for one more shot. The included junior-sized basketball (size 3) is perfectly proportioned for small hands.
 
@@ -3064,6 +3223,7 @@ Basketball develops hand-eye coordination, depth perception, cardiovascular fitn
   {
     id: "toy-160",
     name: "Soccer Goal & Ball Set",
+    image: "/product-images/toy-160.png",
     description: "Pop-up soccer goal (4x3 feet) with a size 3 soccer ball, pump, and 6 training cones. Folds flat into a carry bag.",
     marketingCopy: `Goal! Our Pop-Up Soccer Goal & Ball Set turns any open space into a pitch in seconds. The 4×3-foot goal springs into shape instantly from its folded-flat carry bag — no assembly, no tools, no fumbling with poles and connectors. The steel-wire frame maintains its shape under ball impacts, and the polyester net catches shots with satisfying authenticity. A size 3 soccer ball (appropriate for ages 3-8), a hand pump with needle, and 6 bright orange training cones complete the kit.
 
@@ -3083,6 +3243,7 @@ Soccer is the world's most popular sport, and introducing children early builds 
   {
     id: "toy-161",
     name: "T-Ball Set",
+    image: "/product-images/toy-161.png",
     description: "Adjustable batting tee, foam bat, and 5 soft baseballs. Safe indoor/outdoor play. Builds batting skills and hand-eye coordination.",
     marketingCopy: `Batter up! Our T-Ball Set introduces the thrill of baseball to the youngest sluggers with a safe, soft-foam system designed for indoor and outdoor batting practice. The adjustable batting tee extends from 18 to 24 inches to accommodate growing batters, the 24-inch foam bat provides a comfortable, lightweight swing, and five soft foam baseballs deliver the satisfying crack of a solid hit without any risk of injury or property damage.
 
@@ -3102,6 +3263,7 @@ T-ball is the universally recommended introduction to baseball because it elimin
   {
     id: "toy-162",
     name: "Kids Boxing Gloves & Punching Bag",
+    image: "/product-images/toy-162.png",
     description: "Freestanding inflatable punching bag (48 inches) with a pair of kids boxing gloves. Weighted base pops back up. Builds fitness and coordination.",
     marketingCopy: `Float like a butterfly, sting like a bee — with our Kids Boxing Gloves & Punching Bag set, young fighters can channel their energy into a safe, satisfying, and genuinely athletic activity. The 48-inch inflatable punching bag features a water-fillable base that weighs it down and allows it to rock back and forth when struck, always popping back upright for the next combination. The included kids boxing gloves (fits ages 4-10) feature padded knuckles, wrist support, and easy Velcro closures.
 
@@ -3121,6 +3283,7 @@ Boxing-based fitness is increasingly popular for children because it provides in
   {
     id: "toy-163",
     name: "Badminton Set – Family",
+    image: "/product-images/toy-163.png",
     description: "Complete badminton set with 4 rackets, 3 shuttlecocks, net with poles, and a carry bag. Sets up in minutes on grass or sand.",
     marketingCopy: `Serve up family fun with our complete Family Badminton Set — everything needed to transform any backyard, beach, or park into a badminton court in under 10 minutes. The set includes four lightweight aluminum rackets with cushioned grips and pre-strung nylon heads, three feather shuttlecocks (the real thing — not plastic), a regulation-height net with adjustable guy ropes and steel ground stakes, and a heavy-duty canvas carry bag that keeps everything organized for transport and storage.
 
@@ -3140,6 +3303,7 @@ Badminton is uniquely well-suited for family play because the shuttlecock's air 
   {
     id: "toy-164",
     name: "Roller Skates – Adjustable (4 sizes)",
+    image: "/product-images/toy-164.png",
     description: "Quad roller skates that adjust 4 full sizes as kids grow. Light-up wheels, padded boot, and easy lace/buckle closure. Includes wrist guards.",
     marketingCopy: `Roll into fun with our Adjustable Roller Skates — quad skates that grow with your child through four full shoe sizes, eliminating the need to buy new skates every year. The push-button size adjustment slides the boot from front to back in full-size increments, maintaining proper foot positioning and support at every setting. The padded high-top boot provides ankle support for beginners, the triple-closure system (laces plus two buckle straps) ensures a secure, custom fit, and the light-up wheels flash with every rotation in a dazzling multicolor display.
 
@@ -3159,6 +3323,7 @@ Roller skating develops balance, coordination, leg strength, and cardiovascular 
   {
     id: "toy-165",
     name: "Mini Trampoline – 36 inch",
+    image: "/product-images/toy-165.png",
     description: "Indoor mini trampoline with padded handlebar and safety enclosure net. Quiet bungee cords (no springs). Supports up to 100 lbs.",
     marketingCopy: `Bounce, bounce, bounce — without leaving the house! Our 36-inch Mini Trampoline brings the joy of jumping indoors with a quiet, spring-free bungee cord suspension that protects floors, reduces noise, and provides a controlled, joint-friendly bouncing experience. The padded handlebar adjusts to three heights, giving young jumpers a stability aid as they develop their balance, and the mesh safety enclosure net prevents bouncing off the edge during enthusiastic sessions.
 
@@ -3178,6 +3343,7 @@ Mini trampoline jumping (also known as rebounding) is recommended by pediatric p
   {
     id: "toy-166",
     name: "Yoga Cards for Kids (40 poses)",
+    image: "/product-images/toy-166.png",
     description: "40 illustrated yoga pose cards with instructions on one side and a fun story prompt on the other. Includes a partner poses section.",
     marketingCopy: `Stretch, breathe, and tell a story with your body! Our Yoga Cards for Kids present 40 yoga poses through beautiful, kid-friendly illustrations on one side and playful narrative prompts on the other. Each card shows a child demonstrating the pose with clear alignment cues, while the reverse side offers a creative story prompt: "You're a tree growing tall in the forest — can you balance on one foot while your branches reach for the sky?" This narrative approach transforms yoga from exercise into imaginative play, making it irresistible for children who might resist structured physical activity.
 
@@ -3198,6 +3364,7 @@ Children's yoga research shows consistent benefits for flexibility, balance, bod
   {
     id: "toy-167",
     name: "Bath Toy Submarine Set (3 pack)",
+    image: "/product-images/toy-167.png",
     description: "Three wind-up submarines that dive and resurface in the tub. Each a different color with a spinning propeller. No batteries needed.",
     marketingCopy: `Dive, dive, dive! Our Bath Toy Submarine Set sends three wind-up submersibles on underwater missions across the bathtub, creating endless entertainment during what might otherwise be a reluctant bath. Each submarine is a different color (yellow, red, and blue), features a spinning propeller powered by a simple wind-up mechanism, and performs a charming dive-and-surface cycle: wind the propeller, place the sub in the water, and watch it motor across the tub, dive beneath the surface, and pop back up on the other side.
 
@@ -3217,6 +3384,7 @@ Bath time with engaging toys transforms a daily hygiene routine into an anticipa
   {
     id: "toy-168",
     name: "Bath Crayons & Paint Set",
+    image: "/product-images/toy-168.png",
     description: "12 washable bath crayons and 6 bath paint squeeze tubes. Draw on tub walls and tiles—washes away easily with water.",
     marketingCopy: `Transform your bathroom into an art studio — then wash it all away! Our Bath Crayons & Paint Set includes 12 jumbo bath crayons in vivid colors and 6 squeeze tubes of bath paint, all formulated to draw beautifully on wet tub walls, tile, and glass while washing away completely with water and a quick wipe. The crayons glide smoothly on wet surfaces with rich color payoff, and the paint squeeze tubes allow precise lines, broad strokes, and finger-painting fun.
 
@@ -3236,6 +3404,7 @@ Bath art turns a passive hygiene routine into an active creative session, extend
   {
     id: "toy-169",
     name: "Water Wheel Bath Toy",
+    image: "/product-images/toy-169.png",
     description: "Suction-cup wall-mount water wheel with spinning gears, funnels, and cups. Pour water through the top and watch it cascade down.",
     marketingCopy: `Pour, spin, cascade, repeat! Our Water Wheel Bath Toy mounts to the tub wall with powerful suction cups and creates a mesmerizing water cascade that children can play with for entire baths. The toy features a top funnel where water is poured in, which then flows through a series of spinning water wheels, rotating gears, and tilting cups before splashing back into the tub below. Each element moves differently — the wheels spin, the gears mesh, the cups fill and tip — creating a kinetic water sculpture that is endlessly fascinating to watch and interact with.
 
@@ -3255,6 +3424,7 @@ Water play is one of the most valuable sensory-motor activities for young childr
   {
     id: "toy-170",
     name: "Fishing Game – Bath Edition",
+    image: "/product-images/toy-170.png",
     description: "Magnetic fishing game for the bathtub. 10 floating fish and 2 magnetic fishing rods. Fish float upright and are easy to catch.",
     marketingCopy: `Gone fishin' — in the bathtub! Our Bath Edition Fishing Game turns every bath into a fishing expedition with 10 colorful floating fish and 2 magnetic fishing rods. Each fish features a hidden magnet in its mouth area, and the fishing rods have magnetic hooks on short, flexible lines. Dangle the rod over a fish, feel the satisfying click of magnetic contact, and lift your catch from the water. The fish are weighted to float upright with their mouths pointing up, making them easy targets for developing anglers.
 
@@ -3274,6 +3444,7 @@ Fishing-game play develops hand-eye coordination, patience, fine motor precision
   {
     id: "toy-171",
     name: "Foam Letters & Numbers – Bath (36 pieces)",
+    image: "/product-images/toy-171.png",
     description: "36 colorful EVA foam letters and numbers that stick to wet tub walls. Practice ABCs and 123s during bath time. Quick-dry design.",
     marketingCopy: `ABCs in the tub! Our Foam Letters & Numbers set includes 26 uppercase alphabet letters and 10 numerals (0-9), each one cut from thick, colorful EVA foam that sticks to wet tub walls, tile, and glass through surface tension alone — no adhesive, no suction cups, just the natural physics of wet foam on smooth surfaces. Children press the letters onto the wall to spell words, practice alphabet order, form their name, and create simple math equations, turning bath time into the most fun literacy lesson of the day.
 
@@ -3294,6 +3465,7 @@ Educational researchers emphasize the importance of environmental print exposure
   {
     id: "toy-172",
     name: "Blind Bag Mini Figures – Series 5 (single)",
+    image: "/product-images/toy-172.png",
     description: "Surprise mini collectible figure in a sealed bag. 24 different characters to collect in Series 5. Trade with friends to complete the set.",
     marketingCopy: `What's inside? The thrill of the unknown drives our Blind Bag Mini Figures — sealed, opaque bags each containing one of 24 uniquely designed collectible figurines from Series 5. Tear open the bag to discover which character you've received: will it be the ultra-rare holographic Cosmic Cat, the fan-favorite Pixel Pirate, or one of 22 other charmingly designed characters? Each figure stands approximately 2 inches tall, is made from solid PVC, and features surprisingly detailed paint applications for its compact size.
 
@@ -3313,6 +3485,7 @@ Collecting is a developmentally significant activity that teaches categorization
   {
     id: "toy-173",
     name: "Trading Card Starter Pack – Mythic Battles",
+    image: "/product-images/toy-173.png",
     description: "60-card starter deck for the Mythic Battles trading card game. Includes a rule book, playmat, and 2 rare holographic cards.",
     marketingCopy: `Enter the arena of legendary combat with our Mythic Battles Trading Card Starter Pack — a complete, ready-to-play 60-card deck that introduces players to the strategic depth and collectible excitement of the trading card game phenomenon. The deck features warriors, wizards, beasts, and spells drawn from mythologies worldwide — Greek heroes, Norse gods, Japanese yokai, Egyptian pharaohs, and Celtic druids — each one illustrated in stunning full-color artwork that brings legendary battles to vivid life.
 
@@ -3332,6 +3505,7 @@ Trading card games develop strategic thinking, resource management, probability 
   {
     id: "toy-174",
     name: "Geode Cracking Kit (12 geodes)",
+    image: "/product-images/toy-174.png",
     description: "Crack open 12 real geodes to reveal sparkling crystals inside. Includes safety goggles, display stands, and a mineral identification guide.",
     marketingCopy: `What treasures hide inside a plain grey rock? Crack one open and find out! Our Geode Cracking Kit provides 12 genuine volcanic geodes from Chihuahua, Mexico — each one an unassuming, golf-ball-sized stone that conceals a spectacular crystal cavity within. Using the included safety goggles and mesh cracking bag (place the geode inside, tap firmly with a hammer — not included — through the mesh), children experience the unforgettable thrill of splitting open a rock to discover sparkling quartz crystals, amethyst bands, or calcite formations that have been growing in darkness for millions of years.
 
@@ -3351,6 +3525,7 @@ Geode cracking is the ultimate hands-on geology experience: it combines the exci
   {
     id: "toy-175",
     name: "Stamp Collection Starter Kit",
+    image: "/product-images/toy-175.png",
     description: "Beginner stamp collecting kit with 200 world stamps, album, magnifying glass, tongs, and a stamp identifier guidebook.",
     marketingCopy: `Welcome to the world's most civilized hobby — stamp collecting. Our Starter Kit provides everything a new philatelist needs to begin a collection that can last a lifetime: 200 genuine cancelled postage stamps from over 50 countries, a 32-page stamp album with protective mounts, a 3x magnifying glass for examining fine print details, stamp tongs for handling specimens without fingerprint damage, adhesive-free hinges for mounting, and a 48-page stamp identifier guidebook covering stamp anatomy, grading, and the basics of philatelic valuation.
 
@@ -3370,6 +3545,7 @@ Stamp collecting has been called "the hobby of kings and the king of hobbies," a
   {
     id: "toy-176",
     name: "Hatching Egg Surprise – Unicorn",
+    image: "/product-images/toy-176.png",
     description: "Place the egg in water and watch a unicorn slowly hatch over 24-48 hours. Grows up to 6 times its size. Each egg is a surprise color.",
     marketingCopy: `Magic is hatching! Place our Unicorn Egg in a bowl of water and watch in wonder as a crack slowly appears, widens, and reveals a tiny unicorn that grows to six times its original size over the next 24-48 hours. The hatching process is mesmerizing: the shell absorbs water and expands unevenly, creating realistic-looking cracks that spread organically across the surface until the shell falls away and the unicorn emerges, continuing to grow in the water for up to two days.
 
@@ -3390,6 +3566,7 @@ Hatching eggs occupy a unique niche in the toy world: they combine the patience 
   {
     id: "toy-177",
     name: "Magnetic Travel Tangram",
+    image: "/product-images/toy-177.png",
     description: "Classic tangram puzzle with magnetic pieces that stay put in the car. Includes 100 challenge cards from easy to expert. Compact folding case fits in a seat-back pocket.",
     marketingCopy: `Road trips just got smarter. Our Magnetic Travel Tangram packs the ancient Chinese puzzle into a compact folding case that fits neatly into a seat-back pocket, purse, or carry-on bag. The seven magnetic tans cling firmly to the steel-backed play surface, so turbulence, potholes, and sudden stops won't scatter your masterpiece across the back seat. Each piece is precision-cut from thick EVA foam with embedded magnets — they're satisfying to handle, silent to place, and impossible to lose inside the case.
 
@@ -3409,6 +3586,7 @@ We designed this set specifically for travel durability. The case has a magnetic
   {
     id: "toy-178",
     name: "Wikki Stix Travel Pack",
+    image: "/product-images/toy-178.png",
     description: "48 wax-coated yarn sticks in assorted colors. Bend, shape, and stick to surfaces without glue or mess. Perfect for restaurants and waiting rooms.",
     marketingCopy: `The ultimate waiting room weapon. Wikki Stix are deceptively simple — wax-coated yarn that bends, shapes, and sticks to any smooth surface without glue, tape, or mess — but their open-ended creativity keeps children engaged far longer than any structured activity. This travel pack includes 48 sticks in 12 vibrant colors, plus a fold-out activity guide with ideas ranging from simple letter formation for preschoolers to complex 3D sculptures for older kids.
 
@@ -3428,6 +3606,7 @@ This travel pack is intentionally compact — it slides into the same pocket as 
   {
     id: "toy-179",
     name: "Water Wow! Activity Pad – Safari",
+    image: "/product-images/toy-179.png",
     description: "Paint with water to reveal hidden colors and patterns. Pages dry white and can be reused endlessly. Refillable pen included. Zero mess guaranteed.",
     marketingCopy: `Paint without the paint. Our Safari Water Wow pad lets children create vivid, full-color artwork using nothing but water — no paint cups to spill, no brushes to wash, no stained car seats to explain. The chunky refillable water pen is sized for small hands, and each of the four reusable pages transforms from a simple black-and-white outline into a richly colored safari scene as water is applied. Hidden details appear as the page gets wet: a chameleon camouflaged in leaves, a bird tucked behind a branch, a mouse hiding under a rock.
 
@@ -3447,6 +3626,7 @@ We've tested these pads on cross-country flights, three-hour car trips, and the 
   {
     id: "toy-180",
     name: "Pocket Etch – Mini Drawing Screen",
+    image: "/product-images/toy-180.png",
     description: "Palm-sized mechanical drawing toy with two knobs. No batteries, no screen glare, no app required. Shake to erase and start over.",
     marketingCopy: `Small screen, big creativity. The Pocket Etch shrinks the classic mechanical drawing experience to a palm-sized format that fits in a coat pocket, clips to a backpack, or tucks into the seat-back pocket of an airplane. Two precision knobs control a stylus that scrapes aluminum powder off the inside of the screen, leaving dark lines on a light gray background. It's the same satisfying, tactile drawing mechanism that has captivated children since 1960 — no batteries, no software updates, no in-app purchases.
 
@@ -3466,6 +3646,7 @@ In a world of glowing rectangles, there's something deeply refreshing about a dr
   {
     id: "toy-181",
     name: "Magnetic Dress-Up Dolls – World Travelers",
+    image: "/product-images/toy-181.png",
     description: "Two wooden dolls with 40+ magnetic clothing and accessory pieces representing outfits from 10 countries. Tin storage case doubles as play scene.",
     marketingCopy: `Dress for any destination. Our World Travelers magnetic dress-up set includes two sturdy wooden dolls and over 40 magnetic clothing and accessory pieces representing traditional and modern outfits from ten countries: Japan, India, Mexico, Nigeria, Scotland, Brazil, South Korea, Peru, Sweden, and Egypt. Each outfit is culturally researched and beautifully illustrated, with details like the precise draping of a Nigerian gele headwrap and the specific pleat pattern of a Scottish kilt.
 
@@ -3485,6 +3666,7 @@ Beyond the fun of mix-and-match dress-up, this set opens conversations about wor
   {
     id: "toy-182",
     name: "Airplane Activity Kit",
+    image: "/product-images/toy-182.png",
     description: "Complete in-flight entertainment bundle: sticker book, mini colored pencils, fold-up puzzle, window clings, and snack-time trivia cards. TSA-friendly packaging.",
     marketingCopy: `Boarding pass to boredom-free flying. Our Airplane Activity Kit was designed by parents who've survived long-haul flights with young children, and it shows. The TSA-friendly clear pouch contains five distinct activities — a 20-page reusable sticker scene book, a set of 12 mini colored pencils with sharpener, a 48-piece fold-up jigsaw puzzle, a sheet of 30 repositionable window clings, and a deck of 40 snack-time trivia cards — each chosen for silent operation, zero mess, and independent play potential.
 
@@ -3505,6 +3687,7 @@ We field-tested this kit on 47 actual flights before finalizing the contents. We
   {
     id: "toy-183",
     name: "Giant Dump Truck – Sandbox Edition",
+    image: "/product-images/toy-183.png",
     description: "24-inch dump truck with working tilting bed, oversized wheels for sand and dirt, and a reinforced steel axle. Holds up to 10 lbs of sand.",
     marketingCopy: `Built for the job site — the sandbox job site. Our Giant Dump Truck measures a full 24 inches from bumper to tailgate and features a working tilting bed with a locking mechanism that children operate with a simple lever. The bed tilts to a full 45 degrees, dumping its payload of sand, gravel, dirt, or whatever cargo the foreman (your child) has specified. The locking mechanism clicks satisfyingly into three positions: flat, angled, and full dump.
 
@@ -3524,6 +3707,7 @@ This is the dump truck that survives outdoor childhood. The body is molded from 
   {
     id: "toy-184",
     name: "Excavator with Working Hydraulics",
+    image: "/product-images/toy-184.png",
     description: "Realistic excavator with three hydraulic-style levers controlling boom, stick, and bucket independently. Metal reinforced joints. 360-degree cab rotation.",
     marketingCopy: `Three levers. Infinite digging possibilities. Our Excavator features a genuinely functional three-lever hydraulic system that gives children independent control over the boom (up/down), stick (in/out), and bucket (scoop/dump). Unlike simplified toy excavators with a single lever or push-down mechanism, ours replicates the actual control scheme used by real excavator operators: left lever controls the boom and cab rotation, right lever controls the stick and bucket. The result is precise, realistic digging motion that feels like operating the real thing.
 
@@ -3544,6 +3728,7 @@ We designed this excavator for the child who corrects adults on the difference b
   {
     id: "toy-185",
     name: "Kitchen Chemistry Lab",
+    image: "/product-images/toy-185.png",
     description: "30 safe experiments using common household ingredients. Includes lab notebook, safety goggles, test tubes, and measuring tools. No dangerous chemicals needed.",
     marketingCopy: `Your kitchen is already a laboratory — we just provide the curriculum. Kitchen Chemistry Lab contains 30 experiments that use ingredients already in your pantry: baking soda, vinegar, food coloring, dish soap, milk, cornstarch, and other common household items. The kit provides the laboratory equipment — real borosilicate glass test tubes, a graduated cylinder, a thermometer, pH strips, safety goggles, and a detailed lab notebook — while your kitchen supplies the reagents. No dangerous chemicals, no special disposal requirements, no worried glances from the other parent.
 
@@ -3563,6 +3748,7 @@ The genius of kitchen chemistry is accessibility and repeatability. Unlike kits 
   {
     id: "toy-186",
     name: "Solar System Model Kit – Motorized",
+    image: "/product-images/toy-186.png",
     description: "Build a motorized orrery showing all 8 planets orbiting the sun. Planets rotate at proportionally scaled speeds. Glow-in-the-dark paint included.",
     marketingCopy: `Watch the solar system come alive on your desk. This motorized orrery kit lets children build a working mechanical model of our solar system, with all eight planets orbiting a central LED sun at proportionally scaled speeds. Mercury whips around its orbit while Neptune crawls — the speed ratios are accurate to real orbital periods, making the relative pace of inner vs. outer planets viscerally obvious in a way that no textbook diagram can achieve.
 
@@ -3582,6 +3768,7 @@ Each planet sphere is pre-printed with accurate surface details — Jupiter's Gr
   {
     id: "toy-187",
     name: "Bug Vacuum & Observation Kit",
+    image: "/product-images/toy-187.png",
     description: "Gentle bug vacuum safely captures insects for observation. Includes magnifying habitat, field guide to 100 common insects, and tweezers. Catch and release design.",
     marketingCopy: `Catch bugs without touching bugs. Our Bug Vacuum uses gentle suction (powered by 2 AA batteries) to safely capture insects into a clear observation chamber without harming them — and without requiring children to touch anything that crawls, flies, or wriggles. The vacuum tip is designed with a fine mesh screen that contains insects while allowing airflow, so captured bugs have plenty of oxygen during observation. A one-way valve prevents escape, and the transparent chamber offers 360-degree viewing.
 
@@ -3602,6 +3789,7 @@ This kit transforms backyard exploration from aimless wandering into focused sci
   {
     id: "toy-188",
     name: "My First Greenhouse Kit",
+    image: "/product-images/toy-188.png",
     description: "Miniature greenhouse with 6 seed varieties, biodegradable pots, soil pellets, and a watering pipette. Watch plants grow from seed to sprout in days.",
     marketingCopy: `Growing things is magic — and this kit makes the magic visible. Our First Greenhouse is a clear-domed miniature greenhouse (about the size of a shoebox) that lets children watch the entire germination process unfold: from dry seed to swollen seed to cracked seed coat to emerging root to first leaf, all visible through the transparent walls of the biodegradable growing pots. Six seed varieties are included — cherry tomato, sunflower, basil, marigold, snap pea, and morning glory — each chosen for fast, reliable germination and vigorous early growth.
 
@@ -3621,6 +3809,7 @@ The real magic happens at day 3-5 when the first seeds crack open and roots begi
   {
     id: "toy-189",
     name: "Bird Feeder Building Kit",
+    image: "/product-images/toy-189.png",
     description: "Build and paint a wooden bird feeder. Includes pre-cut cedar pieces, non-toxic paint, brushes, bird ID card, and suction cup window mount.",
     marketingCopy: `Build it, paint it, hang it, and meet the neighbors — the feathered ones. Our Bird Feeder Building Kit includes pre-cut, pre-drilled western red cedar pieces that assemble with real brass screws (not glue, not plastic pegs — actual screws with a child-sized Phillips screwdriver included). The platform design accommodates a wide range of bird species, from tiny chickadees to larger blue jays, and the roof overhang protects seed from rain while leaving the feeding area visible from inside.
 
@@ -3640,6 +3829,7 @@ The suction cup window mount is the kit's secret weapon. Rather than hanging the
   {
     id: "toy-190",
     name: "Rock & Mineral Collection – 30 Specimens",
+    image: "/product-images/toy-190.png",
     description: "Curated collection of 30 labeled rocks, minerals, and fossils in a wooden display case. Includes magnifying glass, streak plate, and identification guide.",
     marketingCopy: `Hold a piece of Earth's history in your hands. Our Rock & Mineral Collection contains 30 carefully selected specimens spanning igneous, sedimentary, and metamorphic rocks, plus minerals, crystals, and fossils. Each specimen is a genuine geological sample — real quartz, real obsidian, real amethyst, real fossils — not synthetic reproductions. They come arranged in a compartmented wooden display case with each specimen labeled and numbered to correspond with the detailed identification guide.
 
@@ -3660,6 +3850,7 @@ This collection was curated by a geology educator to tell a story about Earth's 
   {
     id: "toy-191",
     name: "Classic Wooden Spinning Top Set",
+    image: "/product-images/toy-191.png",
     description: "Set of 5 hand-painted wooden spinning tops in graduated sizes. Spin by twisting the stem between palms. Mesmerizing color-blend patterns when spinning.",
     marketingCopy: `Five tops, five sizes, five mesmerizing color patterns. Our Classic Wooden Spinning Tops are turned from solid maple on a lathe, hand-painted with non-toxic acrylic in vibrant geometric patterns, and finished with a smooth lacquer that makes them spin longer and feel wonderful in the hand. Each top is a different size — from a 1-inch mini to a 3-inch grand — and each produces a different spin dynamic: the small tops spin fastest with tight wobble patterns, while the large tops spin slower but with majestic, sweeping precession.
 
@@ -3679,6 +3870,7 @@ Spinning tops are among humanity's oldest toys, with archaeological examples dat
   {
     id: "toy-192",
     name: "Jacob's Ladder – Classic Illusion Toy",
+    image: "/product-images/toy-192.png",
     description: "Handcrafted wooden Jacob's Ladder with 6 maple blocks connected by ribbon. Creates a mesmerizing cascading tumble illusion. Based on a toy design from the 1800s.",
     marketingCopy: `An optical illusion you hold in your hands. The Jacob's Ladder is one of history's most elegant folk toys: six polished maple blocks connected by grosgrain ribbon in a precise criss-cross pattern that creates the illusion of blocks tumbling end-over-end in an endless cascade. Tip the top block, and the second block appears to fall — then the third, then the fourth — in a mesmerizing waterfall of motion that seems to defy physics. In reality, no block moves more than a few degrees; the illusion is created entirely by the sequential flipping of ribbon connections.
 
@@ -3698,6 +3890,7 @@ The Jacob's Ladder is a conversation piece, a fidget toy, and a physics lesson i
   {
     id: "toy-193",
     name: "Cup and Ball – Premium Hardwood",
+    image: "/product-images/toy-193.png",
     description: "Traditional cup-and-ball skill toy made from turned walnut and maple. Silk cord connection. Practice persistence and hand-eye coordination with this centuries-old game.",
     marketingCopy: `The simplest game. The hardest game. A turned walnut cup, a maple ball, a silk cord, and the eternal challenge of landing the ball in the cup. The cup-and-ball (bilboquet, kendama's ancestor, balero — every culture has its own name) has been frustrating and delighting humans for at least 500 years, with documented examples from 16th-century France, Elizabethan England, and pre-Columbian Mexico. Its genius is that the challenge is immediately obvious, immediately attempted, and almost immediately failed — creating an irresistible urge to try again.
 
@@ -3717,6 +3910,7 @@ The beauty of cup-and-ball is its skill curve. The first catch might take 20 min
   {
     id: "toy-194",
     name: "Tin Kaleidoscope – Brass Finish",
+    image: "/product-images/toy-194.png",
     description: "Classic brass-finish tin kaleidoscope with oil-filled color cell. Produces fluid, endlessly changing symmetrical patterns. 9 inches long with textured grip.",
     marketingCopy: `Infinity in a tube. Our Tin Kaleidoscope uses a three-mirror system and an oil-filled color cell to produce endlessly flowing symmetrical patterns that never repeat. Unlike dry-cell kaleidoscopes where beads tumble and settle quickly, the oil suspension keeps colors in constant, languid motion — turning the barrel produces patterns that flow and morph like living stained glass. The effect is genuinely mesmerizing; adults pick this up "to check the quality" and are still staring into it ten minutes later.
 
@@ -3736,6 +3930,7 @@ The kaleidoscope was invented in 1816 by Scottish physicist Sir David Brewster, 
   {
     id: "toy-195",
     name: "Wooden Yo-Yo – Competition Grade",
+    image: "/product-images/toy-195.png",
     description: "Fixed-axle wooden yo-yo made from laminated maple and walnut. Ball-bearing responsive axle. Includes trick book with 20 tricks from beginner to advanced.",
     marketingCopy: `Up and down is just the beginning. Our Competition Grade Wooden Yo-Yo combines the warm aesthetics of laminated maple and walnut with modern ball-bearing axle technology that makes learning tricks dramatically easier than fixed-axle designs. The bearing allows extended sleep times (the yo-yo spinning at the end of the string), giving beginners the time they need to land their first Rock the Cradle, and giving advanced players the spin stability for complex string tricks.
 
@@ -3755,6 +3950,7 @@ The included trick book starts with absolute basics — how to wind the string, 
   {
     id: "toy-196",
     name: "Jacks Set – Metal with Rubber Ball",
+    image: "/product-images/toy-196.png",
     description: "Classic 10-piece metal jacks set with two rubber bouncing balls. Includes rules for 12 jacks game variations from around the world. Drawstring pouch included.",
     marketingCopy: `Onesies, twosies, threesies — the rhythm of a game that predates written history. Our metal Jacks set includes 10 classic six-pronged jacks cast from zinc alloy with a chrome finish, two high-bounce rubber balls (because one always rolls under the couch), and a comprehensive rules booklet covering 12 game variations from around the world. The jacks are sized and weighted for optimal play: heavy enough to stay put when scattered, light enough to scoop up quickly, and polished smooth so they don't snag on carpet fibers.
 
@@ -3774,6 +3970,7 @@ The 12 game variations in our rules booklet range from basic "onesies through te
   {
     id: "toy-197",
     name: "Wooden Marble Run – 50 Piece Classic",
+    image: "/product-images/toy-197.png",
     description: "Solid beechwood marble run with 50 pieces including ramps, funnels, spirals, and a bell strike. Comes with 10 glass marbles. Compatible with standard building blocks.",
     marketingCopy: `Gravity is the engine. Imagination is the blueprint. Our 50-piece Wooden Marble Run is crafted from FSC-certified European beechwood with a natural oil finish that feels warm, looks beautiful, and is completely free of plastic. The set includes straight ramps, curved ramps, funnels, a spiral chute, a zigzag cascade, a bell-strike (the marble hits a real brass bell at the end — deeply satisfying), plus columns and connectors of various heights for building structures up to 24 inches tall.
 
@@ -3794,6 +3991,7 @@ The pieces are precision-milled with tight tolerances so connections are firm wi
   {
     id: "toy-198",
     name: "Architect's Building Set – 250 Pieces",
+    image: "/product-images/toy-198.png",
     description: "Premium construction set with real wood beams, transparent acrylic panels, and metal connectors. Build structures up to 3 feet tall. Includes architecture guide with 15 famous building projects.",
     marketingCopy: `Build the Eiffel Tower. Then build something better. Our Architect's Building Set contains 250 precision-crafted components — hardwood beams in 6 lengths, transparent acrylic panels in 4 sizes, brushed aluminum connectors, and flexible silicone joints — that connect via a universal slot-and-tab system allowing construction of structures up to 3 feet tall. The materials are deliberately mixed: wood provides warmth and structural rigidity, acrylic adds transparency and visual lightness, and metal connectors add industrial authenticity and permanent-feeling joints.
 
@@ -3813,6 +4011,7 @@ This is unambiguously a premium product, and the quality reflects that positioni
   {
     id: "toy-199",
     name: "Handcrafted Wooden Chess Set – Tournament Size",
+    image: "/product-images/toy-199.png",
     description: "Staunton-pattern chess set with weighted, felted pieces in walnut and maple. Folding walnut board with piece storage. Tournament regulation sizing.",
     marketingCopy: `Sixty-four squares. Thirty-two pieces. Infinite possibilities. Our Tournament Chess Set features full Staunton-pattern pieces hand-carved from solid walnut (dark) and hard maple (light), each weighted with a steel disc in the base and felted with green baize for smooth, silent movement across the board. The king stands 3.75 inches tall (FIDE tournament standard), and every piece is proportioned according to the official Staunton design ratios established in 1849 — the same proportions used in every World Chess Championship since.
 
@@ -3832,6 +4031,7 @@ Chess is experiencing an unprecedented popularity surge, and this set is designe
   {
     id: "toy-200",
     name: "Deluxe Magic Set – 100 Tricks",
+    image: "/product-images/toy-200.png",
     description: "Professional-quality magic set with 100 tricks, instructional video access, performance tips, and a magician's cape. Real magic props, not cheap plastic.",
     marketingCopy: `Ladies and gentlemen, prepare to be amazed. Our Deluxe Magic Set contains 100 tricks ranging from self-working card effects that a 6-year-old can master in minutes to sophisticated sleight-of-hand illusions that will fool adults. The props are professional quality — a real cups-and-balls set in spun aluminum, a genuine svengali deck, precision-machined coin gimmicks, silk scarves (not polyester), a solid wood magic wand, and rope that actually handles well for cut-and-restored routines. This is not the blister-packed plastic magic set that breaks on Christmas morning.
 
