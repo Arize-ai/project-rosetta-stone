@@ -2,6 +2,8 @@ import { products } from "@/lib/inventory";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { BackButton } from "./back-button";
+import { AddToCartButton } from "./add-to-cart-button";
+import { ProductHeaderActions } from "./product-header-actions";
 
 export default async function ProductPage({
   params,
@@ -28,6 +30,7 @@ export default async function ProductPage({
           <img src="/product-images/wonder-toys-logo.png" alt="Wonder Toys" className="w-8 h-8" />
           <span className="text-xl font-bold text-purple-800">Wonder Toys</span>
         </Link>
+        <ProductHeaderActions />
       </header>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
@@ -113,13 +116,21 @@ export default async function ProductPage({
                 )}
               </div>
 
-              {/* Ask about this product */}
-              <Link
-                href={`/?ask=${encodeURIComponent(`Tell me about ${product.name}`)}`}
-                className="inline-block bg-purple-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-purple-700 transition-colors"
-              >
-                Ask about this product
-              </Link>
+              {/* Actions */}
+              <div className="flex gap-3">
+                <AddToCartButton
+                  productId={product.id}
+                  name={product.name}
+                  price={product.price}
+                  image={product.image}
+                />
+                <Link
+                  href={`/?ask=${encodeURIComponent(`Tell me about ${product.name}`)}`}
+                  className="inline-block bg-purple-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-purple-700 transition-colors"
+                >
+                  Ask about this product
+                </Link>
+              </div>
             </div>
           </div>
 

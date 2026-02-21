@@ -23,6 +23,7 @@ export const purchaseProduct = createTool({
       city: z.string().describe("City"),
       state: z.string().describe("State/Province"),
       zip: z.string().describe("ZIP/Postal code"),
+      country: z.string().describe("Country"),
     }),
   }),
   outputSchema: z.object({

@@ -1,10 +1,63 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
+import { useCart } from "./CartContext";
+import { CartIcon } from "./CartIcon";
+
+/**
+ * Parse assistant markdown into segments: plain text blocks and product cards.
+ * Product cards start with a markdown image line like:
+ *   ![Product Name](/product-images/toy-XXX.png)
+ * followed by text lines (name, price, rating, description) until the next
+ * blank line, next product image, or end of string.
+ */
+type Segment =
+  | { type: "text"; content: string }
+  | { type: "product"; id: string; name: string; image: string; lines: string[] };
+
+const PRODUCT_IMAGE_RE = /^!\[([^\]]*)\]\((\/product-images\/(toy-\d+)\.\w+)\)/;
+
+function parseSegments(md: string): Segment[] {
+  const lines = md.split("\n");
+  const segments: Segment[] = [];
+  let textBuf: string[] = [];
+
+  function flushText() {
+    if (textBuf.length > 0) {
+      const content = textBuf.join("\n").trim();
+      if (content) segments.push({ type: "text", content });
+      textBuf = [];
+    }
+  }
+
+  let i = 0;
+  while (i < lines.length) {
+    const match = lines[i].trim().match(PRODUCT_IMAGE_RE);
+    if (match) {
+      flushText();
+      const [, name, image, id] = match;
+      const productLines: string[] = [];
+      i++;
+      // Collect following lines until blank line or next product image
+      while (i < lines.length) {
+        const trimmed = lines[i].trim();
+        if (trimmed === "" || PRODUCT_IMAGE_RE.test(trimmed)) break;
+        productLines.push(trimmed);
+        i++;
+      }
+      segments.push({ type: "product", id, name, image, lines: productLines });
+    } else {
+      textBuf.push(lines[i]);
+      i++;
+    }
+  }
+  flushText();
+  return segments;
+}
 
 interface Message {
   id: string;
@@ -26,6 +79,7 @@ export function Chat() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { addToCart } = useCart();
   const [messages, setMessages] = useState<Message[]>(() => {
     if (typeof window !== "undefined") {
       const saved = sessionStorage.getItem("chat-messages");
@@ -40,6 +94,10 @@ export function Chat() {
   const [popular, setPopular] = useState<FeaturedProduct[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const streamContentRef = useRef("");
+  const rafRef = useRef<number | null>(null);
+  const askHandledRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -48,17 +106,151 @@ export function Chat() {
   }, [status, router]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     sessionStorage.setItem("chat-messages", JSON.stringify(messages));
   }, [messages]);
 
+  // Separate scroll effect — only scroll when message count changes (new message)
+  // or when streaming finishes, not on every content update
+  const messageCount = messages.length;
+  const lastMessageDone = !isLoading;
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 200;
+      if (isNearBottom) {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, [messageCount, lastMessageDone]);
+
+  const sendMessage = useCallback(async (text: string) => {
+    if (!text.trim() || isLoading) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: text.trim(),
+    };
+    const assistantMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: "assistant",
+      content: "",
+    };
+
+    // Build the conversation history for the API call BEFORE updating state
+    // IMPORTANT: Do NOT call fetchResponse inside setMessages — React Strict Mode
+    // calls updater functions twice, which would launch two parallel streams.
+    setMessages((prev) => [...prev, userMessage, assistantMessage]);
+    setInput("");
+    setIsLoading(true);
+
+    // Use a snapshot of messages for the API call (current messages + user message)
+    const currentMessages = [...messages, userMessage];
+    fetchResponse(currentMessages);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, messages]);
+
+  async function fetchResponse(updatedMessages: Message[]) {
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: updatedMessages.map((m) => ({
+            role: m.role,
+            content: m.content,
+          })),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send message");
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("No response stream");
+
+      const decoder = new TextDecoder();
+      streamContentRef.current = "";
+
+      // Throttled state update — batch stream chunks into one render per frame
+      function scheduleUpdate() {
+        if (rafRef.current !== null) return;
+        rafRef.current = requestAnimationFrame(() => {
+          rafRef.current = null;
+          const content = streamContentRef.current;
+          setMessages((prev) => {
+            const updated = [...prev];
+            updated[updated.length - 1] = {
+              ...updated[updated.length - 1],
+              content,
+            };
+            return updated;
+          });
+        });
+      }
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const text = decoder.decode(value);
+        const lines = text.split("\n");
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const data = line.slice(6);
+            if (data === "[DONE]") break;
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.text) {
+                streamContentRef.current += parsed.text;
+                scheduleUpdate();
+              }
+            } catch {
+              // skip unparseable chunks
+            }
+          }
+        }
+      }
+
+      // Final flush — ensure the last content is rendered
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      const finalContent = streamContentRef.current;
+      setMessages((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1] = {
+          ...updated[updated.length - 1],
+          content: finalContent,
+        };
+        return updated;
+      });
+    } catch {
+      setMessages((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1] = {
+          ...updated[updated.length - 1],
+          content: "Sorry, something went wrong. Please try again.",
+        };
+        return updated;
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   useEffect(() => {
     const ask = searchParams.get("ask");
-    if (ask) {
-      setInput(ask);
+    if (ask && askHandledRef.current !== ask) {
+      askHandledRef.current = ask;
+      sendMessage(ask);
       router.replace("/", { scroll: false });
     }
-  }, [searchParams, router]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   useEffect(() => {
     fetch("/api/products/featured")
@@ -80,98 +272,9 @@ export function Chat() {
 
   if (!session) return null;
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: input.trim(),
-    };
-
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
-    setInput("");
-    setIsLoading(true);
-
-    const assistantMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      role: "assistant",
-      content: "",
-    };
-    setMessages([...updatedMessages, assistantMessage]);
-
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: updatedMessages.map((m) => ({
-            role: m.role,
-            content: m.content,
-          })),
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to send message");
-      }
-
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error("No response stream");
-
-      const decoder = new TextDecoder();
-      let assistantContent = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const text = decoder.decode(value);
-        const lines = text.split("\n");
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const data = line.slice(6);
-            if (data === "[DONE]") break;
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.text) {
-                assistantContent += parsed.text;
-                setMessages((prev) => {
-                  const updated = [...prev];
-                  updated[updated.length - 1] = {
-                    ...updated[updated.length - 1],
-                    content: assistantContent,
-                  };
-                  return updated;
-                });
-              }
-            } catch {
-              // skip unparseable chunks
-            }
-          }
-        }
-      }
-    } catch (error) {
-      setMessages((prev) => {
-        const updated = [...prev];
-        updated[updated.length - 1] = {
-          ...updated[updated.length - 1],
-          content: "Sorry, something went wrong. Please try again.",
-        };
-        return updated;
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  function productIdFromImage(src: string | undefined): string | null {
-    if (!src) return null;
-    const match = src.match(/\/product-images\/(toy-\d+)\./);
-    return match ? match[1] : null;
+    sendMessage(input);
   }
 
   function formatCategory(cat: string) {
@@ -183,6 +286,56 @@ export function Chat() {
       .join(" & ");
   }
 
+  function ProductCard({ id, name, image, lines }: { id: string; name: string; image: string; lines: string[] }) {
+    return (
+      <div className="not-prose flex gap-3 my-3 items-start">
+        <div className="shrink-0 w-24">
+          <Link href={`/product/${id}`} className="block w-24 h-24">
+            <img
+              src={image}
+              alt={name}
+              className="rounded-xl w-24 h-24 object-cover border border-gray-200 shadow-sm"
+            />
+          </Link>
+          <button
+            onClick={async (e) => {
+              e.preventDefault();
+              const btn = e.currentTarget;
+              try {
+                const res = await fetch(`/api/products/${id}`);
+                if (!res.ok) return;
+                const p = await res.json();
+                addToCart({ productId: p.id, name: p.name, price: p.price, image: p.image });
+                btn.textContent = "Added!";
+                setTimeout(() => { btn.textContent = "Add to Cart"; }, 1500);
+              } catch { /* ignore */ }
+            }}
+            className="block mt-1 text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-lg hover:bg-purple-200 transition-colors w-24 text-center"
+          >
+            Add to Cart
+          </button>
+        </div>
+        <div className="text-sm text-gray-700 min-w-0">
+          <ReactMarkdown>{lines.join("\n")}</ReactMarkdown>
+        </div>
+      </div>
+    );
+  }
+
+  function renderAssistantContent(content: string) {
+    const segments = parseSegments(content);
+    return segments.map((seg, i) => {
+      if (seg.type === "product") {
+        return <ProductCard key={`p-${i}`} id={seg.id} name={seg.name} image={seg.image} lines={seg.lines} />;
+      }
+      return (
+        <ReactMarkdown key={`t-${i}`}>
+          {seg.content}
+        </ReactMarkdown>
+      );
+    });
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Header */}
@@ -191,7 +344,8 @@ export function Chat() {
           <img src="/product-images/wonder-toys-logo.png" alt="Wonder Toys" className="w-8 h-8" />
           <h1 className="text-xl font-bold text-purple-800">Wonder Toys</h1>
         </Link>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
+          <CartIcon />
           <span className="text-sm text-gray-600">
             {session.user?.name || session.user?.email}
           </span>
@@ -205,7 +359,7 @@ export function Chat() {
       </header>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 max-w-4xl mx-auto w-full">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-4 py-6 max-w-4xl mx-auto w-full">
         {messages.length === 0 && (
           <div className="text-center py-12">
             <div className="text-5xl mb-4">🎁</div>
@@ -224,7 +378,7 @@ export function Chat() {
               ].map((suggestion) => (
                 <button
                   key={suggestion}
-                  onClick={() => setInput(suggestion)}
+                  onClick={() => sendMessage(suggestion)}
                   className="text-sm bg-purple-50 text-purple-700 px-3 py-2 rounded-lg hover:bg-purple-100 transition-colors"
                 >
                   {suggestion}
@@ -277,7 +431,7 @@ export function Chat() {
                     <button
                       key={cat}
                       onClick={() =>
-                        setInput(`Show me ${formatCategory(cat)} toys`)
+                        sendMessage(`Show me ${formatCategory(cat)} toys`)
                       }
                       className="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full hover:bg-purple-50 hover:text-purple-700 transition-colors"
                     >
@@ -306,27 +460,7 @@ export function Chat() {
                 <div className="whitespace-pre-wrap">{message.content}</div>
               ) : (
                 <div className="prose prose-sm prose-gray max-w-none prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0 prose-headings:my-2 prose-pre:bg-gray-100 prose-pre:text-gray-800 prose-code:text-purple-600 prose-code:before:content-none prose-code:after:content-none">
-                  <ReactMarkdown
-                    components={{
-                      img: ({ src, alt }) => {
-                        const productId = productIdFromImage(src);
-                        const image = (
-                          <img
-                            src={src}
-                            alt={alt || "Product image"}
-                            className="rounded-xl w-40 h-40 object-cover border border-gray-200 shadow-sm not-prose"
-                          />
-                        );
-                        return productId ? (
-                          <Link href={`/product/${productId}`}>{image}</Link>
-                        ) : (
-                          image
-                        );
-                      },
-                    }}
-                  >
-                    {message.content}
-                  </ReactMarkdown>
+                  {renderAssistantContent(message.content)}
                 </div>
               )}
             </div>

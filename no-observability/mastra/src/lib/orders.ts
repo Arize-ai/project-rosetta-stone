@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import { products } from "./inventory";
 
 export interface OrderItem {
   productId: string;
@@ -18,8 +19,9 @@ export interface Order {
     city: string;
     state: string;
     zip: string;
+    country: string;
   };
-  status: "processing" | "shipping" | "delivered";
+  status: "processing" | "shipping" | "delivered" | "cancelled";
   createdAt: string;
 }
 
@@ -77,4 +79,25 @@ export function searchOrdersByProduct(
         item.productId.toLowerCase().includes(term)
     )
   );
+}
+
+export function cancelOrder(
+  orderId: string,
+  userId: string
+): { success: boolean; error?: string } {
+  const order = orders.get(orderId.toUpperCase());
+  if (!order) return { success: false, error: "Order not found" };
+  if (order.userId !== userId) return { success: false, error: "Order not found" };
+  if (order.status === "cancelled") return { success: false, error: "Order is already cancelled" };
+  if (order.status === "delivered") return { success: false, error: "Cannot cancel a delivered order" };
+
+  order.status = "cancelled";
+
+  // Restore inventory
+  for (const item of order.items) {
+    const product = products.find((p) => p.id === item.productId);
+    if (product) product.inventory += item.quantity;
+  }
+
+  return { success: true };
 }

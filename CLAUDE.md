@@ -21,12 +21,15 @@ Each top-level directory represents an observability tier. Within each, subdirec
 "Wonder Toys" is a chat-to-purchase toy store assistant. It can:
 - Search a 200-product fake inventory via semantic vector search (ChromaDB + default embeddings) with fallback to keyword matching; supports filtering by age range and category (returns top 10 results)
 - Show rich product details with images, ratings, dimensions, manufacturer info, and marketing copy
-- Process purchases (credit card assumed on file; asks for shipping address)
+- Process purchases (credit card assumed on file; asks for shipping address including country — no geographic restrictions)
 - Track order status by order ID or natural language product search
+- Cancel orders that are still processing or shipping (delivered orders cannot be cancelled; cancellation restores inventory)
 
 Product images and the store logo are AI-generated (gpt-image-1) and stored in `product-images/` at the repo root, symlinked into each tier's `public/product-images/` directory. The agent uses markdown image syntax with local paths (e.g. `![name](/product-images/toy-001.png)`) to display them in the chat UI. Product images in chat link to standalone product detail pages (`/product/[id]`).
 
-The home page shows the top 5 products by best seller rank and category browse chips. Chat state is persisted in sessionStorage so it survives navigation to product pages.
+The home page shows the top 5 products by best seller rank and category browse chips. Chat state is persisted in sessionStorage so it survives navigation to product pages. The UI includes a shopping cart (persisted in sessionStorage) — users can add items from chat product cards or product detail pages, then checkout from the cart page which sends the purchase request to the chat agent.
+
+The chat UI renders product results as custom `ProductCard` components (image + "Add to Cart" button on the left, product details on the right) by pre-parsing the agent's markdown into typed segments before rendering.
 
 The agent uses Claude (Anthropic) as the LLM and X (Twitter) OAuth for authentication.
 
@@ -73,6 +76,16 @@ See `env.example` in each mastra/ directory. Key variables:
 - `TWITTER_CLIENT_ID` / `TWITTER_CLIENT_SECRET` — X OAuth app credentials
 - `CHROMA_URL` — ChromaDB server URL (default: `http://localhost:8000`)
 - `PHOENIX_ENDPOINT` / `PHOENIX_API_KEY` / `PHOENIX_PROJECT_NAME` — Phoenix Cloud (phoenix tier only)
+
+## Streaming Architecture
+
+The chat API route (`src/app/api/chat/route.ts`) uses Mastra's `stream.fullStream` (from Vercel AI SDK) to iterate over streaming events. Key event types:
+- `text-delta` — text chunk, access via `part.payload.text`
+- `tool-call` — tool invocation boundary
+
+The route injects `\n\n` paragraph breaks when text resumes after a tool call so pre-tool and post-tool text don't run together.
+
+**React Strict Mode caveat**: In dev mode, React calls state updater functions and effects twice. Avoid calling `fetch` or other side effects inside `setMessages` updaters — do it outside. Use refs to guard effects that should only fire once (e.g., the `?ask=` query parameter handler).
 
 ## Adding a New Framework
 

@@ -26,15 +26,32 @@ export async function POST(req: Request) {
 
   const stream = await shoppingAgent.stream(messagesWithContext);
 
-  // Convert the Mastra stream to a ReadableStream for the client
+  // Convert the Mastra stream to a ReadableStream for the client.
+  // We use fullStream (Vercel AI SDK) to detect tool-call boundaries and
+  // inject a paragraph break so pre-tool and post-tool text don't run together.
   const encoder = new TextEncoder();
   const readable = new ReadableStream({
     async start(controller) {
       try {
-        for await (const chunk of stream.textStream) {
-          controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify({ text: chunk })}\n\n`)
-          );
+        let hadTextBeforeToolCall = false;
+        let inToolCall = false;
+
+        for await (const part of stream.fullStream) {
+          if (part.type === "text-delta") {
+            // If we're resuming text after a tool call, inject a paragraph break
+            if (inToolCall && hadTextBeforeToolCall) {
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ text: "\n\n" })}\n\n`)
+              );
+            }
+            inToolCall = false;
+            hadTextBeforeToolCall = true;
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify({ text: part.payload.text })}\n\n`)
+            );
+          } else if (part.type === "tool-call") {
+            inToolCall = true;
+          }
         }
         controller.enqueue(encoder.encode("data: [DONE]\n\n"));
         controller.close();
