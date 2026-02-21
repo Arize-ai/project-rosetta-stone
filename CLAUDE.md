@@ -6,6 +6,7 @@ This project implements the same AI shopping agent ("Wonder Toys") across multip
 
 ```
 rosetta/
+├── product-images/      — Generated product images (shared across all tiers via symlinks)
 ├── no-observability/    — Baseline agents with no observability instrumentation
 │   └── mastra/          — Mastra framework version
 ├── phoenix/             — Agents instrumented with Arize Phoenix Cloud
@@ -18,10 +19,12 @@ Each top-level directory represents an observability tier. Within each, subdirec
 ## The Agent
 
 "Wonder Toys" is a chat-to-purchase toy store assistant. It can:
-- Search a 25-product fake inventory by description, keywords, age range, or category
-- Show product details
+- Search a 200-product fake inventory by description, keywords, age range, or category (returns top 10 results)
+- Show rich product details with images, ratings, dimensions, manufacturer info, and marketing copy
 - Process purchases (credit card assumed on file; asks for shipping address)
 - Track order status by order ID or natural language product search
+
+Product images are AI-generated (gpt-image-1) and stored in `product-images/` at the repo root, symlinked into each tier's `public/product-images/` directory. The agent uses markdown image syntax with local paths (e.g. `![name](/product-images/toy-001.png)`) to display them in the chat UI.
 
 The agent uses Claude (Anthropic) as the LLM and X (Twitter) OAuth for authentication.
 

@@ -149,7 +149,7 @@ export function Chat() {
       </header>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 max-w-3xl mx-auto w-full">
+      <div className="flex-1 overflow-y-auto px-4 py-6 max-w-4xl mx-auto w-full">
         {messages.length === 0 && (
           <div className="text-center py-12">
             <div className="text-5xl mb-4">🎁</div>
@@ -194,7 +194,19 @@ export function Chat() {
                 <div className="whitespace-pre-wrap">{message.content}</div>
               ) : (
                 <div className="prose prose-sm prose-gray max-w-none prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0 prose-headings:my-2 prose-pre:bg-gray-100 prose-pre:text-gray-800 prose-code:text-purple-600 prose-code:before:content-none prose-code:after:content-none">
-                  <ReactMarkdown>{message.content}</ReactMarkdown>
+                  <ReactMarkdown
+                    components={{
+                      img: ({ src, alt }) => (
+                        <img
+                          src={src}
+                          alt={alt || "Product image"}
+                          className="rounded-xl w-40 h-40 object-cover border border-gray-200 shadow-sm not-prose"
+                        />
+                      ),
+                    }}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
                 </div>
               )}
             </div>
@@ -220,7 +232,7 @@ export function Chat() {
       <div className="border-t border-gray-200 bg-white px-4 py-3">
         <form
           onSubmit={handleSubmit}
-          className="max-w-3xl mx-auto flex gap-2"
+          className="max-w-4xl mx-auto flex gap-2"
         >
           <input
             type="text"

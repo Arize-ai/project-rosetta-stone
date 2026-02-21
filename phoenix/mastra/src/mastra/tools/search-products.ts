@@ -38,6 +38,12 @@ export const searchProducts = createTool({
         ageRange: z.string(),
         category: z.string(),
         inStock: z.boolean(),
+        image: z.string(),
+        rating: z.object({
+          stars: z.number(),
+          numberOfRatings: z.number(),
+        }),
+        manufacturer: z.string(),
       })
     ),
     totalFound: z.number(),
@@ -76,7 +82,7 @@ export const searchProducts = createTool({
       filtered = filtered.filter((p) => p.category.toLowerCase().includes(cat));
     }
 
-    const results = filtered.map((p) => ({
+    const results = filtered.slice(0, 10).map((p) => ({
       id: p.id,
       name: p.name,
       description: p.description,
@@ -84,8 +90,11 @@ export const searchProducts = createTool({
       ageRange: `${p.ageRange.min}-${p.ageRange.max} years`,
       category: p.category,
       inStock: p.inventory > 0,
+      image: p.image,
+      rating: p.rating,
+      manufacturer: p.manufacturer,
     }));
 
-    return { results, totalFound: results.length };
+    return { results, totalFound: filtered.length };
   },
 });
