@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 
 interface Message {
@@ -11,12 +12,33 @@ interface Message {
   content: string;
 }
 
+interface FeaturedProduct {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  rating: { stars: number; numberOfRatings: number };
+  category: string;
+  ageRange: string;
+}
+
 export function Chat() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [messages, setMessages] = useState<Message[]>([]);
+  const searchParams = useSearchParams();
+  const [messages, setMessages] = useState<Message[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = sessionStorage.getItem("chat-messages");
+      if (saved) {
+        try { return JSON.parse(saved); } catch { /* ignore */ }
+      }
+    }
+    return [];
+  });
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [popular, setPopular] = useState<FeaturedProduct[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -27,7 +49,26 @@ export function Chat() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    sessionStorage.setItem("chat-messages", JSON.stringify(messages));
   }, [messages]);
+
+  useEffect(() => {
+    const ask = searchParams.get("ask");
+    if (ask) {
+      setInput(ask);
+      router.replace("/", { scroll: false });
+    }
+  }, [searchParams, router]);
+
+  useEffect(() => {
+    fetch("/api/products/featured")
+      .then((res) => res.json())
+      .then((data) => {
+        setPopular(data.popular);
+        setCategories(data.categories);
+      })
+      .catch(() => {});
+  }, []);
 
   if (status === "loading") {
     return (
@@ -127,14 +168,29 @@ export function Chat() {
     }
   }
 
+  function productIdFromImage(src: string | undefined): string | null {
+    if (!src) return null;
+    const match = src.match(/\/product-images\/(toy-\d+)\./);
+    return match ? match[1] : null;
+  }
+
+  function formatCategory(cat: string) {
+    return cat
+      .split(/[-&]/)
+      .map((w) => w.trim())
+      .filter(Boolean)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" & ");
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">🧸</span>
+        <Link href="/" className="flex items-center gap-2" onClick={() => { setMessages([]); setInput(""); sessionStorage.removeItem("chat-messages"); }}>
+          <img src="/product-images/wonder-toys-logo.png" alt="Wonder Toys" className="w-8 h-8" />
           <h1 className="text-xl font-bold text-purple-800">Wonder Toys</h1>
-        </div>
+        </Link>
         <div className="flex items-center gap-3">
           <span className="text-sm text-gray-600">
             {session.user?.name || session.user?.email}
@@ -160,7 +216,7 @@ export function Chat() {
               I can help you find toys, answer questions about products, place
               orders, and check order status.
             </p>
-            <div className="flex flex-wrap gap-2 justify-center">
+            <div className="flex flex-wrap gap-2 justify-center mb-8">
               {[
                 "What toys do you have for a 5-year-old?",
                 "Show me STEM toys",
@@ -175,6 +231,62 @@ export function Chat() {
                 </button>
               ))}
             </div>
+
+            {/* Popular Products */}
+            {popular.length > 0 && (
+              <div className="mt-4">
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+                  Popular Right Now
+                </h3>
+                <div className="grid grid-cols-5 gap-3">
+                  {popular.map((product) => (
+                    <Link
+                      key={product.id}
+                      href={`/product/${product.id}`}
+                      className="bg-white border border-gray-200 rounded-xl p-3 hover:border-purple-300 hover:shadow-md transition-all text-left group block"
+                    >
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full aspect-square object-cover rounded-lg mb-2"
+                      />
+                      <div className="text-sm font-medium text-gray-800 truncate group-hover:text-purple-700">
+                        {product.name}
+                      </div>
+                      <div className="text-sm font-semibold text-purple-600">
+                        ${product.price.toFixed(2)}
+                      </div>
+                      <div className="text-xs text-gray-400 mt-0.5">
+                        {"★".repeat(Math.round(product.rating.stars))}{" "}
+                        {product.rating.stars.toFixed(1)}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Categories */}
+            {categories.length > 0 && (
+              <div className="mt-8">
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                  Browse by Category
+                </h3>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {categories.map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() =>
+                        setInput(`Show me ${formatCategory(cat)} toys`)
+                      }
+                      className="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full hover:bg-purple-50 hover:text-purple-700 transition-colors"
+                    >
+                      {formatCategory(cat)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -196,13 +308,21 @@ export function Chat() {
                 <div className="prose prose-sm prose-gray max-w-none prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0 prose-headings:my-2 prose-pre:bg-gray-100 prose-pre:text-gray-800 prose-code:text-purple-600 prose-code:before:content-none prose-code:after:content-none">
                   <ReactMarkdown
                     components={{
-                      img: ({ src, alt }) => (
-                        <img
-                          src={src}
-                          alt={alt || "Product image"}
-                          className="rounded-xl w-40 h-40 object-cover border border-gray-200 shadow-sm not-prose"
-                        />
-                      ),
+                      img: ({ src, alt }) => {
+                        const productId = productIdFromImage(src);
+                        const image = (
+                          <img
+                            src={src}
+                            alt={alt || "Product image"}
+                            className="rounded-xl w-40 h-40 object-cover border border-gray-200 shadow-sm not-prose"
+                          />
+                        );
+                        return productId ? (
+                          <Link href={`/product/${productId}`}>{image}</Link>
+                        ) : (
+                          image
+                        );
+                      },
                     }}
                   >
                     {message.content}

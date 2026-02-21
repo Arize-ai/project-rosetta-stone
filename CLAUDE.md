@@ -24,7 +24,9 @@ Each top-level directory represents an observability tier. Within each, subdirec
 - Process purchases (credit card assumed on file; asks for shipping address)
 - Track order status by order ID or natural language product search
 
-Product images are AI-generated (gpt-image-1) and stored in `product-images/` at the repo root, symlinked into each tier's `public/product-images/` directory. The agent uses markdown image syntax with local paths (e.g. `![name](/product-images/toy-001.png)`) to display them in the chat UI.
+Product images and the store logo are AI-generated (gpt-image-1) and stored in `product-images/` at the repo root, symlinked into each tier's `public/product-images/` directory. The agent uses markdown image syntax with local paths (e.g. `![name](/product-images/toy-001.png)`) to display them in the chat UI. Product images in chat link to standalone product detail pages (`/product/[id]`).
+
+The home page shows the top 5 products by best seller rank and category browse chips. Chat state is persisted in sessionStorage so it survives navigation to product pages.
 
 The agent uses Claude (Anthropic) as the LLM and X (Twitter) OAuth for authentication.
 
