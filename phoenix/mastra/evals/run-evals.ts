@@ -83,6 +83,9 @@ Note: The product data comes from the store's database via tool calls. Treat it 
 <input>
 {{input}}
 </input>
+<tools_used>
+{{tools_used}}
+</tools_used>
 <output>
 {{output}}
 </output>
@@ -372,6 +375,7 @@ async function main() {
       const result = await correctnessEval.evaluate({
         input: userQuery,
         output: agentResponse,
+        tools_used: toolCallCount > 0 ? toolSelection : "(none)",
       });
       console.log(`  Correctness: ${result.label} (${result.score})`);
       allAnnotations.push({

@@ -81,6 +81,9 @@ Note: The product data comes from the store's database via tool calls. Treat it 
 <input>
 {input}
 </input>
+<tools_used>
+{tools_used}
+</tools_used>
 <output>
 {output}
 </output>
@@ -438,7 +441,11 @@ def main():
 
         # 1. Correctness
         try:
-            scores = correctness_eval.evaluate({"input": user_query, "output": agent_response})
+            scores = correctness_eval.evaluate({
+                "input": user_query,
+                "output": agent_response,
+                "tools_used": tool_selection if tool_call_count > 0 else "(none)",
+            })
             result = scores[0]
             print(f"  Correctness: {result.label} ({result.score})")
             all_annotations.append({
