@@ -17,6 +17,9 @@ export const mastra = new Mastra({
               process.env.ARIZE_PROJECT_NAME || "wonder-toys-mastra",
           }),
         ],
+        serializationOptions: {
+          maxStringLength: 10_000,
+        },
       },
     },
   }),
