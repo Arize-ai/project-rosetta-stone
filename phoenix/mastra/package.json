@@ -13,6 +13,8 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.23",
     "@ai-sdk/react": "^3.0.51",
+    "@arizeai/phoenix-client": "^5.9.0",
+    "@arizeai/phoenix-evals": "^0.10.0",
     "@chroma-core/default-embed": "^0.1.9",
     "@mastra/ai-sdk": "^1.0.2",
     "@mastra/arize": "^1.0.0",
@@ -38,6 +40,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.4",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }

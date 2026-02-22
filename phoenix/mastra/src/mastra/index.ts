@@ -17,6 +17,9 @@ export const mastra = new Mastra({
               process.env.PHOENIX_PROJECT_NAME || "wonder-toys-mastra",
           }),
         ],
+        serializationOptions: {
+          maxStringLength: 10_000,
+        },
       },
     },
   }),
