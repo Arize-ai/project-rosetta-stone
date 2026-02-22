@@ -57,26 +57,25 @@ if echo "$COLLECTION_CHECK" | grep -q "NOT_FOUND"; then
   NEEDS_INDEX=true
   echo "Products collection not found, indexing needed"
 else
-  # Collection exists — check if it has the right number of documents
-  COUNT=$(echo "$COLLECTION_CHECK" | node -e "
+  # Collection exists — extract UUID and check document count
+  # (ChromaDB v2 count endpoint requires the collection UUID, not the name)
+  COLLECTION_ID=$(echo "$COLLECTION_CHECK" | node -e "
     let d='';
     process.stdin.on('data',c=>d+=c);
     process.stdin.on('end',()=>{
-      try{
-        const j=JSON.parse(d);
-        // Count endpoint
-        process.stdout.write(String(j.dimension ? 'CHECK_COUNT' : 0));
-      }catch{process.stdout.write('0');}
+      try{process.stdout.write(JSON.parse(d).id);}catch{}
     });
   ")
 
-  if [ "$COUNT" = "CHECK_COUNT" ]; then
-    # Collection exists with embeddings, check count via API
-    COUNT_RESP=$(curl -sf "$CHROMA_URL/api/v2/tenants/default_tenant/databases/default_database/collections/products/count" 2>/dev/null || echo "0")
+  if [ -n "$COLLECTION_ID" ]; then
+    COUNT_RESP=$(curl -sf "$CHROMA_URL/api/v2/tenants/default_tenant/databases/default_database/collections/$COLLECTION_ID/count" 2>/dev/null || echo "0")
     if [ "$COUNT_RESP" -lt 200 ] 2>/dev/null; then
       NEEDS_INDEX=true
       echo "Products collection has $COUNT_RESP items (expected 200), re-indexing"
     fi
+  else
+    NEEDS_INDEX=true
+    echo "Could not read collection info, re-indexing"
   fi
 fi
 
