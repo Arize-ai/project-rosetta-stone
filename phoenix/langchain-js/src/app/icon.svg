@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Purple toy box -->
+  <rect x="4" y="14" width="24" height="15" rx="2" fill="#7c3aed"/>
+  <rect x="4" y="14" width="24" height="4" rx="1" fill="#6d28d9"/>
+  <!-- Box lid slightly open -->
+  <rect x="3" y="11" width="26" height="4" rx="2" fill="#8b5cf6" transform="rotate(-3 16 13)"/>
+  <!-- Star popping out -->
+  <polygon points="16,2 17.8,7.5 23.5,7.5 18.8,11 20.5,16.5 16,13 11.5,16.5 13.2,11 8.5,7.5 14.2,7.5" fill="#fbbf24"/>
+  <polygon points="16,2 17.8,7.5 23.5,7.5 18.8,11 20.5,16.5 16,13 11.5,16.5 13.2,11 8.5,7.5 14.2,7.5" fill="#fbbf24" opacity="0.3" stroke="#f59e0b" stroke-width="0.5"/>
+  <!-- Sparkles -->
+  <circle cx="7" cy="5" r="1" fill="#c084fc"/>
+  <circle cx="25" cy="4" r="1.2" fill="#c084fc"/>
+  <circle cx="27" cy="9" r="0.8" fill="#e9d5ff"/>
+</svg>
