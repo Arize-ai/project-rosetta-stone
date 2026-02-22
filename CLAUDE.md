@@ -11,7 +11,7 @@ rosetta/
 │   └── mastra/          — Mastra framework version
 ├── phoenix/             — Agents instrumented with Arize Phoenix Cloud
 │   └── mastra/          — Mastra framework version
-└── ax/                  — Agents instrumented with Arize AX (future)
+└── ax/                  — Agents instrumented with Arize AX
 ```
 
 Each top-level directory represents an observability tier. Within each, subdirectories hold the same agent implemented in different frameworks (currently only Mastra; more to come).
@@ -38,7 +38,7 @@ The agent uses Claude (Anthropic) as the LLM and X (Twitter) OAuth for authentic
 **The `no-observability` version is the canonical baseline.** When making changes to the agent logic, tools, inventory, UI, or any shared functionality:
 
 1. Make the change in `no-observability/` first
-2. Copy the same change to `phoenix/` (and `ax/` when it exists)
+2. Copy the same change to `phoenix/` and `ax/`
 3. The **only** differences between tiers should be observability-related:
    - `src/mastra/index.ts` — observability config in the Mastra constructor
    - `next.config.ts` — `serverExternalPackages` entries for observability packages
@@ -55,6 +55,7 @@ Do not let non-observability code drift between the tiers.
 - **Auth**: NextAuth v4 with Twitter/X OAuth 2.0
 - **Vector Search**: ChromaDB (local server) with `@chroma-core/default-embed` (all-MiniLM-L6-v2)
 - **Observability** (phoenix tier): `@mastra/observability` + `@mastra/arize` → Phoenix Cloud
+- **Observability** (ax tier): `@mastra/observability` + `@mastra/arize` → Arize AX
 
 ## Running
 
@@ -64,7 +65,7 @@ Do not let non-observability code drift between the tiers.
 3. Indexes all 200 products if the collection is missing or incomplete
 4. Starts the Next.js dev server
 
-The ChromaDB data (`chroma-data/`) and Python venv (`.venv/`) live at the repo root and are gitignored. Both tiers share the same ChromaDB instance.
+The ChromaDB data (`chroma-data/`) and Python venv (`.venv/`) live at the repo root and are gitignored. All tiers share the same ChromaDB instance.
 
 To run Next.js without ChromaDB: `npm run dev:next` (search falls back to keyword matching).
 
@@ -76,6 +77,7 @@ See `env.example` in each mastra/ directory. Key variables:
 - `TWITTER_CLIENT_ID` / `TWITTER_CLIENT_SECRET` — X OAuth app credentials
 - `CHROMA_URL` — ChromaDB server URL (default: `http://localhost:8000`)
 - `PHOENIX_ENDPOINT` / `PHOENIX_API_KEY` / `PHOENIX_PROJECT_NAME` — Phoenix Cloud (phoenix tier only)
+- `ARIZE_SPACE_ID` / `ARIZE_API_KEY` / `ARIZE_PROJECT_NAME` — Arize AX (ax tier only)
 
 ## Streaming Architecture
 
@@ -92,4 +94,5 @@ The route injects `\n\n` paragraph breaks when text resumes after a tool call so
 To add a new framework (e.g., LangChain, CrewAI):
 1. Create `no-observability/<framework>/` with the same agent behavior
 2. Create `phoenix/<framework>/` with Phoenix instrumentation added
-3. Keep the same inventory data, tool behavior, and UI flow so comparisons are fair
+3. Create `ax/<framework>/` with Arize AX instrumentation added
+4. Keep the same inventory data, tool behavior, and UI flow so comparisons are fair
