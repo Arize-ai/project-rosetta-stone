@@ -188,18 +188,31 @@ Requires AX Enterprise. Custom code evaluators are Python-only (JavaScript comin
 4. Scope: **Trace** (root spans)
 5. Click **Add Evaluator** → **Create New** → custom code evaluator
 6. Set the input attribute to `attributes.output.value`
-7. Use this Python code (adapt class/method names to match AX's starter template):
+7. Paste this Python code:
 
 ```python
 import re
 import json
+from typing import Any, Mapping, Optional
+from arize.experimental.datasets.experiments.evaluators.base import (
+    EvaluationResult,
+    CodeEvaluator,
+    JSONSerializable,
+)
 
 class ImageUrlCorrectnessEvaluator(CodeEvaluator):
-    def evaluate(self, *, output: str, **kwargs) -> EvaluationResult:
+    def evaluate(
+        self,
+        *,
+        dataset_row: Optional[Mapping[str, JSONSerializable]] = None,
+        **kwargs: Any,
+    ) -> EvaluationResult:
+        output = dataset_row.get("attributes.output.value") if dataset_row else None
+
         # The output may be JSON-wrapped (e.g. {"text": "..."})
-        text = output
+        text = str(output or "")
         try:
-            parsed = json.loads(output)
+            parsed = json.loads(text)
             if isinstance(parsed, dict) and "text" in parsed:
                 text = parsed["text"]
         except (json.JSONDecodeError, TypeError):
@@ -245,18 +258,32 @@ Requires AX Enterprise.
 4. Scope: **Trace** (root spans)
 5. Click **Add Evaluator** → **Create New** → custom code evaluator
 6. Set input attributes: `attributes.input.value` and `attributes.output.value`
-7. Use this Python code:
+7. Paste this Python code:
 
 ```python
 import re
 import json
+from typing import Any, Mapping, Optional
+from arize.experimental.datasets.experiments.evaluators.base import (
+    EvaluationResult,
+    CodeEvaluator,
+    JSONSerializable,
+)
 
 class ToolCallCountEvaluator(CodeEvaluator):
-    def evaluate(self, *, input: str, output: str, **kwargs) -> EvaluationResult:
+    def evaluate(
+        self,
+        *,
+        dataset_row: Optional[Mapping[str, JSONSerializable]] = None,
+        **kwargs: Any,
+    ) -> EvaluationResult:
+        input_val = dataset_row.get("attributes.input.value") if dataset_row else None
+        output_val = dataset_row.get("attributes.output.value") if dataset_row else None
+
         # Parse the user query from input
-        user_query = input
+        user_query = str(input_val or "")
         try:
-            messages = json.loads(input)
+            messages = json.loads(user_query)
             if isinstance(messages, list):
                 user_msgs = [m for m in messages if isinstance(m, dict) and m.get("role") == "user"]
                 if user_msgs:
