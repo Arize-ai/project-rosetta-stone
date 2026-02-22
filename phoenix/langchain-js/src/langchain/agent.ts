@@ -5,7 +5,7 @@ import * as CallbackManagerModule from "@langchain/core/callbacks/manager";
 
 register({
   projectName: process.env.PHOENIX_PROJECT_NAME || "wonder-toys-langchain-js",
-  url: process.env.PHOENIX_ENDPOINT,
+  url: process.env.PHOENIX_COLLECTOR_ENDPOINT,
   apiKey: process.env.PHOENIX_API_KEY,
 });
 

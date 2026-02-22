@@ -254,7 +254,7 @@ async function runRequest(req: SyntheticRequest, index: number, mastra: any): Pr
 async function main() {
   console.log("Wonder Toys — Synthetic Eval Harness");
   console.log(`Sending ${requests.length} requests sequentially`);
-  console.log(`Phoenix observability is ${process.env.PHOENIX_ENDPOINT ? "ACTIVE" : "NOT CONFIGURED"}`);
+  console.log(`Phoenix observability is ${process.env.PHOENIX_COLLECTOR_ENDPOINT ? "ACTIVE" : "NOT CONFIGURED"}`);
   console.log();
 
   // Dynamic import to avoid CJS/ESM cycle with @arizeai/openinference-genai

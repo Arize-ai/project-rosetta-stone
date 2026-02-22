@@ -47,13 +47,13 @@ The only file that differs from `no-observability/langchain-js` for observabilit
   import { LangChainInstrumentation } from "@arizeai/openinference-instrumentation-langchain";
   import * as CallbackManagerModule from "@langchain/core/callbacks/manager";
 
-  register({ projectName: "...", url: process.env.PHOENIX_ENDPOINT, apiKey: process.env.PHOENIX_API_KEY });
+  register({ projectName: "...", url: process.env.PHOENIX_COLLECTOR_ENDPOINT, apiKey: process.env.PHOENIX_API_KEY });
   new LangChainInstrumentation().manuallyInstrument(CallbackManagerModule);
   ```
 - **`next.config.ts`** — `serverExternalPackages` adds `@arizeai/phoenix-otel` and `@arizeai/openinference-instrumentation-langchain`.
 - **`package.json`** — Adds `@arizeai/phoenix-otel` and `@arizeai/openinference-instrumentation-langchain`.
 
-Phoenix Cloud env vars (`PHOENIX_ENDPOINT`, `PHOENIX_API_KEY`, `PHOENIX_PROJECT_NAME`) are in `.env.local`. The endpoint must be the full OTLP URL including `/v1/traces`.
+Phoenix Cloud env vars (`PHOENIX_COLLECTOR_ENDPOINT`, `PHOENIX_API_KEY`, `PHOENIX_PROJECT_NAME`) are in `.env.local`. The endpoint must be the full OTLP URL including `/v1/traces`.
 
 ### LangChain.js vs Mastra observability approach
 

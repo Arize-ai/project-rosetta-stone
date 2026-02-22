@@ -45,7 +45,7 @@ The only file that differs from `no-observability/mastra` for observability reas
 - **`next.config.ts`** — `serverExternalPackages` includes `@mastra/arize`.
 - **`package.json`** — Adds `@mastra/arize`, `@mastra/observability`, `@arizeai/phoenix-client`, `@arizeai/phoenix-evals`.
 
-Phoenix Cloud env vars (`PHOENIX_ENDPOINT`, `PHOENIX_API_KEY`, `PHOENIX_PROJECT_NAME`) are in `.env.local`. The endpoint must be the full OTLP URL including `/v1/traces`.
+Phoenix Cloud env vars (`PHOENIX_COLLECTOR_ENDPOINT`, `PHOENIX_API_KEY`, `PHOENIX_PROJECT_NAME`) are in `.env.local`. The endpoint must be the full OTLP URL including `/v1/traces`.
 
 ## Eval Harness
 

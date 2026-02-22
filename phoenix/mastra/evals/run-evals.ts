@@ -7,7 +7,7 @@
  * Usage:
  *   set -a && source .env.local && set +a && npx tsx --conditions=import evals/run-evals.ts
  *
- * Requires PHOENIX_ENDPOINT, PHOENIX_API_KEY, PHOENIX_PROJECT_NAME,
+ * Requires PHOENIX_COLLECTOR_ENDPOINT, PHOENIX_API_KEY, PHOENIX_PROJECT_NAME,
  * and ANTHROPIC_API_KEY in the environment.
  */
 
@@ -29,11 +29,11 @@ const projectName = process.env.PHOENIX_PROJECT_NAME || "wonder-toys-mastra";
 const judgeModel = anthropic("claude-sonnet-4-20250514");
 
 // Derive the Phoenix API base URL from the OTLP endpoint.
-// PHOENIX_ENDPOINT is like "https://app.phoenix.arize.com/s/<space>/v1/traces"
+// PHOENIX_COLLECTOR_ENDPOINT is like "https://app.phoenix.arize.com/s/<space>/v1/traces"
 // The client needs "https://app.phoenix.arize.com/s/<space>" (strip /v1/traces)
 function getPhoenixBaseUrl(): string {
-  const endpoint = process.env.PHOENIX_ENDPOINT;
-  if (!endpoint) throw new Error("PHOENIX_ENDPOINT is not set");
+  const endpoint = process.env.PHOENIX_COLLECTOR_ENDPOINT;
+  if (!endpoint) throw new Error("PHOENIX_COLLECTOR_ENDPOINT is not set");
   return endpoint.replace(/\/v1\/traces\/?$/, "");
 }
 

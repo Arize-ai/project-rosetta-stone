@@ -76,7 +76,7 @@ See `env.example` in each mastra/ directory. Key variables:
 - `NEXTAUTH_SECRET` — session encryption (`openssl rand -base64 32`)
 - `TWITTER_CLIENT_ID` / `TWITTER_CLIENT_SECRET` — X OAuth app credentials
 - `CHROMA_URL` — ChromaDB server URL (default: `http://localhost:8000`)
-- `PHOENIX_ENDPOINT` / `PHOENIX_API_KEY` / `PHOENIX_PROJECT_NAME` — Phoenix Cloud (phoenix tier only); endpoint must be the full OTLP URL including `/v1/traces` (e.g. `https://app.phoenix.arize.com/s/<space>/v1/traces`)
+- `PHOENIX_COLLECTOR_ENDPOINT` / `PHOENIX_API_KEY` / `PHOENIX_PROJECT_NAME` — Phoenix Cloud (phoenix tier only); endpoint must be the full OTLP URL including `/v1/traces` (e.g. `https://app.phoenix.arize.com/s/<space>/v1/traces`)
 - `ARIZE_SPACE_ID` / `ARIZE_API_KEY` / `ARIZE_PROJECT_NAME` — Arize AX (ax tier only)
 
 ## Streaming Architecture

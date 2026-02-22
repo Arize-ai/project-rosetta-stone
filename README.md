@@ -127,7 +127,7 @@ Every agent needs these in `.env.local`:
 | `PHOENIX_API_KEY` | Phoenix API key from [app.phoenix.arize.com](https://app.phoenix.arize.com) |
 | `PHOENIX_PROJECT_NAME` | Project name in Phoenix |
 
-Note: Mastra and LangChain.js use `PHOENIX_ENDPOINT` (the full OTLP URL including `/v1/traces`). LangChain Python uses `PHOENIX_COLLECTOR_ENDPOINT` (base URL without `/v1/traces`, as expected by the `arize-phoenix-otel` SDK).
+Note: Mastra and LangChain.js require the full OTLP URL including `/v1/traces`. LangChain Python expects just the base URL without `/v1/traces`, as expected by the `arize-phoenix-otel` SDK.
 
 **AX tier** — additionally requires:
 

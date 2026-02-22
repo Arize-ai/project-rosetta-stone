@@ -11,7 +11,7 @@ export const mastra = new Mastra({
         serviceName: process.env.PHOENIX_PROJECT_NAME || "wonder-toys-mastra",
         exporters: [
           new ArizeExporter({
-            endpoint: process.env.PHOENIX_ENDPOINT!,
+            endpoint: process.env.PHOENIX_COLLECTOR_ENDPOINT!,
             apiKey: process.env.PHOENIX_API_KEY,
             projectName:
               process.env.PHOENIX_PROJECT_NAME || "wonder-toys-mastra",
