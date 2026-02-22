@@ -6,3 +6,6 @@ chroma-data/
 
 # Python virtual environment (for ChromaDB server)
 .venv/
+
+# Python cache
+__pycache__/
