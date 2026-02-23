@@ -64,7 +64,7 @@ Is the response correct or incorrect?
 
 8. Labels: `correct` (score 1), `incorrect` (score 0)
 9. Enable explanations
-10. Configure the task: scope to **Trace**, map `input` → `attributes.input.value`, `output` → `attributes.output.value`, `tools_used` → `attributes.llm.tools`
+10. Configure the task: scope to **Trace**, map `input` → `attributes.input.value`, `output` → `attributes.output.value`, `tools_used` → `attributes.tool.name`
 
 ---
 
