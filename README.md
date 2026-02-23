@@ -11,14 +11,18 @@ rosetta/
 ├── no-observability/          No instrumentation (baseline)
 │   ├── mastra/                  Mastra framework (TypeScript)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
-│   └── langchain-py/            LangChain / LangGraph (Python + Next.js)
+│   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
+│   └── llamaindex-py/           LlamaIndex (Python + Next.js)
 ├── phoenix/                   Arize Phoenix Cloud instrumentation
 │   ├── mastra/                  Mastra framework (TypeScript)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
-│   └── langchain-py/            LangChain / LangGraph (Python + Next.js)
+│   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
+│   └── llamaindex-py/           LlamaIndex (Python + Next.js)
 ├── ax/                        Arize AX instrumentation
 │   ├── mastra/                  Mastra framework (TypeScript)
-│   └── langchain-js/            LangChain.js / LangGraph (TypeScript)
+│   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
+│   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
+│   └── llamaindex-py/           LlamaIndex (Python + Next.js)
 ├── product-images/            200 AI-generated product images (shared)
 └── chroma-data/               ChromaDB vector store (gitignored, auto-created)
 ```
@@ -44,14 +48,15 @@ The UI includes a home page with featured products and category chips, product d
 | **Mastra** | `@mastra/core` Agent | `@ai-sdk/anthropic` (Vercel AI SDK) | `stream.fullStream` | Next.js monolith |
 | **LangChain.js** | `@langchain/langgraph` ReAct agent | `@langchain/anthropic` | `streamEvents` (v2) | Next.js monolith |
 | **LangChain Python** | `langgraph` ReAct agent | `langchain-anthropic` | `astream_events` (v2) | Python FastAPI backend + Next.js frontend |
+| **LlamaIndex Python** | `llama_index` FunctionAgent | `llama-index-llms-anthropic` | `stream_events` | Python FastAPI backend + Next.js frontend |
 
 ## Observability Tiers
 
 | Tier | What it shows |
 |------|---------------|
 | **no-observability** | Baseline — how the agent works with zero instrumentation overhead |
-| **phoenix** | [Arize Phoenix Cloud](https://phoenix.arize.com) — open-source observability via `@mastra/arize` (Mastra), `@arizeai/phoenix-otel` (LangChain.js), or `arize-phoenix-otel` (LangChain Python) |
-| **ax** | [Arize AX](https://arize.com) — enterprise observability via `@mastra/arize` (Mastra) or raw OpenTelemetry (LangChain.js) |
+| **phoenix** | [Arize Phoenix Cloud](https://phoenix.arize.com) — open-source observability |
+| **ax** | [Arize AX](https://arize.com) — enterprise observability |
 
 ### What changes between tiers?
 
@@ -68,12 +73,19 @@ For **LangChain.js**, only these files differ:
 - `env.example` — observability environment variables
 
 For **LangChain Python**, only these files differ:
-- `backend/tracing.py` — Phoenix tracing initialization (new file, imported before LangChain)
+- `backend/tracing.py` — tracing initialization (new file, imported before LangChain)
 - `backend/main.py` — imports `backend.tracing` before other backend modules
-- `backend/requirements.txt` — `arize-phoenix-otel` and `openinference-instrumentation-langchain`
+- `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-langchain`)
 - `env.example` — observability environment variables
 
-Everything else — tools, lib, UI, scripts — is identical across tiers.
+For **LlamaIndex Python**, these files differ:
+- `backend/tracing.py` — tracing initialization (new file, imported before LlamaIndex)
+- `backend/agent.py` — manual root span + OTel context management for proper trace boundaries
+- `backend/main.py` — imports `backend.tracing` before other backend modules
+- `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-llama-index`)
+- `env.example` — observability environment variables
+
+Everything else — tools, UI, scripts — is identical across tiers.
 
 ## Quick Start
 
@@ -98,9 +110,9 @@ npm run dev                 # starts ChromaDB + indexes products + runs the app
 1. Creates a Python venv and installs ChromaDB (via `uv`)
 2. Starts ChromaDB if not already running
 3. Indexes all 200 products if the collection is missing
-4. Starts the dev server (Next.js for JS frameworks; Python backend + Next.js for `langchain-py`)
+4. Starts the dev server (Next.js for JS frameworks; Python backend + Next.js for Python frameworks)
 
-For `langchain-py`, the start script also installs Python backend dependencies and starts a FastAPI server on port 8001. The Next.js frontend proxies API calls to it.
+For Python frameworks (`langchain-py`, `llamaindex-py`), the start script also installs Python backend dependencies and starts a FastAPI server on port 8001. The Next.js frontend proxies API calls to it.
 
 All tiers share the same ChromaDB instance and data at the repo root.
 
@@ -116,8 +128,8 @@ Every agent needs these in `.env.local`:
 | `NEXTAUTH_SECRET` | All tiers | Session encryption key (`openssl rand -base64 32`) |
 | `TWITTER_CLIENT_ID` | All tiers | [X/Twitter OAuth](https://developer.x.com/) app client ID |
 | `TWITTER_CLIENT_SECRET` | All tiers | X/Twitter OAuth app client secret |
-| `BACKEND_SECRET` | `langchain-py` only | Shared secret for Next.js ↔ Python auth (any string) |
-| `BACKEND_URL` | `langchain-py` only | Python backend URL (default: `http://localhost:8001`) |
+| `BACKEND_SECRET` | Python frameworks only | Shared secret for Next.js ↔ Python auth (any string) |
+| `BACKEND_URL` | Python frameworks only | Python backend URL (default: `http://localhost:8001`) |
 
 **Phoenix tier** — additionally requires:
 
@@ -127,7 +139,7 @@ Every agent needs these in `.env.local`:
 | `PHOENIX_API_KEY` | Phoenix API key from [app.phoenix.arize.com](https://app.phoenix.arize.com) |
 | `PHOENIX_PROJECT_NAME` | Project name in Phoenix |
 
-Note: Mastra and LangChain.js require the full OTLP URL including `/v1/traces`. LangChain Python expects just the base URL without `/v1/traces`, as expected by the `arize-phoenix-otel` SDK.
+Note: Mastra and LangChain.js require the full OTLP URL including `/v1/traces`. Python frameworks (`langchain-py`, `llamaindex-py`) expect just the base URL without `/v1/traces`, as expected by the `arize-phoenix-otel` SDK.
 
 **AX tier** — additionally requires:
 
@@ -141,21 +153,49 @@ See each directory's `env.example` for the full template.
 
 ## Evaluations
 
-The `phoenix/mastra` and `ax/mastra` directories include eval harnesses for testing agent quality.
+Each observability tier includes eval harnesses for testing agent quality. All frameworks use the same 25 synthetic requests and the same 6 evaluators.
 
 ### Phoenix (programmatic)
 
+Phoenix evals run programmatically via CLI:
+
 ```bash
-cd phoenix/mastra
+cd phoenix/<framework>
 
 # Generate traces (25 synthetic requests)
+# For TypeScript frameworks:
 set -a && source .env.local && set +a && npx tsx --conditions=import evals/synthetic-requests.ts
 
+# For Python frameworks:
+set -a && source .env.local && set +a && python -m evals.synthetic_requests
+
 # Run 6 evaluators and log results as span annotations
+# For TypeScript frameworks:
 set -a && source .env.local && set +a && npx tsx --conditions=import evals/run-evals.ts
+
+# For Python frameworks:
+set -a && source .env.local && set +a && python -m evals.run_evals
 ```
 
-Six evaluators run against Phoenix traces:
+### AX (UI-driven)
+
+AX evals are configured manually in the AX web console:
+
+```bash
+cd ax/<framework>
+
+# Generate traces (25 synthetic requests)
+# For TypeScript frameworks:
+set -a && source .env.local && set +a && npx tsx --conditions=import evals/synthetic-requests.ts
+
+# For Python frameworks:
+set -a && source .env.local && set +a && python -m evals.synthetic_requests
+```
+
+After generating traces, configure the same 6 evaluators in the [Arize AX console](https://app.arize.com) using LLM-as-a-Judge and Code Evaluator task types. See each framework's `evals/README.md` for step-by-step setup instructions with prompt templates and code.
+
+### The 6 Evaluators
+
 - **Correctness** — Does the response address the user's request? (LLM judge)
 - **Tool Selection** — Were the right tools chosen? (LLM judge)
 - **Tool Response Handling** — Did the agent use tool results properly? (LLM judge)
@@ -163,28 +203,18 @@ Six evaluators run against Phoenix traces:
 - **Image URL Correctness** — Do all image URLs match `/product-images/toy-XXX.png`? (code)
 - **Tool Call Count** — Appropriate number of tool calls? (code)
 
-### AX (UI-driven)
-
-```bash
-cd ax/mastra
-
-# Generate traces (25 synthetic requests)
-set -a && source .env.local && set +a && npx tsx --conditions=import evals/synthetic-requests.ts
-```
-
-After generating traces, configure the same 6 evaluators in the [Arize AX console](https://app.arize.com) using LLM-as-a-Judge and Code Evaluator task types. See [ax/mastra/evals/README.md](ax/mastra/evals/README.md) for step-by-step setup instructions with prompt templates and code.
-
 ## What You Can Learn
 
-- **Framework comparison**: How does defining tools, agents, and streaming differ between Mastra and LangChain.js?
-- **Production patterns**: Streaming architecture, vector search with fallbacks, in-memory order management, and structured tool schemas with Zod.
+- **Framework comparison**: How does defining tools, agents, and streaming differ between Mastra, LangChain.js, LangChain Python, and LlamaIndex?
+- **Observability comparison**: How does adding Phoenix vs AX differ across frameworks? What's auto-instrumented vs manual?
+- **Production patterns**: Streaming architecture, vector search with fallbacks, in-memory order management, and structured tool schemas
 
 ## Tech Stack
 
 | Component | Technology |
 |-----------|-----------|
 | Web framework | Next.js 16 (App Router) |
-| Python backend | FastAPI + uvicorn (`langchain-py` only) |
+| Python backend | FastAPI + uvicorn (`langchain-py`, `llamaindex-py` only) |
 | Styling | Tailwind CSS |
 | Auth | NextAuth v4 + Twitter/X OAuth 2.0 |
 | LLM | Anthropic Claude Sonnet |
