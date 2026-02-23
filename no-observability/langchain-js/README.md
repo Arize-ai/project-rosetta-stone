@@ -1,13 +1,14 @@
-# Wonder Toys — Mastra (No Observability)
+# Wonder Toys — LangChain.js (No Observability)
 
-This is the Mastra (TypeScript) variant of the Wonder Toys shopping agent with no observability instrumentation. It serves as the canonical baseline — all other tiers and frameworks should match this behavior.
+This is the LangChain.js / LangGraph variant of the Wonder Toys shopping agent with no observability instrumentation.
 
 ## Architecture
 
 - **Next.js monolith** — agent, tools, and UI all run in one Next.js app
-- **Agent**: Mastra `Agent` with Vercel AI SDK (`@ai-sdk/anthropic`)
-- **Tools**: Defined as Mastra tools with Zod schemas in `src/mastra/tools/`
-- **Streaming**: `stream.fullStream` iterates over `text-delta` and `tool-call` events
+- **Agent**: LangGraph ReAct agent via `@langchain/langgraph`
+- **LLM**: `@langchain/anthropic` (ChatAnthropic)
+- **Tools**: Defined with `tool()` from `@langchain/core/tools` with Zod schemas
+- **Streaming**: `streamEvents` (v2) iterates over `on_chat_model_stream` events
 - **Vector search**: ChromaDB via `@chroma-core/default-embed` (all-MiniLM-L6-v2)
 
 ## Running
@@ -24,8 +25,8 @@ See the [root README](../../README.md) for full details.
 
 | File | Purpose |
 |------|---------|
-| `src/mastra/index.ts` | Mastra instance + agent definition |
-| `src/mastra/tools/` | Tool definitions (search, purchase, orders, etc.) |
+| `src/langchain/agent.ts` | LangGraph agent definition + streaming |
+| `src/langchain/tools.ts` | Tool definitions (search, purchase, orders, etc.) |
 | `src/app/api/chat/route.ts` | Streaming chat API route |
 | `src/components/Chat.tsx` | Chat UI with product card rendering |
 | `scripts/start.sh` | Dev startup (ChromaDB + indexing + Next.js) |

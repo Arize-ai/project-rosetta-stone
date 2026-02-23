@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Wonder Toys — Mastra (Phoenix Instrumented)
 
-## Getting Started
+This is the Mastra (TypeScript) variant of the Wonder Toys shopping agent, instrumented with Arize Phoenix Cloud for observability.
 
-First, run the development server:
+## Observability Setup
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Phoenix instrumentation is configured entirely in `src/mastra/index.ts` via the Mastra constructor:
+
+```typescript
+import { ArizeExporter } from "@mastra/arize";
+
+new Mastra({
+  // ...
+  telemetry: {
+    enabled: true,
+    exporter: new ArizeExporter({
+      endpoint: process.env.PHOENIX_COLLECTOR_ENDPOINT!,
+      apiKey: process.env.PHOENIX_API_KEY,
+      projectName: process.env.PHOENIX_PROJECT_NAME,
+    }),
+  },
+});
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+No other code changes are needed — Mastra auto-instruments agent runs, tool calls, and LLM requests.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Differences from `no-observability/mastra`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Only observability-related files differ:
 
-## Learn More
+| File | Change |
+|------|--------|
+| `src/mastra/index.ts` | `ArizeExporter` added to Mastra telemetry config |
+| `next.config.ts` | `serverExternalPackages` for observability packages |
+| `package.json` | `@mastra/arize`, `@mastra/observability` added |
+| `env.example` | Phoenix env vars added |
+| `evals/` | **New** — synthetic request harness + programmatic eval runner |
 
-To learn more about Next.js, take a look at the following resources:
+All frontend code, tools, and agent logic are identical to the no-observability version.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Running
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+cp env.example .env.local   # fill in your API keys + Phoenix credentials
+npm install
+npm run dev
+```
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See the [root README](../../README.md) for full details.
