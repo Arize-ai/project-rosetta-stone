@@ -7,7 +7,9 @@ This guide walks through setting up 6 evaluators in the Arize AX console to asse
 Generate traces first by running the synthetic request harness:
 
 ```bash
-set -a && source .env.local && set +a && npx tsx --conditions=import evals/synthetic-requests.ts
+cd ax/langchain-py
+set -a && source .env.local && set +a
+python -m evals.synthetic_requests
 ```
 
 This sends 25 requests of varying complexity directly to the agent, producing traces in your AX project.
@@ -79,11 +81,11 @@ Is the response correct or incorrect?
 You are evaluating whether a shopping assistant selected the appropriate tools for a user's request.
 
 The available tools are:
-- searchProducts — Search the toy store inventory by text query, keywords, age range, or category
-- getProduct — Get detailed information about a specific product by its ID
-- purchaseProduct — Purchase one or more products with a shipping address
-- checkOrderStatus — Check order status by order ID or product search
-- cancelOrderTool — Cancel an order that hasn't been delivered yet
+- search-products — Search the toy store inventory by text query, keywords, age range, or category
+- get-product — Get detailed information about a specific product by its ID
+- purchase-product — Purchase one or more products with a shipping address
+- check-order-status — Check order status by order ID or product search
+- cancel-order — Cancel an order that hasn't been delivered yet
 
 Given the user's request and the tools that were actually called, evaluate whether the tool selection was appropriate.
 
@@ -342,12 +344,12 @@ class ToolCallCountEvaluator(CodeEvaluator):
 
 ## Comparison with Phoenix
 
-These are the same 6 evaluators used in the [Phoenix programmatic eval harness](../../phoenix/mastra/evals/). The key difference is workflow:
+These are the same 6 evaluators used in the [Phoenix programmatic eval harness](../../phoenix/langchain-py/evals/). The key difference is workflow:
 
 | | Phoenix | AX |
 |---|---------|-----|
-| **Setup** | TypeScript code (`run-evals.ts`) | AX web console UI |
+| **Setup** | Python code (`run_evals.py`) | AX web console UI |
 | **Execution** | CLI command | Click "Run" in UI |
-| **LLM judge** | `@arizeai/phoenix-evals` SDK | AX Evaluator Hub |
-| **Code evals** | Inline TypeScript functions | Python code evaluators (Enterprise) |
+| **LLM judge** | `arize-phoenix-evals` SDK | AX Evaluator Hub |
+| **Code evals** | Inline Python functions | Python code evaluators (Enterprise) |
 | **Results** | Logged as span annotations via API | Visible in AX eval dashboard |
