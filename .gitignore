@@ -9,3 +9,4 @@ chroma-data/
 
 # Python cache
 __pycache__/
+.DS_Store
