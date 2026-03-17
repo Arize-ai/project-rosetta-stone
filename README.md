@@ -9,20 +9,23 @@ Project Rosetta Stone implements an identical AI shopping agent across multiple 
 ```
 rosetta/
 ├── no-observability/          No instrumentation (baseline)
-│   ├── mastra/                  Mastra framework (TypeScript)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
 │   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
-│   └── llamaindex-py/           LlamaIndex (Python + Next.js)
+│   ├── llamaindex-py/           LlamaIndex (Python + Next.js)
+│   ├── mastra/                  Mastra framework (TypeScript)
+│   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── phoenix/                   Arize Phoenix Cloud instrumentation
-│   ├── mastra/                  Mastra framework (TypeScript)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
 │   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
-│   └── llamaindex-py/           LlamaIndex (Python + Next.js)
+│   ├── llamaindex-py/           LlamaIndex (Python + Next.js)
+│   ├── mastra/                  Mastra framework (TypeScript)
+│   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── ax/                        Arize AX instrumentation
-│   ├── mastra/                  Mastra framework (TypeScript)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
 │   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
-│   └── llamaindex-py/           LlamaIndex (Python + Next.js)
+│   ├── llamaindex-py/           LlamaIndex (Python + Next.js)
+│   ├── mastra/                  Mastra framework (TypeScript)
+│   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── product-images/            200 AI-generated product images (shared)
 └── chroma-data/               ChromaDB vector store (gitignored, auto-created)
 ```
@@ -45,10 +48,11 @@ The UI includes a home page with featured products and category chips, product d
 
 | Framework | Agent library | LLM client | Streaming API | Architecture |
 |-----------|---------------|------------|---------------|--------------|
-| **Mastra** | `@mastra/core` Agent | `@ai-sdk/anthropic` (Vercel AI SDK) | `stream.fullStream` | Next.js monolith |
 | **LangChain.js** | `@langchain/langgraph` ReAct agent | `@langchain/anthropic` | `streamEvents` (v2) | Next.js monolith |
 | **LangChain Python** | `langgraph` ReAct agent | `langchain-anthropic` | `astream_events` (v2) | Python FastAPI backend + Next.js frontend |
 | **LlamaIndex Python** | `llama_index` FunctionAgent | `llama-index-llms-anthropic` | `stream_events` | Python FastAPI backend + Next.js frontend |
+| **Mastra** | `@mastra/core` Agent | `@ai-sdk/anthropic` (Vercel AI SDK) | `stream.fullStream` | Next.js monolith |
+| **Vercel AI SDK** | Vercel AI SDK `streamText` | `@ai-sdk/anthropic` | `result.fullStream` | Next.js monolith |
 
 ## Observability Tiers
 
@@ -61,28 +65,42 @@ The UI includes a home page with featured products and category chips, product d
 ### What changes between tiers?
 
 For **Mastra**, only these files differ:
+
 - `src/mastra/index.ts` — observability config in the Mastra constructor
 - `next.config.ts` — `serverExternalPackages` for observability packages
 - `package.json` — observability dependencies
 - `env.example` — observability environment variables
 
 For **LangChain.js**, only these files differ:
+
 - `src/langchain/agent.ts` — observability setup at the top of the file (before LangChain imports)
 - `next.config.ts` — `serverExternalPackages` for observability packages
 - `package.json` — observability dependencies
 - `env.example` — observability environment variables
 
 For **LangChain Python**, only these files differ:
+
 - `backend/tracing.py` — tracing initialization (new file, imported before LangChain)
 - `backend/main.py` — imports `backend.tracing` before other backend modules
 - `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-langchain`)
 - `env.example` — observability environment variables
 
 For **LlamaIndex Python**, these files differ:
+
 - `backend/tracing.py` — tracing initialization (new file, imported before LlamaIndex)
 - `backend/agent.py` — manual root span + OTel context management for proper trace boundaries
 - `backend/main.py` — imports `backend.tracing` before other backend modules
 - `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-llama-index`)
+- `env.example` — observability environment variables
+
+For **Vercel AI SDK**, only these files differ:
+
+- `src/instrumentation.ts` — `registerOTel` with OTLP exporter (new file)
+- `src/root-aware-processor.ts` — custom span processor that promotes the first AI SDK span to trace root and drops HTTP spans (new file)
+- `src/app/api/chat/route.ts` — session ID injected into OTel context via `context.with(setSession(...))`
+- `src/components/Chat.tsx` — session ID generated/rotated and sent as `x-session-id` request header
+- `next.config.ts` — `serverExternalPackages` for observability packages
+- `package.json` — observability dependencies
 - `env.example` — observability environment variables
 
 Everything else — tools, UI, scripts — is identical across tiers.
@@ -107,10 +125,11 @@ npm run dev                 # starts ChromaDB + indexes products + runs the app
 ```
 
 `npm run dev` handles everything automatically:
+
 1. Creates a Python venv and installs ChromaDB (via `uv`)
-2. Starts ChromaDB if not already running
-3. Indexes all 200 products if the collection is missing
-4. Starts the dev server (Next.js for JS frameworks; Python backend + Next.js for Python frameworks)
+1. Starts ChromaDB if not already running
+1. Indexes all 200 products if the collection is missing
+1. Starts the dev server (Next.js for JS frameworks; Python backend + Next.js for Python frameworks)
 
 For Python frameworks (`langchain-py`, `llamaindex-py`), the start script also installs Python backend dependencies and starts a FastAPI server on port 8001. The Next.js frontend proxies API calls to it.
 
