@@ -1,26 +1,27 @@
-# Wonder Toys — Vercel AI SDK (Arize AX Instrumented)
+# Wonder Toys — Vercel AI SDK (Phoenix Instrumented)
 
-This is the Vercel AI SDK (TypeScript) variant of the Wonder Toys shopping agent, instrumented with Arize AX for observability.
+This is the Vercel AI SDK (TypeScript) variant of the Wonder Toys shopping agent, instrumented with Arize Phoenix Cloud for observability.
 
 ## Observability Setup
 
-AX instrumentation is configured in `src/instrumentation.ts` via Next.js's instrumentation hook:
+Phoenix instrumentation is configured in `src/instrumentation.ts` via Next.js's instrumentation hook:
 
 ```typescript
 import { registerOTel } from '@vercel/otel';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+import { SEMRESATTRS_PROJECT_NAME } from '@arizeai/openinference-semantic-conventions';
 
 export function register() {
   registerOTel({
-    serviceName: process.env.ARIZE_PROJECT_NAME ?? 'wonder-toys-vercel',
+    serviceName: process.env.PHOENIX_PROJECT_NAME ?? 'wonder-toys-vercel',
+    attributes: {
+      [SEMRESATTRS_PROJECT_NAME]: process.env.PHOENIX_PROJECT_NAME ?? 'wonder-toys-vercel',
+    },
     spanProcessors: [
       new RootAwareOpenInferenceProcessor({
         exporter: new OTLPTraceExporter({
-          url: 'https://otlp.arize.com/v1/traces',
-          headers: {
-            space_id: process.env.ARIZE_SPACE_ID ?? '',
-            api_key: process.env.ARIZE_API_KEY ?? '',
-          },
+          url: process.env.PHOENIX_COLLECTOR_ENDPOINT ?? '',
+          headers: { Authorization: `Bearer ${process.env.PHOENIX_API_KEY}` },
         }),
       }),
     ],
@@ -28,7 +29,7 @@ export function register() {
 }
 ```
 
-Raw OpenTelemetry via `@vercel/otel` — no Arize-specific SDK package required, just OTLP export directly to `otlp.arize.com`.
+Raw OpenTelemetry via `@vercel/otel` — no Phoenix-specific SDK package required, just OTLP export to your Phoenix Cloud collector endpoint with a Bearer token.
 
 ### Root-Aware Span Processor
 
@@ -47,17 +48,17 @@ Only observability-related files differ:
 
 | File | Change |
 |------|--------|
-| `src/instrumentation.ts` | **New** — `registerOTel` with OTLP exporter pointing at Arize AX |
+| `src/instrumentation.ts` | **New** — `registerOTel` with OTLP exporter pointing at Phoenix Cloud |
 | `src/root-aware-processor.ts` | **New** — custom span processor that only exports root-level spans |
 | `src/app/api/chat/route.ts` | Session ID read from `x-session-id` header and set into OTel context via `context.with(setSession(...))` before calling `streamText` |
 | `src/components/Chat.tsx` | `sessionId` state persisted in `sessionStorage("chat-session-id")`; rotated to a new UUID when the user starts a new chat; sent as `x-session-id` header on every `/api/chat` request |
 | `next.config.ts` | `serverExternalPackages` for observability packages |
 | `package.json` | `@vercel/otel`, `@opentelemetry/*`, `@arizeai/openinference-*` added |
-| `env.example` | AX env vars added |
+| `env.example` | Phoenix env vars added |
 
 ### Session tracking
 
-Each conversation is assigned a UUID that groups all its spans under a single session in Arize. The ID is generated in `Chat.tsx` on first load (or restored from `sessionStorage`) and replaced with a fresh UUID whenever the user clicks the logo to start a new chat. It is sent to the server as an `x-session-id` request header.
+Each conversation is assigned a UUID that groups all its spans under a single session in Phoenix. The ID is generated in `Chat.tsx` on first load (or restored from `sessionStorage`) and replaced with a fresh UUID whenever the user clicks the logo to start a new chat. It is sent to the server as an `x-session-id` request header.
 
 In `route.ts`, the session ID is injected into the active OTel context using `setSession` from `@arizeai/openinference-core` before `streamText` is called, so every span created during that request automatically carries the `session.id` attribute:
 
@@ -73,14 +74,14 @@ const result = context.with(
 );
 ```
 
-The `RootAwareOpenInferenceProcessor` (and the `SessionUserSpanProcessor` in `src/instrumentation.ts`) read the session ID back out of the context in their `onStart` hook and stamp it onto each span as it is created.
+The `RootAwareOpenInferenceProcessor` reads the session ID back out of the context in its `onStart` hook and stamps it onto each span as it is created.
 
 All other frontend code, tools, and agent logic are identical to the no-observability version.
 
 ## Running
 
 ```bash
-cp env.example .env.local   # fill in your API keys + AX credentials
+cp env.example .env.local   # fill in your API keys + Phoenix credentials
 npm install
 npm run dev
 ```
