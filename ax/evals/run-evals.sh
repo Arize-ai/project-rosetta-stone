@@ -1,7 +1,15 @@
 #!/usr/bin/env bash
 set -e
 
-APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+# Usage: run-evals.sh <project-dir>
+#   project-dir — path to the Next.js project (e.g. ../mastra or ../vercel-ai-sdk)
+
+if [ -z "$1" ]; then
+  echo "Usage: $0 <project-dir>"
+  exit 1
+fi
+
+APP_DIR="$(cd "$1" && pwd)"
 BASE_URL="${EVAL_BASE_URL:-http://localhost:3000}"
 
 # Generate a random eval secret for this run and export it so both the
@@ -20,7 +28,7 @@ if curl -sf -o /dev/null "$BASE_URL/" 2>/dev/null; then
 else
   echo "Starting Next.js dev server..."
   cd "$APP_DIR"
-  npx next dev > /tmp/nextjs-evals.log 2>&1 &
+  npm run dev > /tmp/nextjs-evals.log 2>&1 &
   NEXT_PID=$!
 
   # Kill Next.js when this script exits (success or failure)
@@ -45,9 +53,11 @@ fi
 # Run the eval harness
 # ---------------------------------------------------------------------------
 
+EVALS_DIR="$(cd "$(dirname "$0")" && pwd)"
+
 echo ""
 cd "$APP_DIR"
-node --env-file-if-exists=.env --env-file-if-exists=.env.local ./node_modules/.bin/tsx evals/synthetic-requests.ts
+node --env-file-if-exists=.env --env-file-if-exists=.env.local ./node_modules/.bin/tsx "$EVALS_DIR/synthetic-requests.ts"
 
 echo ""
 echo "Waiting 20s for traces to sync to Arize AX..."

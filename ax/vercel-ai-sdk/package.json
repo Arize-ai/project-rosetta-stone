@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "index": "npx tsx scripts/index-products.ts",
-    "evals": "bash scripts/run-evals.sh",
+    "evals": "bash ../evals/run-evals.sh .",
     "lint": "eslint"
   },
   "dependencies": {

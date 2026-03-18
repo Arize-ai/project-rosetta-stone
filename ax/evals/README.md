@@ -12,12 +12,10 @@ First generate traces for the evals:
 cd ax/<framework>
 
 # Generate traces (25 synthetic requests)
-# For TypeScript frameworks:
 npm run evals
-
-# For Python frameworks:
-set -a && source .env.local && set +a && python -m evals.synthetic_requests
 ```
+
+This command launches the sample app for the framework of choice, then connects to the running API to send synthetic requests.
 
 After generating traces, configure the same 6 evaluators in the [Arize AX console](https://app.arize.com) using LLM-as-a-Judge and Code Evaluator task types. These evaluators apply to all the projects.
 
