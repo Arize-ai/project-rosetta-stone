@@ -6,7 +6,7 @@ Project Rosetta Stone implements an identical AI shopping agent across multiple 
 
 ## What's in the box
 
-```
+```tree
 rosetta/
 ├── no-observability/          No instrumentation (baseline)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
@@ -198,20 +198,22 @@ set -a && source .env.local && set +a && python -m evals.run_evals
 
 ### AX (UI-driven)
 
-AX evals are configured manually in the AX web console:
+AX evals are configured manually in the AX web console.
+
+First generate traces for the evals:
 
 ```bash
 cd ax/<framework>
 
 # Generate traces (25 synthetic requests)
 # For TypeScript frameworks:
-set -a && source .env.local && set +a && npx tsx --conditions=import evals/synthetic-requests.ts
+npm run evals
 
 # For Python frameworks:
 set -a && source .env.local && set +a && python -m evals.synthetic_requests
 ```
 
-After generating traces, configure the same 6 evaluators in the [Arize AX console](https://app.arize.com) using LLM-as-a-Judge and Code Evaluator task types. See each framework's `evals/README.md` for step-by-step setup instructions with prompt templates and code.
+After generating traces, configure the same 6 evaluators in the [Arize AX console](https://app.arize.com) using LLM-as-a-Judge and Code Evaluator task types. See the [`ax/evals/README.md`](./ax/evals/README.md) for step-by-step setup instructions with prompt templates and code. These evaluators apply to all the projects.
 
 ### The 6 Evaluators
 
@@ -242,4 +244,4 @@ After generating traces, configure the same 6 evaluators in the [Arize AX consol
 
 ## License
 
-MIT
+[MIT](./LICENSE)

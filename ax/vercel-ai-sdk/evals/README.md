@@ -10,7 +10,7 @@ This guide walks through setting up 6 evaluators in the Arize AX console to asse
     npm run evals
     ```
 
-    This sends 25 requests of varying complexity directly to the agent, producing traces in your AX project.
+   This starts the Next.js dev server, sends 25 requests of varying complexity to `/api/chat`, waits 20 seconds for traces to sync to Arize AX, then shuts the server down. Arize AX observability runs inside the Next.js app via `src/instrumentation.ts` — no separate OTel setup is needed.
 
 1. **Open your project** at [app.arize.com](https://app.arize.com).
 

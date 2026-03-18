@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "index": "npx tsx scripts/index-products.ts",
+    "evals": "bash scripts/run-evals.sh",
     "lint": "eslint"
   },
   "dependencies": {
@@ -39,6 +40,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.4",
     "tailwindcss": "^4",
+    "tsx": "^4",
     "typescript": "^5"
   }
 }

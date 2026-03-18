@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "index": "npx tsx scripts/index-products.ts",
+    "evals": "node --env-file-if-exists=.env --env-file-if-exists=.env.local ./node_modules/.bin/tsx --conditions=import evals/synthetic-requests.ts",
     "lint": "eslint"
   },
   "dependencies": {

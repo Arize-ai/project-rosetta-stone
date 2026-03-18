@@ -7,13 +7,20 @@ import { context } from "@opentelemetry/api";
 import { setSession } from "@arizeai/openinference-core";
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
+  let userId: string;
 
-  if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const evalSecret = req.headers.get("x-eval-secret");
+  const configuredSecret = process.env.EVAL_SECRET;
+
+  if (configuredSecret && evalSecret === configuredSecret) {
+    userId = req.headers.get("x-eval-user-id") ?? "eval-user-001";
+  } else {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    userId = (session.user as { id?: string }).id || session.user.email || "anonymous";
   }
-
-  const userId = (session.user as { id?: string }).id || session.user.email || "anonymous";
   const { messages } = await req.json();
   const sessionId = req.headers.get("x-session-id") ?? crypto.randomUUID();
 
