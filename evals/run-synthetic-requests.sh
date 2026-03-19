@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-# Usage: run-evals.sh <project-dir>
+# Usage: run-synthetic-requests.sh <project-dir>
 #   project-dir — path to the Next.js project (e.g. ../mastra or ../vercel-ai-sdk)
 
 if [ -z "$1" ]; then

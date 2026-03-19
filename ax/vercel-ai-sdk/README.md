@@ -73,7 +73,7 @@ const result = context.with(
 );
 ```
 
-The `RootAwareOpenInferenceProcessor` (and the `SessionUserSpanProcessor` in `src/instrumentation.ts`) read the session ID back out of the context in their `onStart` hook and stamp it onto each span as it is created.
+The `RootAwareOpenInferenceProcessor` reads the session ID back out of the context in its `onStart` hook and stamps it onto each span as it is created.
 
 All other frontend code, tools, and agent logic are identical to the no-observability version.
 

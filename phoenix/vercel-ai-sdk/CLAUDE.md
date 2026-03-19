@@ -1,6 +1,6 @@
-# Wonder Toys — Vercel AI SDK (No Observability)
+# Wonder Toys — Vercel AI SDK + Phoenix Cloud
 
-This is the Vercel AI SDK variant of the Wonder Toys shopping agent. It has no observability instrumentation. It is functionally identical to `no-observability/mastra` — same agent logic, tools, inventory, and UI — but uses the Vercel AI SDK directly instead of Mastra.
+This is the Phoenix Cloud-instrumented version of the Wonder Toys shopping agent built with the Vercel AI SDK directly (no Mastra).
 
 ## Architecture
 
@@ -27,37 +27,38 @@ src/
 │   ├── product/[id]/         — Product detail page with add-to-cart
 │   ├── cart/                 — Shopping cart page (sessionStorage-backed)
 │   └── login/                — Login page
+├── instrumentation.ts        — OTel setup via registerOTel + RootAwareOpenInferenceProcessor
+└── root-aware-processor.ts   — Custom span processor: filters non-AI spans, promotes root
 scripts/
 ├── start.sh                  — Dev startup (ChromaDB + indexing + Next.js)
 └── index-products.ts         — Index 200 products into ChromaDB
 ```
 
-## What differs from the Mastra baseline
+## Observability (Phoenix-specific)
 
-Only the framework layer differs:
+The files that differ from `no-observability/vercel-ai-sdk` for observability reasons:
 
-- **`src/ai/`** replaces `src/mastra/` — `tool()` instead of `createTool()`, `streamText()` instead of `Agent`/`Mastra`
-- **`src/app/api/chat/route.ts`** — uses `streamText({ model, system, messages, tools, stopWhen: stepCountIs(10) })` and reads `part.text` (vs Mastra's `part.payload.text`)
-- **`next.config.ts`** — only `"chromadb"` in `serverExternalPackages` (no Mastra packages)
-- **`package.json`** — no `@mastra/core` or `@mastra/ai-sdk`
+- **`src/instrumentation.ts`** — Registers OTel via `@vercel/otel`'s `registerOTel`, using `RootAwareOpenInferenceProcessor` with an `OTLPTraceExporter` pointing at `PHOENIX_COLLECTOR_ENDPOINT`. Sets `SEMRESATTRS_PROJECT_NAME` as a resource attribute for Phoenix project routing.
+- **`src/root-aware-processor.ts`** — Custom `BatchSpanProcessor` subclass that drops non-OpenInference spans (HTTP infrastructure) and promotes the first AI SDK span per trace to be the trace root, avoiding orphaned spans on the Traces tab.
+- **`src/app/api/chat/route.ts`** — Reads `x-session-id` header; wraps `streamText` call in `context.with(setSession(...))` to propagate session ID into all child spans.
+- **`src/components/Chat.tsx`** — Generates a UUID session ID on first load (persisted in `sessionStorage`), rotates it on new chat, sends it as `x-session-id` header.
+- **`next.config.ts`** — `serverExternalPackages` includes OTel and OpenInference packages.
+- **`package.json`** — Adds `@vercel/otel`, `@opentelemetry/*`, `@arizeai/openinference-vercel`, `@arizeai/openinference-semantic-conventions`.
+- **`env.example`** — Adds `PHOENIX_COLLECTOR_ENDPOINT`, `PHOENIX_API_KEY`, `PHOENIX_PROJECT_NAME`.
 
-Everything else (lib, components, pages, scripts) is identical to the Mastra variant.
+Phoenix Cloud env vars (`PHOENIX_COLLECTOR_ENDPOINT`, `PHOENIX_API_KEY`, `PHOENIX_PROJECT_NAME`) are in `.env.local`. The endpoint must be the full OTLP URL including `/v1/traces`.
 
-## What differs in observability tiers
+### Phoenix vs AX exporter difference
 
-When creating `phoenix/vercel-ai-sdk` or `ax/vercel-ai-sdk`:
-
-- **`src/app/api/chat/route.ts`** or **`src/ai/agent.ts`** — add OTel/observability setup
-- **`next.config.ts`** — add observability packages to `serverExternalPackages`
-- **`package.json`** — add observability dependencies
-- **`env.example`** — add observability environment variables
+Phoenix uses `PHOENIX_COLLECTOR_ENDPOINT` (full OTLP URL) + `Authorization: Bearer` header.
+AX uses `https://otlp.arize.com/v1/traces` with `space_id` and `api_key` headers.
 
 ## Key Implementation Details
 
-- **`maxSteps: 10`** — required for multi-turn tool use; Mastra handles this internally but the raw Vercel AI SDK requires it explicitly
-- **`part.text`** — the Vercel AI SDK v6 `fullStream` text-delta event uses `part.text`; Mastra re-wraps it as `part.payload.text`
-- **`system` parameter** — user context is appended to the system string passed to `streamText()`; in Mastra it was injected as a `role: "system"` message in the messages array
-- **Streaming**: same custom SSE format as Mastra (`data: {"text":"..."}\n\n` / `data: [DONE]\n\n`) so Chat.tsx is unchanged
+- **`maxSteps: 10`** — required for multi-turn tool use; Mastra handles this internally but the raw Vercel AI SDK requires it explicitly.
+- **`part.text`** — the Vercel AI SDK v6 `fullStream` text-delta event uses `part.text`; Mastra re-wraps it as `part.payload.text`.
+- **`system` parameter** — user context is appended to the system string passed to `streamText()`; in Mastra it was injected as a `role: "system"` message in the messages array.
+- **Streaming**: same custom SSE format as Mastra (`data: {"text":"..."}\n\n` / `data: [DONE]\n\n`) so Chat.tsx is unchanged.
 
 ## Running
 

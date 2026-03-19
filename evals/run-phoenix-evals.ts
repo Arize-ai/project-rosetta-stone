@@ -5,7 +5,7 @@
  * 2 code-based), and logs results back as span annotations.
  *
  * Usage:
- *   set -a && source .env.local && set +a && npx tsx --conditions=import evals/run-evals.ts
+ *   npm run evals    (from any phoenix/<framework> directory)
  *
  * Requires PHOENIX_COLLECTOR_ENDPOINT, PHOENIX_API_KEY, PHOENIX_PROJECT_NAME,
  * and ANTHROPIC_API_KEY in the environment.
