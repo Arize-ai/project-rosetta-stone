@@ -11,7 +11,8 @@ rosetta/
 │   ├── mastra/            — Mastra framework (TypeScript)
 │   ├── langchain-js/      — LangChain.js / LangGraph (TypeScript)
 │   ├── langchain-py/      — LangChain / LangGraph (Python + Next.js)
-│   └── llamaindex-py/     — LlamaIndex (Python + Next.js)
+│   ├── llamaindex-py/     — LlamaIndex (Python + Next.js)
+│   └── microsoft-agent-py/ — Microsoft Agent Framework (Python + Next.js)
 ├── phoenix/             — Agents instrumented with Arize Phoenix Cloud
 │   ├── mastra/            — Mastra framework (TypeScript)
 │   ├── langchain-js/      — LangChain.js / LangGraph (TypeScript)
@@ -115,6 +116,15 @@ Do not let non-observability code drift between the tiers.
 - **Observability** (phoenix): `arize-phoenix-otel` + `openinference-instrumentation-llama-index`
 - **Observability** (ax): `arize-otel` + `openinference-instrumentation-llama-index`
 
+### Microsoft Agent Framework Python (no-observability only)
+- **Framework**: Microsoft Agent Framework (`agent-framework-anthropic`, pre-release)
+- **LLM**: Claude (`claude-sonnet-4-20250514`) via `agent_framework.anthropic.AnthropicClient`
+- **Backend**: FastAPI + uvicorn (port 8001)
+- **Frontend**: Next.js (App Router, Tailwind CSS)
+- **Auth**: NextAuth v4 with Twitter/X OAuth 2.0
+- **Vector Search**: ChromaDB (local server, default embeddings)
+- **Sessions**: Per-user `AgentSession` stored in memory; `FunctionInvocationContext` injects `user_id` at runtime
+
 ## Running
 
 `npm run dev` handles everything automatically via `scripts/start.sh`:
@@ -123,7 +133,7 @@ Do not let non-observability code drift between the tiers.
 3. Indexes all 200 products if the collection is missing or incomplete
 4. Starts the dev server (Next.js for JS frameworks; Python backend + Next.js for Python frameworks)
 
-For Python frameworks (`langchain-py`, `llamaindex-py`), the start script also installs Python backend dependencies and starts a FastAPI server on port 8001. The Next.js frontend proxies API calls to it.
+For Python frameworks (`langchain-py`, `llamaindex-py`, `microsoft-agent-py`), the start script also installs Python backend dependencies and starts a FastAPI server on port 8001. The Next.js frontend proxies API calls to it.
 
 The ChromaDB data (`chroma-data/`) and Python venv (`.venv/`) live at the repo root and are gitignored. All tiers share the same ChromaDB instance.
 
@@ -136,7 +146,7 @@ See `env.example` in each directory. Key variables:
 - `NEXTAUTH_SECRET` — session encryption (`openssl rand -base64 32`)
 - `TWITTER_CLIENT_ID` / `TWITTER_CLIENT_SECRET` — X OAuth app credentials
 - `CHROMA_URL` — ChromaDB server URL (default: `http://localhost:8000`)
-- `BACKEND_SECRET` / `BACKEND_URL` — Python backend auth (langchain-py and llamaindex-py only)
+- `BACKEND_SECRET` / `BACKEND_URL` — Python backend auth (langchain-py, llamaindex-py, and microsoft-agent-py only)
 - `PHOENIX_COLLECTOR_ENDPOINT` / `PHOENIX_API_KEY` / `PHOENIX_PROJECT_NAME` — Phoenix Cloud (phoenix tier only); Mastra and LangChain.js need the full OTLP URL including `/v1/traces`, Python frameworks expect just the base URL
 - `ARIZE_SPACE_ID` / `ARIZE_API_KEY` / `ARIZE_PROJECT_NAME` — Arize AX (ax tier only)
 

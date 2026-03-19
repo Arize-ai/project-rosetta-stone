@@ -13,3 +13,6 @@ __pycache__/
 
 # dependencies
 node_modules/
+
+.env
+.env.local
