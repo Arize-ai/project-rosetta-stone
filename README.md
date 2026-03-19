@@ -181,19 +181,14 @@ Phoenix evals run programmatically via CLI:
 ```bash
 cd phoenix/<framework>
 
-# Generate traces (25 synthetic requests)
-# For TypeScript frameworks:
-set -a && source .env.local && set +a && npx tsx --conditions=import evals/synthetic-requests.ts
+# Install npm packages
+npm i
 
-# For Python frameworks:
-set -a && source .env.local && set +a && python -m evals.synthetic_requests
+# Generate traces (25 synthetic requests)
+npm run synthetic-requests
 
 # Run 6 evaluators and log results as span annotations
-# For TypeScript frameworks:
-set -a && source .env.local && set +a && npx tsx --conditions=import evals/run-evals.ts
-
-# For Python frameworks:
-set -a && source .env.local && set +a && python -m evals.run_evals
+npm run evals
 ```
 
 ### AX (UI-driven)
@@ -205,11 +200,14 @@ First generate traces for the evals:
 ```bash
 cd ax/<framework>
 
+# Install npm packages
+npm i
+
 # Generate traces (25 synthetic requests)
-npm run evals
+npm run synthetic-requests
 ```
 
-After generating traces, configure the same 6 evaluators in the [Arize AX console](https://app.arize.com) using LLM-as-a-Judge and Code Evaluator task types. See the [`ax/evals/README.md`](./ax/evals/README.md) for step-by-step setup instructions with prompt templates and code. These evaluators apply to all the projects.
+After generating traces, configure the same 6 evaluators in the [Arize AX console](https://app.arize.com) using LLM-as-a-Judge and Code Evaluator task types. See the [`evals/README.md`](./evals/README.md) for step-by-step setup instructions with prompt templates and code. These evaluators apply to all the projects.
 
 ### The 6 Evaluators
 

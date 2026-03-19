@@ -1,0 +1,15 @@
+{
+  "name": "wonder-toys-evals",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.0",
+    "@arizeai/phoenix-client": "^5.9.0",
+    "@arizeai/phoenix-evals": "^0.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4",
+    "typescript": "^5"
+  }
+}

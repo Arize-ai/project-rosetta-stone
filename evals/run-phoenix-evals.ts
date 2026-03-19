@@ -25,7 +25,9 @@ import { logSpanAnnotations } from "@arizeai/phoenix-client/spans";
 // Config
 // ---------------------------------------------------------------------------
 
-const projectName = process.env.PHOENIX_PROJECT_NAME || "wonder-toys-mastra";
+const projectName = process.env.PHOENIX_PROJECT_NAME;
+if (!projectName) throw new Error("PHOENIX_PROJECT_NAME is not set");
+
 const judgeModel = anthropic("claude-sonnet-4-20250514");
 
 // Derive the Phoenix API base URL from the OTLP endpoint.

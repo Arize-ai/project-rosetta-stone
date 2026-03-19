@@ -7,7 +7,7 @@
     "dev:next": "next dev",
     "build": "next build",
     "start": "next start",
-    "evals": "bash ../evals/run-evals.sh .",
+    "synthetic-requests": "bash ../../evals/run-synthetic-requests.sh .",
     "lint": "eslint"
   },
   "dependencies": {

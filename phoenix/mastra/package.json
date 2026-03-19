@@ -8,6 +8,8 @@
     "build": "next build",
     "start": "next start",
     "index": "npx tsx scripts/index-products.ts",
+    "synthetic-requests": "bash ../../evals/run-synthetic-requests.sh .",
+    "evals": "bash ../../evals/run-phoenix-evals.sh .",
     "lint": "eslint"
   },
   "dependencies": {

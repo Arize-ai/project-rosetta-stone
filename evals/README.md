@@ -1,25 +1,39 @@
-# AX Evals
+# Evals
 
-This guide walks through setting up 6 evaluators in the Arize AX console to assess the Wonder Toys shopping agent.
+This guide walks through setting up 6 evaluators to assess the Wonder Toys shopping agent.
 
-## Prerequisites
+## The 6 Evaluators
+
+- **Correctness** — Does the response address the user's request? (LLM judge)
+- **Tool Selection** — Were the right tools chosen? (LLM judge)
+- **Tool Response Handling** — Did the agent use tool results properly? (LLM judge)
+- **Format Compliance** — Does the response follow markdown formatting rules? (LLM judge)
+- **Image URL Correctness** — Do all image URLs match `/product-images/toy-XXX.png`? (code)
+- **Tool Call Count** — Appropriate number of tool calls? (code)
+
+## AX Evals
 
 AX evals are configured manually in the AX web console.
+
+### Prerequisites
 
 First generate traces for the evals:
 
 ```bash
 cd ax/<framework>
 
+# Install npm packages
+npm i
+
 # Generate traces (25 synthetic requests)
-npm run evals
+npm run synthetic-requests
 ```
 
 This command launches the sample app for the framework of choice, then connects to the running API to send synthetic requests.
 
 After generating traces, configure the same 6 evaluators in the [Arize AX console](https://app.arize.com) using LLM-as-a-Judge and Code Evaluator task types. These evaluators apply to all the projects.
 
-## Eval 1: Correctness (LLM-as-a-Judge)
+### Eval 1: Correctness (LLM-as-a-Judge)
 
 1. Click **New Eval Task** (or **Eval Tasks** → **Add Eval Task**) → **LLM-as-a-Judge** → **Create From Blank**
 1. Name: `correctness`
@@ -74,7 +88,7 @@ After generating traces, configure the same 6 evaluators in the [Arize AX consol
 
 ---
 
-## Eval 2: Tool Selection (LLM-as-a-Judge)
+### Eval 2: Tool Selection (LLM-as-a-Judge)
 
 1. Click **New Eval Task** (or **Eval Tasks** → **Add Eval Task**) → **LLM-as-a-Judge** → **Create From Blank**
 1. Name: `tool_selection`
@@ -122,7 +136,7 @@ After generating traces, configure the same 6 evaluators in the [Arize AX consol
 
 ---
 
-## Eval 3: Tool Response Handling (LLM-as-a-Judge)
+### Eval 3: Tool Response Handling (LLM-as-a-Judge)
 
 1. Click **New Eval Task** (or **Eval Tasks** → **Add Eval Task**) → **LLM-as-a-Judge** → **Create From Blank**
 1. Name: `tool_response_handling`
@@ -168,7 +182,7 @@ After generating traces, configure the same 6 evaluators in the [Arize AX consol
 
 ---
 
-## Eval 4: Format Compliance (LLM-as-a-Judge)
+### Eval 4: Format Compliance (LLM-as-a-Judge)
 
 1. Click **New Eval Task** (or **Eval Tasks** → **Add Eval Task**) → **LLM-as-a-Judge** → **Create From Blank**
 1. Name: `format_compliance`
@@ -207,7 +221,7 @@ After generating traces, configure the same 6 evaluators in the [Arize AX consol
 
 ---
 
-## Eval 5: Image URL Correctness (Code Evaluator)
+### Eval 5: Image URL Correctness (Code Evaluator)
 
 Requires AX Enterprise. Custom code evaluators are Python-only (JavaScript coming soon).
 
@@ -286,7 +300,7 @@ Requires AX Enterprise. Custom code evaluators are Python-only (JavaScript comin
 
 ---
 
-## Eval 6: Tool Call Count (Code Evaluator)
+### Eval 6: Tool Call Count (Code Evaluator)
 
 Requires AX Enterprise. Custom code evaluators are Python-only (JavaScript coming soon).
 
@@ -381,9 +395,40 @@ Requires AX Enterprise. Custom code evaluators are Python-only (JavaScript comin
 
 > **Note:** The tool call count may not be directly available as a span attribute. You may need to adjust this evaluator based on what trace data AX exposes, or use the managed **Matches Regex** evaluator as an approximation.
 
-## Comparison with Phoenix
+## Phoenix Evals
 
-These are the same 6 evaluators used in the Phoenix programmatic eval harness defined in each project. The key difference is workflow:
+Phoenix evals run programmatically via code.
+
+### Prerequisites
+
+First generate traces for the evals:
+
+```bash
+cd phoenix/<framework>
+
+# Install npm packages
+npm i
+
+# Generate traces (25 synthetic requests)
+npm run synthetic-requests
+```
+
+This command launches the sample app for the framework of choice, then connects to the running API to send synthetic requests.
+
+### Run the evaluators
+
+After generating traces, you can run the evaluators in code using LLM-as-a-Judge and Code Evaluator task types. These evaluators apply to all the projects.
+
+```bash
+cd phoenix/<framework>
+
+# Run the evals against the 25 synthetic requests you created earlier
+npm run evals
+```
+
+## Comparison of AX with Phoenix
+
+The same 6 evaluators are used in both AX via the AX console, and the Phoenix programmatic eval harness defined in each project. The key difference is workflow:
 
 | | Phoenix | AX |
 |---|---|---|
