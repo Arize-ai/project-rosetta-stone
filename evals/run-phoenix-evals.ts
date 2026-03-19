@@ -39,13 +39,17 @@ function getPhoenixBaseUrl(): string {
   return endpoint.replace(/\/v1\/traces\/?$/, "");
 }
 
-// Available tools the agent can use
+// Available tools the agent can use — listed in kebab-case (canonical form).
+// Tool names are normalised to kebab-case in extractToolData so the LLM judge
+// can always match them exactly, regardless of framework naming conventions
+// (camelCase for Mastra/Vercel, snake_case for LangChain.js, kebab-case for
+// LangChain Py / LlamaIndex).
 const AVAILABLE_TOOLS = [
-  "searchProducts — Search the toy store inventory by text query, keywords, age range, or category",
-  "getProduct — Get detailed information about a specific product by its ID",
-  "purchaseProduct — Purchase one or more products with a shipping address",
-  "checkOrderStatus — Check order status by order ID or product search",
-  "cancelOrderTool — Cancel an order that hasn't been delivered yet",
+  "search-products — Search the toy store inventory by text query, keywords, age range, or category",
+  "get-product — Get detailed information about a specific product by its ID",
+  "purchase-product — Purchase one or more products with a shipping address",
+  "check-order-status — Check order status by order ID or product search",
+  "cancel-order — Cancel an order that hasn't been delivered yet",
 ].join("\n");
 
 // ---------------------------------------------------------------------------
@@ -228,31 +232,107 @@ function evaluateToolCallCount(
 // ---------------------------------------------------------------------------
 
 /**
- * From a root agent_run span, extract the user's query and the agent's
- * text response.
+ * From a root span, extract the user's query and the agent's text response.
  *
- * Root span attributes:
- *   input.value  = JSON array of messages [{role, content}, ...]
- *   output.value = JSON object { text: "...", files: [] }
+ * Handles multiple framework span formats:
+ *   - Mastra:        input.value = JSON array [{role, content}], output.value = { text: "..." }
+ *   - LangChain.js:  root span is an HTTP span (span_kind=UNKNOWN) with no input.value;
+ *                    actual data lives on the LangGraph child span. Messages use LangChain
+ *                    constructor format: {lc:1, type:"constructor", id:[...,"HumanMessage"], kwargs:{content}}
+ *   - LangChain Py:  input.value = { messages: [{type:"human"|"ai"|"system", content}] };
+ *                    AI message content may be a list of blocks [{type:"text",text:"..."}, ...]
+ *   - Vercel SDK:    input.value = JSON array [{role, content}], output.value = plain string or { text }
  */
-function extractRootData(span: any): { userQuery: string; agentResponse: string } {
-  const attrs = span.attributes ?? {};
+function extractRootData(span: any, allSpans: any[]): { userQuery: string; agentResponse: string } {
+  let attrs = span.attributes ?? {};
+
+  // langchain-js: root span is an HTTP span with span_kind=UNKNOWN and no input.value.
+  // Find the first span in the same trace with a non-UNKNOWN span_kind that has input.value.
+  if (!attrs["input.value"]) {
+    const traceId = span.context?.trace_id;
+    const agentSpan = allSpans.find((s: any) =>
+      s.context?.trace_id === traceId &&
+      s.span_kind !== "UNKNOWN" &&
+      (s.attributes ?? {})["input.value"],
+    );
+    if (agentSpan) {
+      attrs = agentSpan.attributes ?? {};
+    }
+  }
+
+  // Extract text from a content field that may be a string or array of blocks.
+  function extractContent(content: any): string {
+    if (typeof content === "string") return content;
+    if (Array.isArray(content)) {
+      return content
+        .filter((b: any) => b.type === "text")
+        .map((b: any) => String(b.text || b.content || ""))
+        .join(" ");
+    }
+    return String(content ?? "");
+  }
+
+  // Determine role for a message across all framework formats.
+  function getRole(m: any): "user" | "assistant" | null {
+    if (m.role === "user") return "user";
+    if (m.role === "assistant") return "assistant";
+    if (m.type === "human") return "user";
+    if (m.type === "ai") return "assistant";
+    // LangChain JS constructor format: {lc:1, type:"constructor", id:[...,"HumanMessage"]}
+    if (m.lc === 1 && m.type === "constructor" && Array.isArray(m.id)) {
+      const typeName: string = m.id[m.id.length - 1];
+      if (typeName === "HumanMessage") return "user";
+      if (typeName === "AIMessage" || typeName === "AIMessageChunk") return "assistant";
+    }
+    return null;
+  }
+
+  // Get content for a message, handling both direct .content and LangChain .kwargs.content.
+  function getContent(m: any): string {
+    const raw = m.lc === 1 && m.kwargs !== undefined ? m.kwargs?.content : m.content;
+    return extractContent(raw);
+  }
 
   // Extract last user message from input
   let userQuery = "";
   try {
-    const messages = JSON.parse(attrs["input.value"] || "[]");
-    const userMsgs = messages.filter((m: any) => m.role === "user");
-    userQuery = userMsgs.length > 0 ? userMsgs[userMsgs.length - 1].content : "";
+    const parsed = JSON.parse(attrs["input.value"] || "[]");
+    const messages: any[] = Array.isArray(parsed) ? parsed : (parsed.messages ?? []);
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (getRole(messages[i]) === "user") {
+        userQuery = getContent(messages[i]);
+        break;
+      }
+    }
   } catch {
     userQuery = String(attrs["input.value"] || "");
   }
 
-  // Extract text from output
+  // Extract text from output — multiple formats across frameworks
   let agentResponse = "";
   try {
-    const output = JSON.parse(attrs["output.value"] || "{}");
-    agentResponse = output.text || "";
+    const parsed = JSON.parse(attrs["output.value"] || "");
+    if (typeof parsed === "string") {
+      // Plain string (some Vercel SDK spans)
+      agentResponse = parsed;
+    } else if (typeof parsed.text === "string") {
+      // Mastra format: { text: "...", files: [] }
+      agentResponse = parsed.text;
+    } else if (Array.isArray(parsed.messages)) {
+      // LangChain format: { messages: [...] } — find last AI message with text content
+      for (let i = parsed.messages.length - 1; i >= 0; i--) {
+        const m = parsed.messages[i];
+        if (getRole(m) === "assistant") {
+          const content = getContent(m);
+          if (content.trim()) {
+            agentResponse = content;
+            break;
+          }
+        }
+      }
+    } else {
+      agentResponse = String(parsed.content ?? parsed.response ?? "");
+    }
   } catch {
     agentResponse = String(attrs["output.value"] || "");
   }
@@ -260,12 +340,71 @@ function extractRootData(span: any): { userQuery: string; agentResponse: string 
   return { userQuery, agentResponse };
 }
 
+// Canonical name map — normalises all framework naming conventions to kebab-case
+// so they can be matched against AVAILABLE_TOOLS which is listed in kebab-case.
+const TOOL_NAME_MAP: Record<string, string> = {
+  searchProducts: "search-products",
+  search_products: "search-products",
+  "search-products": "search-products",
+  getProduct: "get-product",
+  get_product: "get-product",
+  "get-product": "get-product",
+  purchaseProduct: "purchase-product",
+  purchase_product: "purchase-product",
+  "purchase-product": "purchase-product",
+  checkOrderStatus: "check-order-status",
+  check_order_status: "check-order-status",
+  "check-order-status": "check-order-status",
+  // Vercel registers the tool as cancelOrderTool; all others use cancel-order
+  cancelOrderTool: "cancel-order",
+  cancelOrder: "cancel-order",
+  cancel_order: "cancel-order",
+  "cancel-order": "cancel-order",
+};
+
+function normalizeToolName(name: string): string {
+  if (TOOL_NAME_MAP[name]) return TOOL_NAME_MAP[name];
+  // Fallback: camelCase / snake_case → kebab-case
+  return name.replace(/([a-z])([A-Z])/g, "$1-$2").replace(/_/g, "-").toLowerCase();
+}
+
 /**
- * From all spans in a trace, gather tool call information:
- * - Which tools were called (from tool_call spans)
- * - What arguments were passed
- * - What results were returned
- * - Total count of tool calls
+ * Extract the human-readable tool result from framework-specific output formats.
+ *
+ * Frameworks wrap tool results differently:
+ *   - Mastra / Vercel:  output.value is the raw JSON result object
+ *   - LangChain.js:     output.value = { output: { lc:1, ..., kwargs: { content: "..." } } }
+ *   - LangChain Py:     output.value = { content: "..." }
+ */
+function extractToolResultText(outputValue: string): string {
+  if (!outputValue) return "";
+  try {
+    const parsed = JSON.parse(outputValue);
+    // LangChain.py: { content: "json-string" }
+    if (typeof parsed.content === "string") return parsed.content;
+    // LangChain.js ToolMessage constructor: { output: { lc:1, ..., kwargs: { content: "..." } } }
+    if (parsed.output?.kwargs?.content !== undefined) {
+      return String(parsed.output.kwargs.content);
+    }
+    // Mastra / Vercel: direct result object — return compact JSON
+    return JSON.stringify(parsed);
+  } catch {
+    return outputValue;
+  }
+}
+
+/**
+ * From all spans in a trace, gather tool call information.
+ *
+ * Identifies tool spans using multiple strategies to cover all frameworks:
+ *   1. OpenInference standard attribute: openinference.span.kind === "TOOL"
+ *      (LangChain.js via @arizeai/openinference-instrumentation-langchain,
+ *       Vercel AI SDK via @arizeai/openinference-vercel)
+ *   2. Phoenix top-level field:         span.span_kind === "TOOL"
+ *   3. Mastra-specific:                 mastra.span.type === "tool_call"
+ *   4. Known tool name fallback:        span.name in TOOL_NAMES
+ *
+ * Tool names are normalised to kebab-case to match AVAILABLE_TOOLS.
  */
 function extractToolData(
   traceId: string,
@@ -279,9 +418,19 @@ function extractToolData(
   const traceSpans = allSpans.filter(
     (s: any) => s.context?.trace_id === traceId,
   );
-  const toolSpans = traceSpans.filter(
-    (s: any) => s.attributes?.["mastra.span.type"] === "tool_call",
-  );
+
+  // Known tool names across all frameworks (camelCase, kebab-case, and snake_case variants)
+  const TOOL_NAMES = new Set(Object.keys(TOOL_NAME_MAP));
+
+  const toolSpans = traceSpans.filter((s: any) => {
+    const attrs = s.attributes ?? {};
+    return (
+      attrs["openinference.span.kind"] === "TOOL" ||  // OpenInference attribute
+      s.span_kind === "TOOL" ||                        // Phoenix top-level field
+      attrs["mastra.span.type"] === "tool_call" ||     // Mastra-specific
+      TOOL_NAMES.has(s.name)                           // name-based fallback
+    );
+  });
 
   if (toolSpans.length === 0) {
     return {
@@ -298,13 +447,18 @@ function extractToolData(
 
   for (const ts of toolSpans) {
     const attrs = ts.attributes ?? {};
-    const name = attrs["tool.name"] || ts.name;
+    const rawName = attrs["tool.name"] || ts.name;
+    const name = normalizeToolName(rawName);
     const input = attrs["input.value"] || "";
     const output = attrs["output.value"] || "";
 
+    // Extract the readable result content and give the LLM judge enough text
+    // to verify the agent accurately incorporated the tool results (2000 chars).
+    const resultText = extractToolResultText(String(output));
+
     selections.push(name);
     calls.push(`${name}(${input})`);
-    results.push(`${name} → ${String(output).slice(0, 500)}`);
+    results.push(`${name} → ${resultText.slice(0, 4500)}`);
   }
 
   return {
@@ -363,7 +517,7 @@ async function main() {
     const traceId = span.context?.trace_id;
     if (!spanId || !traceId) continue;
 
-    const { userQuery, agentResponse } = extractRootData(span);
+    const { userQuery, agentResponse } = extractRootData(span, spans as any[]);
     const { toolCallCount, toolSelection, toolCallSummary, toolResultSummary } =
       extractToolData(traceId, spans as any[]);
 
