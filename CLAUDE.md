@@ -17,7 +17,8 @@ rosetta/
 │   ├── mastra/            — Mastra framework (TypeScript)
 │   ├── langchain-js/      — LangChain.js / LangGraph (TypeScript)
 │   ├── langchain-py/      — LangChain / LangGraph (Python + Next.js)
-│   └── llamaindex-py/     — LlamaIndex (Python + Next.js)
+│   ├── llamaindex-py/     — LlamaIndex (Python + Next.js)
+│   └── microsoft-agent-py/ — Microsoft Agent Framework (Python + Next.js)
 └── ax/                  — Agents instrumented with Arize AX
     ├── mastra/            — Mastra framework (TypeScript)
     ├── langchain-js/      — LangChain.js / LangGraph (TypeScript)
@@ -116,14 +117,15 @@ Do not let non-observability code drift between the tiers.
 - **Observability** (phoenix): `arize-phoenix-otel` + `openinference-instrumentation-llama-index`
 - **Observability** (ax): `arize-otel` + `openinference-instrumentation-llama-index`
 
-### Microsoft Agent Framework Python (no-observability only)
+### Microsoft Agent Framework Python
 - **Framework**: Microsoft Agent Framework (`agent-framework-anthropic`, pre-release)
 - **LLM**: Claude (`claude-sonnet-4-20250514`) via `agent_framework.anthropic.AnthropicClient`
 - **Backend**: FastAPI + uvicorn (port 8001)
 - **Frontend**: Next.js (App Router, Tailwind CSS)
 - **Auth**: NextAuth v4 with Twitter/X OAuth 2.0
 - **Vector Search**: ChromaDB (local server, default embeddings)
-- **Sessions**: Per-user `AgentSession` stored in memory; `FunctionInvocationContext` injects `user_id` at runtime
+- **Sessions**: Per-user `AgentSession` stored in memory; `**kwargs` injects `user_id` at runtime via `additional_function_arguments`
+- **Observability** (phoenix): `arize-phoenix-otel` + `openinference-instrumentation-agent-framework` + `agent_framework.observability.enable_instrumentation`
 
 ## Running
 
