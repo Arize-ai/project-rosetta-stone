@@ -15,25 +15,29 @@ Expects these environment variables:
 
 import os
 
-from phoenix.otel import register
-from openinference.instrumentation.agent_framework import AgentFrameworkToOpenInferenceProcessor
+from opentelemetry import trace
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+
+from phoenix.otel import BatchSpanProcessor, PROJECT_NAME
+
 from agent_framework.observability import enable_instrumentation
 
-_tracer_provider = register(
-    project_name=os.environ.get("PHOENIX_PROJECT_NAME", "wonder-toys-microsoft-agent-py"),
-    batch=True,
+from openinference.instrumentation.agent_framework import (
+    AgentFrameworkToOpenInferenceProcessor,
 )
 
-# Add the OpenInference processor alongside register()'s BatchSpanProcessor.
-# replace_default_processor=False keeps Phoenix's BatchSpanProcessor in place.
-# Execution order per span:
-#   1. BatchSpanProcessor.on_end() — queues span reference
-#   2. AgentFrameworkToOpenInferenceProcessor.on_end() — transforms span._attributes in-place
-#   3. Background thread — exports the (now-transformed) span from the queue
-_tracer_provider.add_span_processor(
-    AgentFrameworkToOpenInferenceProcessor(),
-    replace_default_processor=False,
+tracer_provider = TracerProvider(
+    resource=Resource.create(
+        {PROJECT_NAME: os.getenv("PHOENIX_PROJECT_NAME", "agent-framework")}
+    )
 )
 
-# Enable agent-framework's built-in OTel instrumentation so it emits spans
+# Process spans before exporting them to Phoenix.
+tracer_provider.add_span_processor(AgentFrameworkToOpenInferenceProcessor())
+tracer_provider.add_span_processor(
+    BatchSpanProcessor(endpoint=os.environ.get("PHOENIX_COLLECTOR_ENDPOINT"))
+)
+trace.set_tracer_provider(tracer_provider)
+
 enable_instrumentation(enable_sensitive_data=True)
