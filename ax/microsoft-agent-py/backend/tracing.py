@@ -1,4 +1,4 @@
-"""Phoenix tracing initialization.
+"""Arize AX tracing initialization.
 
 This module MUST be imported before any agent_framework imports so that
 the OpenInference span processor is registered before the agent is built.
@@ -15,22 +15,28 @@ Expects these environment variables:
 
 import os
 
-from arize.otel import register
-from openinference.instrumentation.agent_framework import AgentFrameworkToOpenInferenceProcessor
 from agent_framework.observability import enable_instrumentation
+from arize.otel import BatchSpanProcessor, PROJECT_NAME, Resource
+from openinference.instrumentation.agent_framework import (
+    AgentFrameworkToOpenInferenceProcessor,
+)
+from opentelemetry import trace as otel_trace
+from opentelemetry.sdk.trace import TracerProvider
 
-_tracer_provider = register(
-    api_key=os.environ.get("ARIZE_API_KEY"),
-    space_id=os.environ.get("ARIZE_SPACE_ID"),
-    project_name=os.environ.get("ARIZE_PROJECT_NAME", "wonder-toys-microsoft-agent-py"),
-    batch=True,
-    verbose=True,
-    log_to_console=True,
+resource = Resource.create({
+    PROJECT_NAME: os.environ["ARIZE_PROJECT_NAME"],
+})
+tracer_provider = TracerProvider(resource=resource)
+
+tracer_provider.add_span_processor(AgentFrameworkToOpenInferenceProcessor())
+tracer_provider.add_span_processor(
+    BatchSpanProcessor(
+        space_id=os.environ["ARIZE_SPACE_ID"],
+        api_key=os.environ["ARIZE_API_KEY"],
+    )
 )
 
-_tracer_provider.add_span_processor(
-    AgentFrameworkToOpenInferenceProcessor()
-)
+otel_trace.set_tracer_provider(tracer_provider)
 
-# Enable agent-framework's built-in OTel instrumentation so it emits spans
 enable_instrumentation(enable_sensitive_data=True)
+print("Arize AX tracing initialized for Microsoft Agent Framework.")
