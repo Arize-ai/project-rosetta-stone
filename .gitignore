@@ -13,3 +13,14 @@ __pycache__/
 
 # dependencies
 node_modules/
+
+.env
+.env.local
+.env.test-local
+
+# Externally installed Arize / Phoenix skills (synced from skills-lock.json)
+.agents/skills/arize-*
+.agents/skills/phoenix-*
+.claude/skills/arize-*
+.claude/skills/phoenix-*
+skills-lock.json

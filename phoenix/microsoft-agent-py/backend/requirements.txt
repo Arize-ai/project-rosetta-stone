@@ -1,0 +1,8 @@
+agent-framework==1.4.0
+agent-framework-anthropic==1.0.0b260514
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+chromadb>=0.6.0
+pydantic>=2.0.0
+arize-phoenix-otel>=0.16.1
+openinference-instrumentation-agent-framework>=0.1.4
