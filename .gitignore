@@ -3,6 +3,10 @@
 
 # ChromaDB local data
 chroma-data/
+chroma-data.bak/
+
+# Local TODO
+TODO.md
 
 # Python virtual environment (for ChromaDB server)
 .venv/
