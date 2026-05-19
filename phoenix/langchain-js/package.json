@@ -16,7 +16,6 @@
     "@arizeai/openinference-core": "^2.1.0",
     "@arizeai/openinference-instrumentation-langchain": "^4.0.10",
     "@arizeai/openinference-semantic-conventions": "^2.3.0",
-    "@arizeai/openinference-vercel": "^2.7.5",
     "@arizeai/phoenix-otel": "^1.0.2",
     "@opentelemetry/exporter-trace-otlp-proto": "^0.218.0",
     "@opentelemetry/sdk-trace-base": "^2.7.1",

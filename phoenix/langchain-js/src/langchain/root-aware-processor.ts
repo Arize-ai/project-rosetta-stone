@@ -1,11 +1,15 @@
 import { Context } from "@opentelemetry/api";
-import { Span, SpanExporter } from "@opentelemetry/sdk-trace-base";
 import {
-  OpenInferenceBatchSpanProcessor,
-  isOpenInferenceSpan,
-} from "@arizeai/openinference-vercel";
+  BatchSpanProcessor,
+  ReadableSpan,
+  Span,
+  SpanExporter,
+} from "@opentelemetry/sdk-trace-base";
 import { getSession } from "@arizeai/openinference-core";
-import { SESSION_ID } from "@arizeai/openinference-semantic-conventions";
+import {
+  SemanticConventions,
+  SESSION_ID,
+} from "@arizeai/openinference-semantic-conventions";
 import { LRUCache } from "lru-cache";
 
 // Top-level LangChain/LangGraph runnable names that should become the trace root
@@ -24,16 +28,23 @@ function isRootOISpanByName(spanName: string): boolean {
   );
 }
 
+function isOpenInferenceSpan(span: ReadableSpan): boolean {
+  return (
+    typeof span.attributes[SemanticConventions.OPENINFERENCE_SPAN_KIND] ===
+    "string"
+  );
+}
+
 interface RootAwareConfig {
   exporter: SpanExporter;
   cacheSize?: number;
 }
 
-export class RootAwareOpenInferenceProcessor extends OpenInferenceBatchSpanProcessor {
+export class RootAwareOpenInferenceProcessor extends BatchSpanProcessor {
   private traceIds: LRUCache<string, boolean>;
 
   constructor(config: RootAwareConfig) {
-    super({ exporter: config.exporter, spanFilter: isOpenInferenceSpan });
+    super(config.exporter);
     this.traceIds = new LRUCache({ max: config.cacheSize ?? 1000 });
   }
 
@@ -52,6 +63,11 @@ export class RootAwareOpenInferenceProcessor extends OpenInferenceBatchSpanProce
     }
 
     super.onStart(span, parentContext);
+  }
+
+  onEnd(span: ReadableSpan): void {
+    if (!isOpenInferenceSpan(span)) return;
+    super.onEnd(span);
   }
 
   shutdown(): Promise<void> {
