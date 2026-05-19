@@ -10,6 +10,7 @@ Every framework below is implemented across all three observability tiers (no-ob
 
 | Framework | Python | TypeScript |
 |---|:---:|:---:|
+| [BeeAI](https://framework.beeai.dev/) | ✅ | — |
 | [CrewAI](https://www.crewai.com/) | ✅ | — |
 | [Google ADK](https://google.github.io/adk-docs/) | ✅ | — |
 | [LangChain / LangGraph](https://www.langchain.com/) | ✅ | ✅ |
@@ -24,6 +25,7 @@ Every framework below is implemented across all three observability tiers (no-ob
 ```tree
 rosetta/
 ├── no-observability/          No instrumentation (baseline)
+│   ├── beeai-py/                BeeAI (Python + Next.js)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── google-adk-py/           Google ADK (Python + Next.js)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
@@ -34,6 +36,7 @@ rosetta/
 │   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
 │   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── phoenix/                   Arize Phoenix Cloud instrumentation
+│   ├── beeai-py/                BeeAI (Python + Next.js)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── google-adk-py/           Google ADK (Python + Next.js)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
@@ -44,6 +47,7 @@ rosetta/
 │   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
 │   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── ax/                        Arize AX instrumentation
+│   ├── beeai-py/                BeeAI (Python + Next.js)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── google-adk-py/           Google ADK (Python + Next.js)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
@@ -75,6 +79,7 @@ The UI includes a home page with featured products and category chips, product d
 
 | Framework | Agent library | LLM client | Streaming API | Architecture |
 |-----------|---------------|------------|---------------|--------------|
+| **BeeAI** | `beeai_framework` `RequirementAgent` + `UnconstrainedMemory` | `ChatModel.from_name("anthropic:claude-sonnet-4")` (litellm) | `agent.run(...).observe(...)` over `RequirementAgentFinalAnswerEvent.delta` | Python FastAPI backend + Next.js frontend |
 | **CrewAI** | `crewai` Agent + Task + Crew | `crewai.LLM("anthropic/claude-sonnet-4-5")` (litellm) | `crewai_event_bus` `LLMStreamChunkEvent` | Python FastAPI backend + Next.js frontend |
 | **Google ADK** | `google.adk` Agent + Runner + `InMemorySessionService` | `LiteLlm("anthropic/claude-sonnet-4")` | `Runner.run_async(streaming_mode=SSE)` over `Event` (`event.partial`) | Python FastAPI backend + Next.js frontend |
 | **LangChain.js** | `@langchain/langgraph` ReAct agent | `@langchain/anthropic` | `streamEvents` (v2) | Next.js monolith |
@@ -107,6 +112,13 @@ For **LangChain.js**, only these files differ:
 - `src/langchain/agent.ts` — observability setup at the top of the file (before LangChain imports)
 - `next.config.ts` — `serverExternalPackages` for observability packages
 - `package.json` — observability dependencies
+- `env.example` — observability environment variables
+
+For **BeeAI**, only these files differ:
+
+- `backend/tracing.py` — tracing initialization (new file, imported before `beeai_framework`). Uses the standard `register()` + `BeeAIInstrumentor().instrument(tracer_provider=...)` pattern. The instrumentor subscribes to `Emitter.root()` and converts BeeAI's internal events into OpenInference spans. `session.id` is auto-tagged via `using_session(user_id)` wrap around `agent.run()` in `agent.py`.
+- `backend/main.py` — imports `backend.tracing` before other backend modules
+- `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-beeai`)
 - `env.example` — observability environment variables
 
 For **CrewAI**, only these files differ:
