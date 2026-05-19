@@ -29,7 +29,7 @@ Snapshot (last refreshed 2026-05-19 from `https://arize.com/docs/llms.txt`). Eac
 - [ ] Pipecat
 - [x] Pydantic AI
 - [ ] Semantic Kernel
-- [ ] Smolagents (Hugging Face)
+- [x] Smolagents (Hugging Face)
 - [x] BeeAI
 
 ### TypeScript (Tier A)
