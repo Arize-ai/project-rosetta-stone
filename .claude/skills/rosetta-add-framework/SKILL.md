@@ -55,6 +55,7 @@ Decide whether the project wants this dimension before starting. If yes, the per
 - [ ] MCP / Model Context Protocol (wire protocol)
 - [ ] Portkey (LLM gateway)
 - [ ] Together AI (LLM provider)
+- [ ] OpenInference Annotation Tracing (Java) — `@Chain`/`@LLM`/`@Tool`/`@Agent` decorators applied via ByteBuddy for hand-built agents; not a framework
 
 ## Phases
 
