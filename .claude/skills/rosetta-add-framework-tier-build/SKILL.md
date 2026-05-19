@@ -50,6 +50,29 @@ for p in ["$DST/package.json", "$DST/package-lock.json"]:
 EOF
 ```
 
+### 2b. Patch `next.config.ts` with the Turbopack root
+
+**Required** for every new tier on Next.js 16+. Without this, `next dev` starts but fails on the first request with `We couldn't find the Next.js package (next/package.json) from the project directory: …/src/app`.
+
+Reason: the repo has no top-level `package.json`, so Turbopack's workspace-root inference walks past the tier directory and gives up. Setting `turbopack.root` explicitly pins it to the tier's own directory.
+
+If the source clone's `next.config.ts` looks like `const nextConfig: NextConfig = {};` (no turbopack config), replace with:
+
+```ts
+import path from "node:path";
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  turbopack: {
+    root: path.resolve(__dirname),
+  },
+};
+
+export default nextConfig;
+```
+
+If the source has other config (e.g. `serverExternalPackages`), merge — don't overwrite. Saved to memory at `framework_nextjs_turbopack_root.md` for future reference.
+
 ### 3. Rewrite framework-specific files
 
 Three files differ between frameworks. The rest stay byte-identical.
@@ -138,10 +161,19 @@ cd "$DST" && /Users/jimbobbennett/github/project-rosetta-stone/.venv/bin/ruff ch
 
 Fail-fast if ruff complains — usually unused imports or missing-import errors. Fix and re-lint.
 
-### 6. Install + smoke-import
+### 6. Install Python + npm deps + smoke-import
+
+The clone stripped `node_modules` and `.venv` from the source. Both need restoring before any boot will succeed — npm in particular because `scripts/start.sh` runs `npx next dev` which fails to resolve `next/package.json` if `node_modules/` isn't populated.
 
 ```bash
+# Python deps into the shared venv
 VIRTUAL_ENV=/Users/jimbobbennett/github/project-rosetta-stone/.venv uv pip install -r "$DST/backend/requirements.txt" 2>&1 | tail -5
+
+# npm deps for the Next.js frontend (required even for backend-only smoke tests
+# since start.sh boots Next.js)
+(cd "$DST" && npm install --silent 2>&1 | tail -3)
+test -f "$DST/node_modules/next/package.json" || { echo "npm install didn't produce node_modules/next — abort"; exit 1; }
+
 # Confirm the new framework imports cleanly
 /Users/jimbobbennett/github/project-rosetta-stone/.venv/bin/python -c "
 import sys; sys.path.insert(0, '$DST')

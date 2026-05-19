@@ -58,28 +58,28 @@ cat > tests/public-flow.spec.ts <<'TS'
 import { test, expect } from "@playwright/test";
 
 // Public-flow smoke: anything that doesn't require NextAuth.
-// Auth-gated paths (chat, cart checkout) are out of scope.
+// The home page gates featured products + chat behind X/Twitter sign-in,
+// so we can only verify the unauthenticated landing renders.
 
-test("home page loads with featured products", async ({ page }) => {
+test("unauthenticated landing renders sign-in prompt", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveTitle(/Wonder Toys/i);
-  // Featured products section should render at least one product image
-  const productImages = page.locator('img[alt][src^="/product-images/"]');
-  await expect(productImages.first()).toBeVisible({ timeout: 15_000 });
-  const count = await productImages.count();
-  expect(count).toBeGreaterThan(0);
+  await expect(
+    page.getByRole("heading", { name: /Wonder Toys/i, level: 1 })
+  ).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText(/Sign in to start shopping/i)).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Sign in with X/i })
+  ).toBeVisible();
 });
 
-test("clicking a product opens its detail page", async ({ page }) => {
-  await page.goto("/");
-  // Click the first product card link — any anchor whose href matches /product/<id>
-  const productLink = page.locator('a[href^="/product/"]').first();
-  await expect(productLink).toBeVisible({ timeout: 15_000 });
-  await productLink.click();
-  // Detail page URL pattern
-  await expect(page).toHaveURL(/\/product\/.+/);
-  // Detail page should show a product image
-  await expect(page.locator('img[src^="/product-images/"]').first()).toBeVisible();
+test("product detail page is publicly accessible and shows the product image", async ({ page }) => {
+  // Product detail pages (`/product/<id>`) are the entry point for shared
+  // product links — they don't require auth. We hit a known seed product.
+  await page.goto("/product/toy-001");
+  await expect(page.locator('img[src^="/product-images/"]').first()).toBeVisible({
+    timeout: 15_000,
+  });
 });
 TS
 
@@ -93,12 +93,25 @@ npx playwright install chromium
 ## Run the test
 
 ```bash
-# Boot the framework's Next.js dev server if not already running
+# Boot the framework's Next.js dev server if not already running.
+# Prereq: `npm install` must have run in $TIER/$FRAMEWORK_DIR already (the
+# tier-build skill does this in step 6). Without node_modules, npx next dev
+# fails with "couldn't find next/package.json".
 if ! curl -sf http://localhost:3000/ > /dev/null 2>&1; then
   cd "/Users/jimbobbennett/github/project-rosetta-stone/$TIER/$FRAMEWORK_DIR"
+  test -d node_modules || { echo "node_modules missing — run tier-build's step 6 first"; exit 1; }
   npm run dev > /tmp/rosetta-playwright-dev.log 2>&1 &
   DEV_PID=$!
   until curl -sf http://localhost:3000/ > /dev/null 2>&1; do
+    # Catch the Turbopack-root failure mode and surface it loudly — the
+    # tier-build skill should have already added turbopack.root to
+    # next.config.ts; this is a defensive check.
+    if grep -q "Turbopack build failed" /tmp/rosetta-playwright-dev.log 2>/dev/null; then
+      echo "Next.js failed to start — likely missing turbopack.root in next.config.ts."
+      echo "See tier-build skill step 2b. Tail of dev log:"
+      tail -20 /tmp/rosetta-playwright-dev.log
+      exit 1
+    fi
     if ! kill -0 $DEV_PID 2>/dev/null; then
       echo "dev script died:"; tail -20 /tmp/rosetta-playwright-dev.log; exit 1
     fi
