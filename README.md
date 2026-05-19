@@ -14,6 +14,7 @@ Every framework below is implemented across all three observability tiers (no-ob
 | [CrewAI](https://www.crewai.com/) | ✅ | — |
 | [DSPy](https://dspy.ai/) | ✅ | — |
 | [Google ADK](https://google.github.io/adk-docs/) | ✅ | — |
+| [Haystack](https://haystack.deepset.ai/) | ✅ | — |
 | [LangChain / LangGraph](https://www.langchain.com/) | ✅ | ✅ |
 | [LlamaIndex](https://www.llamaindex.ai/) | ✅ | — |
 | [Mastra](https://mastra.ai/) | — | ✅ |
@@ -30,6 +31,7 @@ rosetta/
 │   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── dspy-py/                 DSPy (Python + Next.js)
 │   ├── google-adk-py/           Google ADK (Python + Next.js)
+│   ├── haystack-py/             Haystack (Python + Next.js)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
 │   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
 │   ├── llamaindex-py/           LlamaIndex (Python + Next.js)
@@ -42,6 +44,7 @@ rosetta/
 │   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── dspy-py/                 DSPy (Python + Next.js)
 │   ├── google-adk-py/           Google ADK (Python + Next.js)
+│   ├── haystack-py/             Haystack (Python + Next.js)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
 │   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
 │   ├── llamaindex-py/           LlamaIndex (Python + Next.js)
@@ -54,6 +57,7 @@ rosetta/
 │   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── dspy-py/                 DSPy (Python + Next.js)
 │   ├── google-adk-py/           Google ADK (Python + Next.js)
+│   ├── haystack-py/             Haystack (Python + Next.js)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
 │   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
 │   ├── llamaindex-py/           LlamaIndex (Python + Next.js)
@@ -87,6 +91,7 @@ The UI includes a home page with featured products and category chips, product d
 | **CrewAI** | `crewai` Agent + Task + Crew | `crewai.LLM("anthropic/claude-sonnet-4-5")` (litellm) | `crewai_event_bus` `LLMStreamChunkEvent` | Python FastAPI backend + Next.js frontend |
 | **DSPy** | `dspy.ReAct` over a `dspy.Signature` + `dspy.History` | `dspy.LM("anthropic/claude-sonnet-4")` (litellm) | `dspy.streamify` + `StreamListener(signature_field_name="answer")` | Python FastAPI backend + Next.js frontend |
 | **Google ADK** | `google.adk` Agent + Runner + `InMemorySessionService` | `LiteLlm("anthropic/claude-sonnet-4")` | `Runner.run_async(streaming_mode=SSE)` over `Event` (`event.partial`) | Python FastAPI backend + Next.js frontend |
+| **Haystack** | `haystack.components.agents.Agent` | `AnthropicChatGenerator` (`anthropic-haystack`) | `streaming_callback(StreamingChunk)` bridged into an asyncio queue | Python FastAPI backend + Next.js frontend |
 | **LangChain.js** | `@langchain/langgraph` ReAct agent | `@langchain/anthropic` | `streamEvents` (v2) | Next.js monolith |
 | **LangChain Python** | `langgraph` ReAct agent | `langchain-anthropic` | `astream_events` (v2) | Python FastAPI backend + Next.js frontend |
 | **LlamaIndex Python** | `llama_index` FunctionAgent | `llama-index-llms-anthropic` | `stream_events` | Python FastAPI backend + Next.js frontend |
@@ -147,6 +152,15 @@ For **Google ADK**, only these files differ:
 - `backend/main.py` — imports `backend.tracing` before other backend modules
 - `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-google-adk`)
 - `env.example` — observability environment variables
+
+For **Haystack**, only these files differ:
+
+- `backend/tracing.py` — tracing initialization (new file, imported before `haystack`). Uses the standard `register()` + `HaystackInstrumentor().instrument(tracer_provider=...)` pattern.
+- `backend/main.py` — imports `backend.tracing` before other backend modules
+- `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-haystack`)
+- `env.example` — observability environment variables
+
+`backend/agent.py` is shared across all three tiers and wraps `agent.run_async` in `using_session(user_id)` so spans carry `session.id` — the Haystack OpenInference instrumentation does not emit it on its own. The no-observability tier falls back to a `nullcontext()` shim when `openinference.instrumentation` isn't installed.
 
 For **LangChain Python**, only these files differ:
 
