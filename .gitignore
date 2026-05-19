@@ -11,6 +11,14 @@ TODO.md
 # Demo screenshots captured by the rosetta-demo-capture skill
 demo-screenshots/
 
+# Playwright build artefacts (Playwright project lives inside the
+# rosetta-add-framework-playwright skill; only node_modules and test
+# outputs are ignored)
+.claude/skills/rosetta-add-framework-playwright/test-results/
+.claude/skills/rosetta-add-framework-playwright/playwright-report/
+.claude/skills/rosetta-add-framework-playwright/blob-report/
+.claude/skills/rosetta-add-framework-playwright/.cache/
+
 # Python virtual environment (for ChromaDB server)
 .venv/
 

@@ -11,6 +11,7 @@ Every framework below is implemented across all three observability tiers (no-ob
 | Framework | Python | TypeScript |
 |---|:---:|:---:|
 | [CrewAI](https://www.crewai.com/) | ✅ | — |
+| [Google ADK](https://google.github.io/adk-docs/) | ✅ | — |
 | [LangChain / LangGraph](https://www.langchain.com/) | ✅ | ✅ |
 | [LlamaIndex](https://www.llamaindex.ai/) | ✅ | — |
 | [Mastra](https://mastra.ai/) | — | ✅ |
@@ -24,6 +25,7 @@ Every framework below is implemented across all three observability tiers (no-ob
 rosetta/
 ├── no-observability/          No instrumentation (baseline)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
+│   ├── google-adk-py/           Google ADK (Python + Next.js)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
 │   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
 │   ├── llamaindex-py/           LlamaIndex (Python + Next.js)
@@ -33,6 +35,7 @@ rosetta/
 │   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── phoenix/                   Arize Phoenix Cloud instrumentation
 │   ├── crewai-py/               CrewAI (Python + Next.js)
+│   ├── google-adk-py/           Google ADK (Python + Next.js)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
 │   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
 │   ├── llamaindex-py/           LlamaIndex (Python + Next.js)
@@ -42,6 +45,7 @@ rosetta/
 │   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── ax/                        Arize AX instrumentation
 │   ├── crewai-py/               CrewAI (Python + Next.js)
+│   ├── google-adk-py/           Google ADK (Python + Next.js)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
 │   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
 │   ├── llamaindex-py/           LlamaIndex (Python + Next.js)
@@ -72,6 +76,7 @@ The UI includes a home page with featured products and category chips, product d
 | Framework | Agent library | LLM client | Streaming API | Architecture |
 |-----------|---------------|------------|---------------|--------------|
 | **CrewAI** | `crewai` Agent + Task + Crew | `crewai.LLM("anthropic/claude-sonnet-4-5")` (litellm) | `crewai_event_bus` `LLMStreamChunkEvent` | Python FastAPI backend + Next.js frontend |
+| **Google ADK** | `google.adk` Agent + Runner + `InMemorySessionService` | `LiteLlm("anthropic/claude-sonnet-4")` | `Runner.run_async(streaming_mode=SSE)` over `Event` (`event.partial`) | Python FastAPI backend + Next.js frontend |
 | **LangChain.js** | `@langchain/langgraph` ReAct agent | `@langchain/anthropic` | `streamEvents` (v2) | Next.js monolith |
 | **LangChain Python** | `langgraph` ReAct agent | `langchain-anthropic` | `astream_events` (v2) | Python FastAPI backend + Next.js frontend |
 | **LlamaIndex Python** | `llama_index` FunctionAgent | `llama-index-llms-anthropic` | `stream_events` | Python FastAPI backend + Next.js frontend |
@@ -109,6 +114,13 @@ For **CrewAI**, only these files differ:
 - `backend/tracing.py` — tracing initialization (new file, imported before `crewai`)
 - `backend/main.py` — imports `backend.tracing` before other backend modules
 - `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-crewai`)
+- `env.example` — observability environment variables
+
+For **Google ADK**, only these files differ:
+
+- `backend/tracing.py` — tracing initialization (new file, imported before `google.adk`). Uses the standard `register()` + `GoogleADKInstrumentor().instrument(tracer_provider=...)` pattern. The OpenInference ADK instrumentation auto-emits `session.id` from the ADK Runner's `session_id` — no `using_session()` wrap needed.
+- `backend/main.py` — imports `backend.tracing` before other backend modules
+- `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-google-adk`)
 - `env.example` — observability environment variables
 
 For **LangChain Python**, only these files differ:
