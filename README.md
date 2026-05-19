@@ -4,27 +4,50 @@
 
 Project Rosetta Stone implements an identical AI shopping agent across multiple frameworks so you can compare developer experience. It also implements observability for the agent across both Arize Phoenix and Arize AX, so you can see how that's done whichever one you choose.
 
+## Supported frameworks
+
+Every framework below is implemented across all three observability tiers (no-observability, Phoenix, AX).
+
+| Framework | Python | TypeScript |
+|---|:---:|:---:|
+| [CrewAI](https://www.crewai.com/) | ✅ | — |
+| [LangChain / LangGraph](https://www.langchain.com/) | ✅ | ✅ |
+| [LlamaIndex](https://www.llamaindex.ai/) | ✅ | — |
+| [Mastra](https://mastra.ai/) | — | ✅ |
+| [Microsoft Agent Framework](https://learn.microsoft.com/en-us/agent-framework/) | ✅ | — |
+| [Pydantic AI](https://ai.pydantic.dev/) | ✅ | — |
+| [Vercel AI SDK](https://ai-sdk.dev/) | — | ✅ |
+
 ## What's in the box
 
 ```tree
 rosetta/
 ├── no-observability/          No instrumentation (baseline)
+│   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
 │   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
 │   ├── llamaindex-py/           LlamaIndex (Python + Next.js)
 │   ├── mastra/                  Mastra framework (TypeScript)
+│   ├── microsoft-agent-py/      Microsoft Agent Framework (Python + Next.js)
+│   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
 │   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── phoenix/                   Arize Phoenix Cloud instrumentation
+│   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
 │   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
 │   ├── llamaindex-py/           LlamaIndex (Python + Next.js)
 │   ├── mastra/                  Mastra framework (TypeScript)
+│   ├── microsoft-agent-py/      Microsoft Agent Framework (Python + Next.js)
+│   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
 │   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── ax/                        Arize AX instrumentation
+│   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
 │   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
 │   ├── llamaindex-py/           LlamaIndex (Python + Next.js)
 │   ├── mastra/                  Mastra framework (TypeScript)
+│   ├── microsoft-agent-py/      Microsoft Agent Framework (Python + Next.js)
+│   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
 │   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── product-images/            200 AI-generated product images (shared)
 └── chroma-data/               ChromaDB vector store (gitignored, auto-created)
@@ -48,10 +71,13 @@ The UI includes a home page with featured products and category chips, product d
 
 | Framework | Agent library | LLM client | Streaming API | Architecture |
 |-----------|---------------|------------|---------------|--------------|
+| **CrewAI** | `crewai` Agent + Task + Crew | `crewai.LLM("anthropic/claude-sonnet-4-5")` (litellm) | `crewai_event_bus` `LLMStreamChunkEvent` | Python FastAPI backend + Next.js frontend |
 | **LangChain.js** | `@langchain/langgraph` ReAct agent | `@langchain/anthropic` | `streamEvents` (v2) | Next.js monolith |
 | **LangChain Python** | `langgraph` ReAct agent | `langchain-anthropic` | `astream_events` (v2) | Python FastAPI backend + Next.js frontend |
 | **LlamaIndex Python** | `llama_index` FunctionAgent | `llama-index-llms-anthropic` | `stream_events` | Python FastAPI backend + Next.js frontend |
 | **Mastra** | `@mastra/core` Agent | `@ai-sdk/anthropic` (Vercel AI SDK) | `stream.fullStream` | Next.js monolith |
+| **Microsoft Agent Framework** | `agent_framework` Agent + AgentSession | `agent_framework.anthropic.AnthropicClient` | `agent.run(stream=True)` over `AgentResponseUpdate` events | Python FastAPI backend + Next.js frontend |
+| **Pydantic AI** | `pydantic_ai` Agent | `"anthropic:claude-sonnet-4"` model string | `agent.run_stream_events()` over PartStart/PartDelta events | Python FastAPI backend + Next.js frontend |
 | **Vercel AI SDK** | Vercel AI SDK `streamText` | `@ai-sdk/anthropic` | `result.fullStream` | Next.js monolith |
 
 ## Observability Tiers
@@ -78,6 +104,13 @@ For **LangChain.js**, only these files differ:
 - `package.json` — observability dependencies
 - `env.example` — observability environment variables
 
+For **CrewAI**, only these files differ:
+
+- `backend/tracing.py` — tracing initialization (new file, imported before `crewai`)
+- `backend/main.py` — imports `backend.tracing` before other backend modules
+- `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-crewai`)
+- `env.example` — observability environment variables
+
 For **LangChain Python**, only these files differ:
 
 - `backend/tracing.py` — tracing initialization (new file, imported before LangChain)
@@ -91,6 +124,20 @@ For **LlamaIndex Python**, these files differ:
 - `backend/agent.py` — manual root span + OTel context management for proper trace boundaries
 - `backend/main.py` — imports `backend.tracing` before other backend modules
 - `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-llama-index`)
+- `env.example` — observability environment variables
+
+For **Microsoft Agent Framework**, only these files differ:
+
+- `backend/tracing.py` — tracing initialization (new file, imported before `agent_framework`). Uses a manually-constructed `TracerProvider` with `Resource.create({PROJECT_NAME: …})`, plus `AgentFrameworkToOpenInferenceProcessor` to reshape MAF's GenAI-convention spans into OpenInference format. The `register()` shortcut doesn't route MAF spans to the configured project — see `backend/tracing.py` for the working pattern.
+- `backend/main.py` — imports `backend.tracing` before other backend modules
+- `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-agent-framework`)
+- `env.example` — observability environment variables
+
+For **Pydantic AI**, only these files differ:
+
+- `backend/tracing.py` — tracing initialization (new file, imported before `pydantic_ai`). Calls `Agent.instrument_all(InstrumentationSettings(tracer_provider=…))` after registering the tracer provider — Pydantic AI doesn't emit OTel spans without this. `OpenInferenceSpanProcessor` reshapes the spans before export.
+- `backend/main.py` — imports `backend.tracing` before other backend modules
+- `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-pydantic-ai`)
 - `env.example` — observability environment variables
 
 For **Vercel AI SDK**, only these files differ:
@@ -131,7 +178,7 @@ npm run dev                 # starts ChromaDB + indexes products + runs the app
 1. Indexes all 200 products if the collection is missing
 1. Starts the dev server (Next.js for JS frameworks; Python backend + Next.js for Python frameworks)
 
-For Python frameworks (`langchain-py`, `llamaindex-py`), the start script also installs Python backend dependencies and starts a FastAPI server on port 8001. The Next.js frontend proxies API calls to it.
+For Python frameworks, the start script also installs Python backend dependencies and starts a FastAPI server on port 8001. The Next.js frontend proxies API calls to it.
 
 All tiers share the same ChromaDB instance and data at the repo root.
 
@@ -158,7 +205,7 @@ Every agent needs these in `.env.local`:
 | `PHOENIX_API_KEY` | Phoenix API key from [app.phoenix.arize.com](https://app.phoenix.arize.com) |
 | `PHOENIX_PROJECT_NAME` | Project name in Phoenix |
 
-Note: Mastra and LangChain.js require the full OTLP URL including `/v1/traces`. Python frameworks (`langchain-py`, `llamaindex-py`) expect just the base URL without `/v1/traces`, as expected by the `arize-phoenix-otel` SDK.
+Note: TypeScript frameworks require the full OTLP URL including `/v1/traces`. Python frameworks expect just the base URL without `/v1/traces`, as expected by the `arize-phoenix-otel` SDK.
 
 **AX tier** — additionally requires:
 
@@ -220,7 +267,7 @@ After generating traces, configure the same 6 evaluators in the [Arize AX consol
 
 ## What You Can Learn
 
-- **Framework comparison**: How does defining tools, agents, and streaming differ between Mastra, LangChain.js, LangChain Python, and LlamaIndex?
+- **Framework comparison**: How does defining tools, agents, and streaming differ across agent frameworks?
 - **Observability comparison**: How does adding Phoenix vs AX differ across frameworks? What's auto-instrumented vs manual?
 - **Production patterns**: Streaming architecture, vector search with fallbacks, in-memory order management, and structured tool schemas
 
@@ -229,7 +276,7 @@ After generating traces, configure the same 6 evaluators in the [Arize AX consol
 | Component | Technology |
 |-----------|-----------|
 | Web framework | Next.js 16 (App Router) |
-| Python backend | FastAPI + uvicorn (`langchain-py`, `llamaindex-py` only) |
+| Python backend | FastAPI + uvicorn (Python frameworks only) |
 | Styling | Tailwind CSS |
 | Auth | NextAuth v4 + Twitter/X OAuth 2.0 |
 | LLM | Anthropic Claude Sonnet |
