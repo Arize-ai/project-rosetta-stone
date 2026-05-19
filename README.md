@@ -11,6 +11,7 @@ Every framework below is implemented across all three observability tiers (no-ob
 | Framework | Python | TypeScript |
 |---|:---:|:---:|
 | [Agno](https://docs.agno.com/) | ✅ | — |
+| [AutoGen AgentChat](https://microsoft.github.io/autogen/stable/) | ✅ | — |
 | [BeeAI](https://framework.beeai.dev/) | ✅ | — |
 | [CrewAI](https://www.crewai.com/) | ✅ | — |
 | [DSPy](https://dspy.ai/) | ✅ | — |
@@ -30,6 +31,7 @@ Every framework below is implemented across all three observability tiers (no-ob
 rosetta/
 ├── no-observability/          No instrumentation (baseline)
 │   ├── agno-py/                 Agno (Python + Next.js)
+│   ├── autogen-py/              AutoGen AgentChat (Python + Next.js)
 │   ├── beeai-py/                BeeAI (Python + Next.js)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── dspy-py/                 DSPy (Python + Next.js)
@@ -45,6 +47,7 @@ rosetta/
 │   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── phoenix/                   Arize Phoenix Cloud instrumentation
 │   ├── agno-py/                 Agno (Python + Next.js)
+│   ├── autogen-py/              AutoGen AgentChat (Python + Next.js)
 │   ├── beeai-py/                BeeAI (Python + Next.js)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── dspy-py/                 DSPy (Python + Next.js)
@@ -60,6 +63,7 @@ rosetta/
 │   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── ax/                        Arize AX instrumentation
 │   ├── agno-py/                 Agno (Python + Next.js)
+│   ├── autogen-py/              AutoGen AgentChat (Python + Next.js)
 │   ├── beeai-py/                BeeAI (Python + Next.js)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── dspy-py/                 DSPy (Python + Next.js)
@@ -96,6 +100,7 @@ The UI includes a home page with featured products and category chips, product d
 | Framework | Agent library | LLM client | Streaming API | Architecture |
 |-----------|---------------|------------|---------------|--------------|
 | **Agno** | `agno.agent.Agent` + `InMemoryDb` | `agno.models.anthropic.Claude` | `agent.arun(stream=True, stream_events=True)` over `RunContentEvent` / `ToolCallStartedEvent` | Python FastAPI backend + Next.js frontend |
+| **AutoGen AgentChat** | `autogen_agentchat` AssistantAgent | `autogen_ext.models.anthropic.AnthropicChatCompletionClient` | `agent.run_stream()` over `ModelClientStreamingChunkEvent` (requires `model_client_stream=True`) | Python FastAPI backend + Next.js frontend |
 | **BeeAI** | `beeai_framework` `RequirementAgent` + `UnconstrainedMemory` | `ChatModel.from_name("anthropic:claude-sonnet-4")` (litellm) | `agent.run(...).observe(...)` over `RequirementAgentFinalAnswerEvent.delta` | Python FastAPI backend + Next.js frontend |
 | **CrewAI** | `crewai` Agent + Task + Crew | `crewai.LLM("anthropic/claude-sonnet-4-5")` (litellm) | `crewai_event_bus` `LLMStreamChunkEvent` | Python FastAPI backend + Next.js frontend |
 | **DSPy** | `dspy.ReAct` over a `dspy.Signature` + `dspy.History` | `dspy.LM("anthropic/claude-sonnet-4")` (litellm) | `dspy.streamify` + `StreamListener(signature_field_name="answer")` | Python FastAPI backend + Next.js frontend |
@@ -140,6 +145,16 @@ For **Agno**, only these files differ:
 - `backend/main.py` — imports `backend.tracing` before other backend modules
 - `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-agno`)
 - `env.example` — observability environment variables
+
+For **AutoGen AgentChat**, only these files differ:
+
+- `backend/tracing.py` — tracing initialization (new file, imported before `autogen_agentchat`). Uses the standard `register()` + `AutogenAgentChatInstrumentor().instrument(tracer_provider=...)` pattern. The instrumentation package is `openinference-instrumentation-autogen-agentchat` (AgentChat layer) rather than `openinference-instrumentation-autogen` (low-level core).
+- `backend/agent.py` — wraps the `agent.run_stream()` call in `using_session(user_id)` + `using_user(user_id)` because the AutoGen AgentChat OpenInference instrumentor does not auto-emit `session.id` / `user.id` attributes. A `try/except ImportError` fallback keeps no-observability working without an `openinference.instrumentation` dependency.
+- `backend/main.py` — imports `backend.tracing` before other backend modules
+- `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-autogen-agentchat`)
+- `env.example` — observability environment variables
+
+Note: AutoGen's `FunctionTool` requires plain-string Annotated tool descriptions (`Annotated[str, "what this is"]`) instead of the Pydantic `Annotated[..., Field(description=...)]` style the other Python tiers use, so `backend/tools.py` is also rewritten in the same way across all three AutoGen tiers.
 
 For **BeeAI**, only these files differ:
 
