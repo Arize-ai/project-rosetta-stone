@@ -182,6 +182,33 @@ print('agent module imports OK')
 "
 ```
 
+### 6a. Regression check — confirm no shared-venv conflict broke existing tiers
+
+The shared `.venv` is used by every Python tier. Installing a new framework's deps can downgrade transitive packages and break tiers built earlier (this has happened — e.g. `opentelemetry-semconv` getting downgraded by one install and then breaking another's instrumentor).
+
+Run a fast import check across every existing Python tier's `backend.agent` and fail loud if any has broken:
+
+```bash
+for tier in no-observability phoenix ax; do
+  for fwk_dir in /Users/jimbobbennett/github/project-rosetta-stone/$tier/*-py/; do
+    [ -d "$fwk_dir" ] || continue
+    [ "$fwk_dir" = "$DST/" ] && continue
+    fwk_name=$(basename "$fwk_dir")
+    /Users/jimbobbennett/github/project-rosetta-stone/.venv/bin/python -c "
+import sys; sys.path.insert(0, '$fwk_dir')
+try:
+    import backend.agent
+except Exception as e:
+    print(f'  BROKEN $tier/$fwk_name — {type(e).__name__}: {e}')
+    sys.exit(1)
+" || { echo "DEP CONFLICT — abort and trigger rollback (see orchestrator's Failure isolation section)"; exit 1; }
+  done
+done
+echo "regression check: all existing Python tiers still import cleanly"
+```
+
+If this fails, the orchestrator should mark the new framework as `[!]` with reason `dep-conflict` and run the rollback procedure documented in `rosetta-add-framework/SKILL.md` under "Failure isolation".
+
 ### 7. Copy `.env.local`
 
 If a sibling `.env.local` exists in the same tier (e.g. `ax/pydantic-ai-py/.env.local`), copy it as a starting point and update only the project name:

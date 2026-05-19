@@ -35,11 +35,13 @@ ls -d ax/*-py/ ax/*-js/ ax/*-ts/ ax/mastra/ ax/vercel-ai-sdk/ 2>/dev/null \
 ### 3. Categorise
 
 Map each Arize slug to one of:
-- **Implemented** — in `/tmp/rosetta-existing`
-- **Tier A — clear agent frameworks** — recommended for the repo (CrewAI, Pydantic AI, LangChain, LlamaIndex, etc.)
-- **Borderline** — utility libraries / wire protocols / LLM providers that don't fit the "build an agent" comparison goal (Guardrails AI, Instructor, MCP, Portkey, Together AI)
+- **Implemented** (`[x]`) — in `/tmp/rosetta-existing`
+- **Skipped on principle** (`[~]`) — viability gate decided not to build (e.g. voice-only, no Anthropic). The reason is appended after the framework name in the orchestrator's TODO. Preserve these markers — don't reset them to `[ ]`.
+- **Failed previously** (`[!]`) — last build attempt broke. The orchestrator may retry on a future run; preserve the marker until the failure is resolved.
+- **Tier A — clear agent frameworks** (`[ ]`) — recommended for the repo (CrewAI, Pydantic AI, LangChain, LlamaIndex, etc.)
+- **Borderline** — utility libraries / wire protocols / LLM providers that don't fit the "build an agent" comparison goal (Guardrails AI, Instructor, MCP, Portkey, Together AI). The borderline set is hardcoded — these need a per-framework decision and shouldn't auto-be added.
 
-The borderline set is hardcoded — these need a per-framework decision and shouldn't auto-be added.
+When refreshing the TODO snapshot (step 5 below), **preserve** existing `[x]`, `[~]`, and `[!]` markers verbatim — including the reason text after them. Only flip newly-implemented frameworks from `[ ]` to `[x]`.
 
 ### 4. Output
 
