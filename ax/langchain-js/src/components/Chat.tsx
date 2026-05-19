@@ -89,6 +89,16 @@ export function Chat() {
     }
     return [];
   });
+  const [sessionId, setSessionId] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const saved = sessionStorage.getItem("chat-session-id");
+      if (saved) return saved;
+      const id = crypto.randomUUID();
+      sessionStorage.setItem("chat-session-id", id);
+      return id;
+    }
+    return crypto.randomUUID();
+  });
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [popular, setPopular] = useState<FeaturedProduct[]>([]);
@@ -146,15 +156,15 @@ export function Chat() {
 
     // Use a snapshot of messages for the API call (current messages + user message)
     const currentMessages = [...messages, userMessage];
+    // eslint-disable-next-line react-hooks/immutability
     fetchResponse(currentMessages);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, messages]);
 
   async function fetchResponse(updatedMessages: Message[]) {
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-session-id": sessionId },
         body: JSON.stringify({
           messages: updatedMessages.map((m) => ({
             role: m.role,
@@ -340,7 +350,7 @@ export function Chat() {
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2" onClick={() => { setMessages([]); setInput(""); sessionStorage.removeItem("chat-messages"); }}>
+        <Link href="/" className="flex items-center gap-2" onClick={() => { setMessages([]); setInput(""); sessionStorage.removeItem("chat-messages"); const newId = crypto.randomUUID(); sessionStorage.setItem("chat-session-id", newId); setSessionId(newId); }}>
           <img src="/product-images/wonder-toys-logo.png" alt="Wonder Toys" className="w-8 h-8" />
           <h1 className="text-xl font-bold text-purple-800">Wonder Toys</h1>
         </Link>

@@ -6,11 +6,6 @@ import { purchaseProduct } from "./tools/purchase";
 import { checkOrderStatus } from "./tools/order-status";
 import { cancelOrderTool } from "./tools/cancel-order";
 
-const llm = new ChatAnthropic({
-  model: "claude-sonnet-4-20250514",
-  anthropicApiKey: process.env.ANTHROPIC_API_KEY,
-});
-
 const tools = [searchProducts, getProduct, purchaseProduct, checkOrderStatus, cancelOrderTool];
 
 export const SYSTEM_PROMPT = `You are a friendly and helpful shopping assistant for "Wonder Toys", a children's toy store. Your job is to help customers find the perfect toys, answer questions about products, and help them complete purchases.
@@ -68,7 +63,15 @@ Description or marketing copy
 
 7. **Important**: You have a userId available in the conversation context. Always use it when making purchases or checking orders. The userId will be provided in the system context.`;
 
-export const shoppingAgent = createReactAgent({
-  llm,
-  tools,
-});
+let _shoppingAgent: ReturnType<typeof createReactAgent> | null = null;
+
+export function getShoppingAgent() {
+  if (!_shoppingAgent) {
+    const llm = new ChatAnthropic({
+      model: "claude-sonnet-4-20250514",
+      apiKey: process.env.ANTHROPIC_API_KEY,
+    });
+    _shoppingAgent = createReactAgent({ llm, tools });
+  }
+  return _shoppingAgent;
+}
