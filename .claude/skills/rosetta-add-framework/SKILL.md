@@ -26,7 +26,7 @@ Snapshot (last refreshed 2026-05-19 from `https://arize.com/docs/llms.txt`). Eac
 - [x] Google ADK
 - [ ] Haystack
 - [!] LlamaIndex Workflows — failed: two autonomous sub-agent attempts stalled (watchdog killed at 600s no-progress); each had built 2-3 tiers but never committed. Retry serially (not in a parallel batch) or build manually.
-- [ ] Pipecat
+- [~] Pipecat — skipped: not-chat-shaped (real-time voice/multimodal framework; audio I/O pipeline only, no text-only chat mode)
 - [x] Pydantic AI
 - [ ] Semantic Kernel
 - [ ] Smolagents (Hugging Face)
