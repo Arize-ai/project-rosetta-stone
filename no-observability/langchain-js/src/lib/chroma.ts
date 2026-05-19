@@ -1,4 +1,4 @@
-import { ChromaClient } from "chromadb";
+import { ChromaClient, type Where } from "chromadb";
 
 const CHROMA_URL = process.env.CHROMA_URL || "http://localhost:8000";
 const COLLECTION_NAME = "products";
@@ -39,7 +39,7 @@ export async function vectorSearch(
     const results = await collection.query({
       queryTexts: [query],
       nResults,
-      ...(where ? { where } : {}),
+      ...(where ? { where: where as Where } : {}),
     });
 
     return results.ids[0] || [];

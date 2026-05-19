@@ -1,4 +1,4 @@
-import { shoppingAgent, SYSTEM_PROMPT } from "@/langchain/agent";
+import { getShoppingAgent, SYSTEM_PROMPT } from "@/langchain/agent";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
@@ -20,6 +20,7 @@ export async function POST(req: Request) {
     userId = (session.user as { id?: string }).id || session.user.email || "anonymous";
   }
   const { messages } = await req.json();
+  const sessionId = req.headers.get("x-session-id") ?? crypto.randomUUID();
 
   // Convert client messages to LangChain message types and prepend system context
   const langchainMessages = [
@@ -45,9 +46,9 @@ export async function POST(req: Request) {
         let hadTextBeforeToolCall = false;
         let inToolCall = false;
 
-        const eventStream = shoppingAgent.streamEvents(
+        const eventStream = getShoppingAgent().streamEvents(
           { messages: langchainMessages },
-          { version: "v2" }
+          { version: "v2", metadata: { session_id: sessionId } }
         );
 
         for await (const event of eventStream) {

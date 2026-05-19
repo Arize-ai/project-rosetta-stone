@@ -1,29 +1,30 @@
 // Arize AX observability — must be registered before creating LangChain clients
 import { SEMRESATTRS_PROJECT_NAME } from "@arizeai/openinference-semantic-conventions";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
-import { Resource } from "@opentelemetry/resources";
-import { NodeTracerProvider, SimpleSpanProcessor } from "@opentelemetry/sdk-trace-node";
+import { resourceFromAttributes } from "@opentelemetry/resources";
+import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 import { LangChainInstrumentation } from "@arizeai/openinference-instrumentation-langchain";
 import * as CallbackManagerModule from "@langchain/core/callbacks/manager";
+import { RootAwareOpenInferenceProcessor } from "./root-aware-processor";
 
 const projectName = process.env.ARIZE_PROJECT_NAME || "wonder-toys-langchain-js";
 
 const provider = new NodeTracerProvider({
-  resource: new Resource({
+  resource: resourceFromAttributes({
     [ATTR_SERVICE_NAME]: projectName,
     [SEMRESATTRS_PROJECT_NAME]: projectName,
   }),
   spanProcessors: [
-    new SimpleSpanProcessor(
-      new OTLPTraceExporter({
+    new RootAwareOpenInferenceProcessor({
+      exporter: new OTLPTraceExporter({
         url: "https://otlp.arize.com/v1/traces",
         headers: {
           space_id: process.env.ARIZE_SPACE_ID || "",
           api_key: process.env.ARIZE_API_KEY || "",
         },
-      })
-    ),
+      }),
+    }),
   ],
 });
 
@@ -39,11 +40,6 @@ import { getProduct } from "./tools/get-product";
 import { purchaseProduct } from "./tools/purchase";
 import { checkOrderStatus } from "./tools/order-status";
 import { cancelOrderTool } from "./tools/cancel-order";
-
-const llm = new ChatAnthropic({
-  model: "claude-sonnet-4-20250514",
-  anthropicApiKey: process.env.ANTHROPIC_API_KEY,
-});
 
 const tools = [searchProducts, getProduct, purchaseProduct, checkOrderStatus, cancelOrderTool];
 
@@ -102,7 +98,15 @@ Description or marketing copy
 
 7. **Important**: You have a userId available in the conversation context. Always use it when making purchases or checking orders. The userId will be provided in the system context.`;
 
-export const shoppingAgent = createReactAgent({
-  llm,
-  tools,
-});
+let _shoppingAgent: ReturnType<typeof createReactAgent> | null = null;
+
+export function getShoppingAgent() {
+  if (!_shoppingAgent) {
+    const llm = new ChatAnthropic({
+      model: "claude-sonnet-4-20250514",
+      apiKey: process.env.ANTHROPIC_API_KEY,
+    });
+    _shoppingAgent = createReactAgent({ llm, tools });
+  }
+  return _shoppingAgent;
+}

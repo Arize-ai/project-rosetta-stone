@@ -1,12 +1,37 @@
 // Phoenix observability — must be registered before creating LangChain clients
 import { register } from "@arizeai/phoenix-otel";
 import { LangChainInstrumentation } from "@arizeai/openinference-instrumentation-langchain";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
 import * as CallbackManagerModule from "@langchain/core/callbacks/manager";
+import { RootAwareOpenInferenceProcessor } from "./root-aware-processor";
+
+// Mirror @arizeai/phoenix-otel's `ensureCollectorEndpoint`: append `/v1/traces`
+// when the user-provided endpoint omits it. We need this here because we
+// construct the OTLPTraceExporter ourselves to wrap it in the root-aware
+// processor; the default `register({ url })` path would do this for us.
+function ensureCollectorEndpoint(url: string): string {
+  if (!url.includes("/v1/traces")) {
+    const u = new URL(url);
+    if (!u.pathname.endsWith("/")) u.pathname += "/";
+    u.pathname += "v1/traces";
+    return u.toString();
+  }
+  return new URL(url).toString();
+}
+
+const phoenixUrl = ensureCollectorEndpoint(process.env.PHOENIX_COLLECTOR_ENDPOINT ?? "http://localhost:6006");
+const phoenixApiKey = process.env.PHOENIX_API_KEY ?? "";
 
 register({
   projectName: process.env.PHOENIX_PROJECT_NAME || "wonder-toys-langchain-js",
-  url: process.env.PHOENIX_COLLECTOR_ENDPOINT,
-  apiKey: process.env.PHOENIX_API_KEY,
+  spanProcessors: [
+    new RootAwareOpenInferenceProcessor({
+      exporter: new OTLPTraceExporter({
+        url: phoenixUrl,
+        headers: { authorization: `Bearer ${phoenixApiKey}` },
+      }),
+    }),
+  ],
 });
 
 const lcInstrumentation = new LangChainInstrumentation();
@@ -19,11 +44,6 @@ import { getProduct } from "./tools/get-product";
 import { purchaseProduct } from "./tools/purchase";
 import { checkOrderStatus } from "./tools/order-status";
 import { cancelOrderTool } from "./tools/cancel-order";
-
-const llm = new ChatAnthropic({
-  model: "claude-sonnet-4-20250514",
-  anthropicApiKey: process.env.ANTHROPIC_API_KEY,
-});
 
 const tools = [searchProducts, getProduct, purchaseProduct, checkOrderStatus, cancelOrderTool];
 
@@ -82,7 +102,15 @@ Description or marketing copy
 
 7. **Important**: You have a userId available in the conversation context. Always use it when making purchases or checking orders. The userId will be provided in the system context.`;
 
-export const shoppingAgent = createReactAgent({
-  llm,
-  tools,
-});
+let _shoppingAgent: ReturnType<typeof createReactAgent> | null = null;
+
+export function getShoppingAgent() {
+  if (!_shoppingAgent) {
+    const llm = new ChatAnthropic({
+      model: "claude-sonnet-4-20250514",
+      apiKey: process.env.ANTHROPIC_API_KEY,
+    });
+    _shoppingAgent = createReactAgent({ llm, tools });
+  }
+  return _shoppingAgent;
+}
