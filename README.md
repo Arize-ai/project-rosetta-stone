@@ -21,6 +21,7 @@ Every framework below is implemented across all three observability tiers (no-ob
 | [LlamaIndex](https://www.llamaindex.ai/) | ✅ | — |
 | [Mastra](https://mastra.ai/) | — | ✅ |
 | [Microsoft Agent Framework](https://learn.microsoft.com/en-us/agent-framework/) | ✅ | — |
+| [Microsoft Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/) | ✅ | — |
 | [Pydantic AI](https://ai.pydantic.dev/) | ✅ | — |
 | [Smolagents](https://huggingface.co/docs/smolagents/) | ✅ | — |
 | [Vercel AI SDK](https://ai-sdk.dev/) | — | ✅ |
@@ -44,6 +45,7 @@ rosetta/
 │   ├── mastra/                  Mastra framework (TypeScript)
 │   ├── microsoft-agent-py/      Microsoft Agent Framework (Python + Next.js)
 │   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
+│   ├── semantic-kernel-py/      Microsoft Semantic Kernel (Python + Next.js)
 │   ├── smolagents-py/           Smolagents (Python + Next.js)
 │   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── phoenix/                   Arize Phoenix Cloud instrumentation
@@ -61,6 +63,7 @@ rosetta/
 │   ├── mastra/                  Mastra framework (TypeScript)
 │   ├── microsoft-agent-py/      Microsoft Agent Framework (Python + Next.js)
 │   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
+│   ├── semantic-kernel-py/      Microsoft Semantic Kernel (Python + Next.js)
 │   ├── smolagents-py/           Smolagents (Python + Next.js)
 │   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── ax/                        Arize AX instrumentation
@@ -78,6 +81,7 @@ rosetta/
 │   ├── mastra/                  Mastra framework (TypeScript)
 │   ├── microsoft-agent-py/      Microsoft Agent Framework (Python + Next.js)
 │   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
+│   ├── semantic-kernel-py/      Microsoft Semantic Kernel (Python + Next.js)
 │   ├── smolagents-py/           Smolagents (Python + Next.js)
 │   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── product-images/            200 AI-generated product images (shared)
@@ -115,6 +119,7 @@ The UI includes a home page with featured products and category chips, product d
 | **LlamaIndex Python** | `llama_index` FunctionAgent | `llama-index-llms-anthropic` | `stream_events` | Python FastAPI backend + Next.js frontend |
 | **Mastra** | `@mastra/core` Agent | `@ai-sdk/anthropic` (Vercel AI SDK) | `stream.fullStream` | Next.js monolith |
 | **Microsoft Agent Framework** | `agent_framework` Agent + AgentSession | `agent_framework.anthropic.AnthropicClient` | `agent.run(stream=True)` over `AgentResponseUpdate` events | Python FastAPI backend + Next.js frontend |
+| **Microsoft Semantic Kernel** | `semantic_kernel.agents` `ChatCompletionAgent` + `ChatHistoryAgentThread` | `semantic_kernel.connectors.ai.anthropic.AnthropicChatCompletion` | `agent.invoke_stream()` over `StreamingChatMessageContent` chunks | Python FastAPI backend + Next.js frontend |
 | **Pydantic AI** | `pydantic_ai` Agent | `"anthropic:claude-sonnet-4"` model string | `agent.run_stream_events()` over PartStart/PartDelta events | Python FastAPI backend + Next.js frontend |
 | **Smolagents** | `smolagents.ToolCallingAgent` | `LiteLLMModel("anthropic/claude-sonnet-4")` | `agent.run(stream=True)` over `ChatMessageStreamDelta` events with `stream_outputs=True` | Python FastAPI backend + Next.js frontend |
 | **Vercel AI SDK** | Vercel AI SDK `streamText` | `@ai-sdk/anthropic` | `result.fullStream` | Next.js monolith |
@@ -219,6 +224,15 @@ For **Microsoft Agent Framework**, only these files differ:
 - `backend/main.py` — imports `backend.tracing` before other backend modules
 - `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-agent-framework`)
 - `env.example` — observability environment variables
+
+For **Microsoft Semantic Kernel**, only these files differ:
+
+- `backend/tracing.py` — tracing initialization (new file, imported before `semantic_kernel`). Uses `openinference-instrumentation-anthropic` directly against the global TracerProvider set up by `phoenix.otel.register` / `arize.otel.register`. The Arize docs' suggested OpenLIT bridge is **not** used — OpenLIT has no `semantic_kernel` instrumentor, and its anthropic instrumentor wraps streaming responses in a class that breaks SK's `isinstance(response, AsyncStream)` introspection. Patching the Anthropic SDK directly sidesteps both issues.
+- `backend/main.py` — imports `backend.tracing` before other backend modules
+- `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-anthropic`)
+- `env.example` — observability environment variables
+
+`backend/agent.py` is shared across all three tiers and wraps `ChatCompletionAgent.invoke_stream` in `using_session(user_id)` so spans carry `session.id`. SK emits its own native OTel `agent` / `AutoFunctionInvocationLoop` / `execute_tool` spans automatically, so the trace tree contains AGENT + CHAIN + TOOL + LLM kinds without any manual wrapping. Also note: SK's Anthropic connector parser rejects `list[T]` tool args streamed by Claude (`FunctionExecutionException: expected to be parsed to list[str] but is not`), so `backend/tools.py` declares `keywords`, `product_ids`, and `quantities` as comma-separated strings and splits them inside each tool.
 
 For **Pydantic AI**, only these files differ:
 

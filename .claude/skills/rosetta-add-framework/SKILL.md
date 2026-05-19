@@ -28,7 +28,7 @@ Snapshot (last refreshed 2026-05-19 from `https://arize.com/docs/llms.txt`). Eac
 - [!] LlamaIndex Workflows — failed: two autonomous sub-agent attempts stalled (watchdog killed at 600s no-progress); each had built 2-3 tiers but never committed. Retry serially (not in a parallel batch) or build manually.
 - [ ] Pipecat
 - [x] Pydantic AI
-- [ ] Semantic Kernel
+- [x] Semantic Kernel
 - [x] Smolagents (Hugging Face)
 - [x] BeeAI
 
