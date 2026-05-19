@@ -11,6 +11,12 @@ TODO.md
 # Demo screenshots captured by the rosetta-demo-capture skill
 demo-screenshots/
 
+# Playwright build artefacts (kept: playwright/package.json, config, tests)
+playwright/test-results/
+playwright/playwright-report/
+playwright/blob-report/
+playwright/.cache/
+
 # Python virtual environment (for ChromaDB server)
 .venv/
 
