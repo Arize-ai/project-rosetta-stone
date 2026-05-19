@@ -10,7 +10,7 @@ End-to-end workflow for bringing a new agent framework into the repo. Mirrors th
 ## Inputs
 
 - `<framework>` — framework name in the form used by directory naming, e.g. `agno`, `google-adk`, `smolagents`, `crewai`. Use the slug from Arize's docs (`https://arize.com/docs/ax/integrations/python-agent-frameworks/<slug>/<slug>-tracing`).
-- `<language>` — `py` for Python, `js`/`ts` for TypeScript. Affects which existing tier is used as the clone source.
+- `<language>` — `py` for Python, `js`/`ts` for TypeScript, `java` for Java. Affects which existing tier is used as the clone source. **Note:** Java tiers don't fit the current Node/Python repo shape — see the Java section under TODO before attempting.
 - `--start-from <phase>` (optional) — resume from `discover` | `research` | `build-noobs` | `build-phoenix` | `build-ax` | `playwright` | `docs`. Useful when a phase fails mid-flow.
 
 ## TODO — frameworks not yet implemented
@@ -34,6 +34,20 @@ Snapshot (last refreshed 2026-05-18 from `https://arize.com/docs/llms.txt`). Eac
 
 ### TypeScript (Tier A)
 - [ ] BeeAI
+
+### Java (Tier A)
+
+⚠️ Adding a Java tier is a **significantly larger lift** than adding another Python or TypeScript framework. The repo's current shape assumes a Node/Python stack — every existing tier is either a Next.js monolith or a FastAPI Python backend + Next.js frontend. A Java tier needs:
+- A JVM build setup (Maven or Gradle) added to the repo
+- A new backend serving the same `/chat` SSE protocol from Java (e.g. Spring Boot)
+- Either a separate Java→Next.js frontend bridge, or a Java-rendered UI
+- Java-specific tracing setup matching the Arize Java docs
+- Adjustments to `scripts/start.sh` patterns since the existing one is `uv`/`npm`-only
+
+Decide whether the project wants this dimension before starting. If yes, the per-framework work is then:
+- [ ] LangChain4j
+- [ ] Spring AI
+- [ ] Arconia
 
 ### Borderline — decide before building
 - [ ] Guardrails AI (output validation)
