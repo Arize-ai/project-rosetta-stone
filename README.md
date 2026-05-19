@@ -10,6 +10,7 @@ Every framework below is implemented across all three observability tiers (no-ob
 
 | Framework | Python | TypeScript |
 |---|:---:|:---:|
+| [AutoGen AgentChat](https://microsoft.github.io/autogen/stable/) | ✅ | — |
 | [CrewAI](https://www.crewai.com/) | ✅ | — |
 | [Google ADK](https://google.github.io/adk-docs/) | ✅ | — |
 | [LangChain / LangGraph](https://www.langchain.com/) | ✅ | ✅ |
@@ -24,6 +25,7 @@ Every framework below is implemented across all three observability tiers (no-ob
 ```tree
 rosetta/
 ├── no-observability/          No instrumentation (baseline)
+│   ├── autogen-py/              AutoGen AgentChat (Python + Next.js)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── google-adk-py/           Google ADK (Python + Next.js)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
@@ -34,6 +36,7 @@ rosetta/
 │   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
 │   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── phoenix/                   Arize Phoenix Cloud instrumentation
+│   ├── autogen-py/              AutoGen AgentChat (Python + Next.js)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── google-adk-py/           Google ADK (Python + Next.js)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
@@ -44,6 +47,7 @@ rosetta/
 │   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
 │   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── ax/                        Arize AX instrumentation
+│   ├── autogen-py/              AutoGen AgentChat (Python + Next.js)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── google-adk-py/           Google ADK (Python + Next.js)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
@@ -75,6 +79,7 @@ The UI includes a home page with featured products and category chips, product d
 
 | Framework | Agent library | LLM client | Streaming API | Architecture |
 |-----------|---------------|------------|---------------|--------------|
+| **AutoGen AgentChat** | `autogen_agentchat` AssistantAgent | `autogen_ext.models.anthropic.AnthropicChatCompletionClient` | `agent.run_stream()` over `ModelClientStreamingChunkEvent` (requires `model_client_stream=True`) | Python FastAPI backend + Next.js frontend |
 | **CrewAI** | `crewai` Agent + Task + Crew | `crewai.LLM("anthropic/claude-sonnet-4-5")` (litellm) | `crewai_event_bus` `LLMStreamChunkEvent` | Python FastAPI backend + Next.js frontend |
 | **Google ADK** | `google.adk` Agent + Runner + `InMemorySessionService` | `LiteLlm("anthropic/claude-sonnet-4")` | `Runner.run_async(streaming_mode=SSE)` over `Event` (`event.partial`) | Python FastAPI backend + Next.js frontend |
 | **LangChain.js** | `@langchain/langgraph` ReAct agent | `@langchain/anthropic` | `streamEvents` (v2) | Next.js monolith |
@@ -108,6 +113,16 @@ For **LangChain.js**, only these files differ:
 - `next.config.ts` — `serverExternalPackages` for observability packages
 - `package.json` — observability dependencies
 - `env.example` — observability environment variables
+
+For **AutoGen AgentChat**, only these files differ:
+
+- `backend/tracing.py` — tracing initialization (new file, imported before `autogen_agentchat`). Uses the standard `register()` + `AutogenAgentChatInstrumentor().instrument(tracer_provider=...)` pattern. The instrumentation package is `openinference-instrumentation-autogen-agentchat` (AgentChat layer) rather than `openinference-instrumentation-autogen` (low-level core).
+- `backend/agent.py` — wraps the `agent.run_stream()` call in `using_session(user_id)` + `using_user(user_id)` because the AutoGen AgentChat OpenInference instrumentor does not auto-emit `session.id` / `user.id` attributes. A `try/except ImportError` fallback keeps no-observability working without an `openinference.instrumentation` dependency.
+- `backend/main.py` — imports `backend.tracing` before other backend modules
+- `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-autogen-agentchat`)
+- `env.example` — observability environment variables
+
+Note: AutoGen's `FunctionTool` requires plain-string Annotated tool descriptions (`Annotated[str, "what this is"]`) instead of the Pydantic `Annotated[..., Field(description=...)]` style the other Python tiers use, so `backend/tools.py` is also rewritten in the same way across all three AutoGen tiers.
 
 For **CrewAI**, only these files differ:
 
