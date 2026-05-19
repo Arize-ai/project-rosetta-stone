@@ -236,6 +236,43 @@ After generating traces, configure the same 6 evaluators in the [Arize AX consol
 | Vector search | ChromaDB + all-MiniLM-L6-v2 embeddings |
 | Product images | AI-generated (gpt-image-1) |
 
+## Claude Code Skills
+
+The repo ships with a small set of project-specific skills under `.claude/skills/` that automate common workflows. They're discovered automatically when you open the repo in Claude Code — invoke them by name or describe the task and Claude will pick the right one.
+
+### `rosetta-test` (and its 5 phase skills)
+
+End-to-end test a framework × platform combination on Arize AX or Phoenix. Trigger phrases: *"test the `<framework>` `<platform>` project"*, *"run e2e on `<framework>` `<platform>`"*.
+
+In one invocation, the orchestrator:
+
+1. **setup** — provisions a fresh isolated project on AX/Phoenix with a unique name; writes an `.env.test-local` overlay so the real `.env.local` is never mutated
+2. **traces** — runs the 25 synthetic Wonder Toys requests against the framework's backend
+3. **evals** — Phoenix: runs `npm run evals`. AX: ensures the stable space-level `rosetta-e2e-*` evaluators exist (creates missing ones), then creates and triggers a per-run eval task
+4. **verify** — confirms 25 root traces exist and every expected eval annotation is present
+5. **cleanup** — deletes the platform project, removes the env overlay, kills leftover processes. Always runs unless you pass `--keep`
+
+Each phase has its own skill (`rosetta-test-setup`, `-traces`, `-evals`, `-verify`, `-cleanup`) so you can re-run a single phase against an existing project. Frameworks and platforms are discovered from the directory layout — no hardcoded list, so this works for any new framework dropped under `ax/` or `phoenix/`.
+
+### `rosetta-demo-capture`
+
+Record a full Wonder Toys demo. Trigger phrases: *"capture a demo for `<framework>`"*, *"record screenshots of the Arize session"*.
+
+Runs a canned 3-turn purchase conversation (search dragons → buy the plushie → ship), then drives Safari via AppleScript to:
+
+1. Open the resulting Arize session URL
+2. Expand all trace accordions in the session conversation popover via injected JavaScript
+3. Screenshot the session view
+4. Walk through each trace, expand its spans, screenshot
+
+Output lands in `./demo-screenshots/<framework>-<timestamp>/`. macOS only.
+
+**One-time setup:** in Safari → Settings → Advanced → enable *"Show features for web developers"*, then Settings → Developer → enable *"Allow JavaScript from Apple Events"*. The skill needs this to expand the trace tree before capture.
+
+### External Arize skills
+
+Skills under `.claude/skills/arize-*` (e.g. `arize-trace`, `arize-evaluator`, `arize-dataset`) are installed from [Arize-ai/arize-skills](https://github.com/Arize-ai/arize-skills) and are pinned in `skills-lock.json`. They wrap the `ax` CLI for common Arize platform operations. They're git-ignored locally — re-sync them on a fresh clone via Claude Code's skill installer.
+
 ## License
 
 [MIT](./LICENSE)

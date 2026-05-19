@@ -8,6 +8,9 @@ chroma-data.bak/
 # Local TODO
 TODO.md
 
+# Demo screenshots captured by the rosetta-demo-capture skill
+demo-screenshots/
+
 # Python virtual environment (for ChromaDB server)
 .venv/
 
