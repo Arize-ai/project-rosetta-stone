@@ -75,6 +75,7 @@ Execute in order. Each phase has a dedicated skill — read it and follow.
 | 10 | Session.id verification + fix | (inline — see "Session.id audit" below) |
 | 11 | Playwright UI smoke | `.claude/skills/rosetta-add-framework-playwright/SKILL.md` |
 | 12 | Docs + commit + PR | `.claude/skills/rosetta-add-framework-docs/SKILL.md` |
+| 13 | Screenshots attached to PR | `.claude/skills/rosetta-pr-screenshots/SKILL.md` (auto-invoked by step 12) |
 
 ## Viability gate (phase 2)
 
