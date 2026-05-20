@@ -45,9 +45,9 @@ Snapshot (last refreshed 2026-05-18 from `https://arize.com/docs/llms.txt`). Eac
 - Adjustments to `scripts/start.sh` patterns since the existing one is `uv`/`npm`-only
 
 Decide whether the project wants this dimension before starting. If yes, the per-framework work is then:
-- [ ] LangChain4j
-- [ ] Spring AI
-- [ ] Arconia
+- [~] LangChain4j — deferred: needs Java/Maven build infra + Spring Boot SSE backend before any per-framework work can start. Revisit when infra is decided.
+- [~] Spring AI — deferred: same as LangChain4j; needs Java infra first.
+- [~] Arconia — deferred: same as LangChain4j; needs Java infra first.
 
 ### Borderline — decide before building
 - [ ] Guardrails AI (output validation)
