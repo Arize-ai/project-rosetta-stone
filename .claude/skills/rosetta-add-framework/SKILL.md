@@ -33,7 +33,7 @@ Snapshot (last refreshed 2026-05-19 from `https://arize.com/docs/llms.txt`). Eac
 - [ ] BeeAI
 
 ### TypeScript (Tier A)
-- [ ] BeeAI
+- [~] BeeAI — skipped: needs-manual-investigation. Two autonomous attempts stalled at the parallel-viability-check stage (watchdog killed after 600s of no progress). Surfaced constraint before stalling: `@arizeai/openinference-instrumentation-beeai` only supports `beeai-framework >=0.1.9 <0.1.14`, so pin to `0.1.13` if revisiting. Build manually or run a sub-agent serially (no parallel tool dispatch) when retrying.
 
 ### Java (Tier A)
 
