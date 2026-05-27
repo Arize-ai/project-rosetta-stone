@@ -93,4 +93,14 @@ test("ax session + traces", async ({ page }) => {
       fullPage: true,
     });
   }
+
+  // Save the rotated cookies back to disk so the next run starts from a
+  // fresh refresh token. Without this, AX's single-use refresh-token model
+  // means every subsequent run needs `auth-bootstrap.mjs` again.
+  // We only save if the session screenshot actually rendered auth'd content
+  // (heuristic: the page URL is still on /organizations/... — if AX
+  // redirected to /auth/login the test would have shown the login page).
+  if (!page.url().includes("/auth/login")) {
+    await page.context().storageState({ path: STORAGE_STATE });
+  }
 });

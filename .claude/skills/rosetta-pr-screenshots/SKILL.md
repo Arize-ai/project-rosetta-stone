@@ -46,6 +46,10 @@ This opens Chromium, navigates to `https://app.arize.com`, watches the URL for t
 
 Re-run only when the session expires (observed: ~5–7 days). Override paths via `AX_STORAGE_STATE=/some/path node auth-bootstrap.mjs`.
 
+### Token rotation
+
+AX rotates the refresh token on every use, so the saved state would be stale after the first Playwright run. The AX screenshot spec writes the context's `storageState` back to disk at the end of every successful run (`page.context().storageState({ path: STATE_PATH })`). The next run reads the rotated token. As long as you re-run before AX's underlying session expiry (~5–7 days), you don't need to re-bootstrap.
+
 ## Inputs
 
 - `FRAMEWORK` — slug (e.g. `agno`, `crewai`)
