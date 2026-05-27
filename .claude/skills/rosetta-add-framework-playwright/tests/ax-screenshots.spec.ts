@@ -3,7 +3,7 @@ import path from "node:path";
 import os from "node:os";
 import fs from "node:fs";
 
-// Captures Arize AX session view + per-trace screenshots.
+// Captures Arize AX session view + per-trace screenshots in a single test.
 //
 // Driven by env vars from the rosetta-pr-screenshots skill orchestrator:
 //   OUT_DIR              absolute path to write PNGs into
@@ -11,8 +11,14 @@ import fs from "node:fs";
 //   AX_TRACE_URLS        JSON array of trace URLs (e.g. '["url1","url2"]')
 //   AX_STORAGE_STATE     path to storage state JSON (default ~/.rosetta-stone/ax-auth.json)
 //
-// The whole file skips if AX_SESSION_URL isn't set, so a generic `npm test`
+// The file skips if AX_SESSION_URL isn't set, so a generic `npm test`
 // only runs the public-flow smoke.
+//
+// Why one test instead of one-per-screenshot: each Playwright test runs in a
+// fresh context, and AX's auth model appears to consume the saved refresh
+// token on first use — so only the first context can auth from the saved
+// storageState. Bundling everything into one test keeps a single context
+// across session + all trace screenshots.
 
 const OUT_DIR = process.env.OUT_DIR;
 const SESSION_URL = process.env.AX_SESSION_URL;
@@ -22,9 +28,6 @@ const STORAGE_STATE =
   path.join(os.homedir(), ".rosetta-stone", "ax-auth.json");
 
 test.skip(!SESSION_URL || !OUT_DIR, "AX_SESSION_URL or OUT_DIR not set");
-
-// AX SPA is heavy — give each test plenty of room to load + render + expand.
-test.describe.configure({ timeout: 90_000 });
 
 test.use({
   storageState: STORAGE_STATE,
@@ -56,37 +59,29 @@ test.beforeAll(() => {
   if (OUT_DIR) fs.mkdirSync(OUT_DIR, { recursive: true });
 });
 
-test("ax session view", async ({ page }) => {
+test("ax session + traces", async ({ page }) => {
+  const traceUrls: string[] = JSON.parse(TRACE_URLS_JSON);
+  test.setTimeout(120_000 + traceUrls.length * 45_000);
+
+  // Session view first — establishes auth for the context.
   await page.goto(SESSION_URL!, { waitUntil: "domcontentloaded" });
-  // Wait for the SPA to render. The session panel is the most reliable
-  // marker — accordion triggers appear once trace data has loaded.
   await page
     .waitForSelector("button.ac-accordion-trigger", { timeout: 30_000 })
-    .catch(() => {
-      // If we can't find the accordion, the session may be empty. Continue
-      // anyway and screenshot whatever rendered.
-    });
+    .catch(() => {});
   await expandAll(page);
   await page.waitForTimeout(1500);
   await page.screenshot({
     path: path.join(OUT_DIR!, "ax-01-session.png"),
     fullPage: true,
   });
-});
 
-const traceUrls: string[] = JSON.parse(TRACE_URLS_JSON);
+  // Trace views reuse the same auth'd page.
+  for (const [idx, url] of traceUrls.entries()) {
+    const n = String(idx + 2).padStart(2, "0");
+    const tidMatch = url.match(/selectedTraceId=([0-9a-fA-F]+)/);
+    const tidShort = tidMatch ? tidMatch[1].slice(-8) : `idx${idx + 1}`;
 
-for (const [idx, url] of traceUrls.entries()) {
-  const n = String(idx + 2).padStart(2, "0");
-  // Trace IDs in URLs use `selectedTraceId=<hex>` — pull the last 8 chars
-  // for the filename so it's recognizable but short.
-  const tidMatch = url.match(/selectedTraceId=([0-9a-fA-F]+)/);
-  const tidShort = tidMatch ? tidMatch[1].slice(-8) : `idx${idx + 1}`;
-
-  test(`ax trace ${idx + 1} (${tidShort})`, async ({ page }) => {
     await page.goto(url, { waitUntil: "domcontentloaded" });
-    // Wait for the trace detail panel to render. "Trace Tree" is the
-    // tab label that appears once the span tree component mounts.
     await page
       .getByText("Trace Tree", { exact: false })
       .first()
@@ -97,5 +92,5 @@ for (const [idx, url] of traceUrls.entries()) {
       path: path.join(OUT_DIR!, `ax-${n}-trace-${tidShort}.png`),
       fullPage: true,
     });
-  });
-}
+  }
+});
