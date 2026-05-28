@@ -1,0 +1,34 @@
+server:
+  port: 18004
+  # Long timeouts because LLM responses can take a while to start streaming.
+  servlet:
+    session:
+      timeout: 30m
+
+spring:
+  application:
+    name: wonder-toys-annotation-java
+  # Keep noise low by default; bump via WONDER_TOYS_LOG_LEVEL env.
+  output:
+    ansi:
+      enabled: detect
+
+logging:
+  level:
+    root: INFO
+    com.wondertoys: ${WONDER_TOYS_LOG_LEVEL:INFO}
+    com.anthropic: WARN
+    org.springframework.web: WARN
+
+wondertoys:
+  anthropic:
+    api-key: ${ANTHROPIC_API_KEY:}
+    model: claude-sonnet-4-20250514
+  chroma:
+    url: ${CHROMA_URL:http://localhost:8000}
+  backend:
+    secret: ${BACKEND_SECRET:}
+  phoenix:
+    endpoint: ${PHOENIX_COLLECTOR_ENDPOINT:http://localhost:6006/v1/traces}
+    api-key: ${PHOENIX_API_KEY:}
+    project-name: ${PHOENIX_PROJECT_NAME:wonder-toys-annotation-java}
