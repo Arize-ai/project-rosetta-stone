@@ -33,7 +33,7 @@ Snapshot (last refreshed 2026-05-19 from `https://arize.com/docs/llms.txt`). Eac
 - [x] BeeAI
 
 ### TypeScript (Tier A)
-- [ ] BeeAI
+- [x] BeeAI
 
 ### Java (Tier A)
 

@@ -12,7 +12,7 @@ Every framework below is implemented across all three observability tiers (no-ob
 |---|:---:|:---:|
 | [Agno](https://docs.agno.com/) | ✅ | — |
 | [AutoGen AgentChat](https://microsoft.github.io/autogen/stable/) | ✅ | — |
-| [BeeAI](https://framework.beeai.dev/) | ✅ | — |
+| [BeeAI](https://framework.beeai.dev/) | ✅ | ✅ |
 | [CrewAI](https://www.crewai.com/) | ✅ | — |
 | [DSPy](https://dspy.ai/) | ✅ | — |
 | [Google ADK](https://google.github.io/adk-docs/) | ✅ | — |
@@ -33,6 +33,7 @@ rosetta/
 │   ├── agno-py/                 Agno (Python + Next.js)
 │   ├── autogen-py/              AutoGen AgentChat (Python + Next.js)
 │   ├── beeai-py/                BeeAI (Python + Next.js)
+│   ├── beeai-ts/                BeeAI framework (TypeScript)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── dspy-py/                 DSPy (Python + Next.js)
 │   ├── google-adk-py/           Google ADK (Python + Next.js)
@@ -49,6 +50,7 @@ rosetta/
 │   ├── agno-py/                 Agno (Python + Next.js)
 │   ├── autogen-py/              AutoGen AgentChat (Python + Next.js)
 │   ├── beeai-py/                BeeAI (Python + Next.js)
+│   ├── beeai-ts/                BeeAI framework (TypeScript)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── dspy-py/                 DSPy (Python + Next.js)
 │   ├── google-adk-py/           Google ADK (Python + Next.js)
@@ -65,6 +67,7 @@ rosetta/
 │   ├── agno-py/                 Agno (Python + Next.js)
 │   ├── autogen-py/              AutoGen AgentChat (Python + Next.js)
 │   ├── beeai-py/                BeeAI (Python + Next.js)
+│   ├── beeai-ts/                BeeAI framework (TypeScript)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── dspy-py/                 DSPy (Python + Next.js)
 │   ├── google-adk-py/           Google ADK (Python + Next.js)
@@ -102,6 +105,7 @@ The UI includes a home page with featured products and category chips, product d
 | **Agno** | `agno.agent.Agent` + `InMemoryDb` | `agno.models.anthropic.Claude` | `agent.arun(stream=True, stream_events=True)` over `RunContentEvent` / `ToolCallStartedEvent` | Python FastAPI backend + Next.js frontend |
 | **AutoGen AgentChat** | `autogen_agentchat` AssistantAgent | `autogen_ext.models.anthropic.AnthropicChatCompletionClient` | `agent.run_stream()` over `ModelClientStreamingChunkEvent` (requires `model_client_stream=True`) | Python FastAPI backend + Next.js frontend |
 | **BeeAI** | `beeai_framework` `RequirementAgent` + `UnconstrainedMemory` | `ChatModel.from_name("anthropic:claude-sonnet-4")` (litellm) | `agent.run(...).observe(...)` over `RequirementAgentFinalAnswerEvent.delta` | Python FastAPI backend + Next.js frontend |
+| **BeeAI (TypeScript)** | `beeai-framework` ReActAgent + UnconstrainedMemory | `AnthropicChatModel` (BeeAI's wrapper around `@ai-sdk/anthropic`) | `agent.run().observe(emitter)` — `partialUpdate` event with `update.key === "final_answer"` | Next.js monolith |
 | **CrewAI** | `crewai` Agent + Task + Crew | `crewai.LLM("anthropic/claude-sonnet-4-5")` (litellm) | `crewai_event_bus` `LLMStreamChunkEvent` | Python FastAPI backend + Next.js frontend |
 | **DSPy** | `dspy.ReAct` over a `dspy.Signature` + `dspy.History` | `dspy.LM("anthropic/claude-sonnet-4")` (litellm) | `dspy.streamify` + `StreamListener(signature_field_name="answer")` | Python FastAPI backend + Next.js frontend |
 | **Google ADK** | `google.adk` Agent + Runner + `InMemorySessionService` | `LiteLlm("anthropic/claude-sonnet-4")` | `Runner.run_async(streaming_mode=SSE)` over `Event` (`event.partial`) | Python FastAPI backend + Next.js frontend |
