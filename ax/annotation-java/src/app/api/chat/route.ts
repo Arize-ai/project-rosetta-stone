@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8001";
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:18004";
 const BACKEND_SECRET = process.env.BACKEND_SECRET || "";
 
 export async function POST(req: Request) {
