@@ -17,8 +17,11 @@ repositories {
     mavenCentral()
 }
 
-extra["langchain4jVersion"] = "1.0.0"
-extra["langchain4jAnthropicVersion"] = "1.0.0-beta5"
+// LangChain4j 1.12.0 is the floor: openinference-instrumentation-langchain4j
+// 0.1.8 references `dev.langchain4j.observability.api.listener.AiServiceRequestIssuedListener`
+// which first appears in langchain4j-core 1.12.0. Anything older NoClassDefFounds.
+extra["langchain4jVersion"] = "1.12.2"
+extra["langchain4jAnthropicVersion"] = "1.12.2"
 
 dependencies {
     // Spring Boot — Web MVC for the SSE chat endpoint, JSON product API.
