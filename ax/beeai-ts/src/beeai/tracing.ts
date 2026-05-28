@@ -31,11 +31,15 @@ export async function initTracing() {
   const { OTLPTraceExporter } = await import("@opentelemetry/exporter-trace-otlp-proto");
   const { resourceFromAttributes } = await import("@opentelemetry/resources");
   const { NodeTracerProvider } = await import("@opentelemetry/sdk-trace-node");
-  const { SimpleSpanProcessor } = await import("@opentelemetry/sdk-trace-base");
   const { ATTR_SERVICE_NAME } = await import("@opentelemetry/semantic-conventions");
   const { BeeAIInstrumentation } = await import(
     "@arizeai/openinference-instrumentation-beeai"
   );
+  // Wraps the OTLP exporter so BeeAI's emitter-based spans are normalised into
+  // OpenInference semconv (adds the missing instrumentationScope.name which
+  // the OTel transformer otherwise can't serialise — Phoenix's
+  // `@arizeai/phoenix-otel` register() uses this same processor by default).
+  const { OpenInferenceSimpleSpanProcessor } = await import("@arizeai/openinference-vercel");
   // Whole namespace import so the instrumentor can patch all exported classes.
   const beeaiFramework = await import("beeai-framework");
 
@@ -49,15 +53,15 @@ export async function initTracing() {
       [SEMRESATTRS_PROJECT_NAME]: projectName,
     }),
     spanProcessors: [
-      new SimpleSpanProcessor(
-        new OTLPTraceExporter({
+      new OpenInferenceSimpleSpanProcessor({
+        exporter: new OTLPTraceExporter({
           url: "https://otlp.arize.com/v1/traces",
           headers: {
             space_id: spaceId,
             api_key: apiKey,
           },
         }),
-      ),
+      }),
     ],
   });
 
