@@ -43,7 +43,7 @@ class WonderToysPlugin:
     # ---------------------------------------------------------------------
     @kernel_function(
         name="search_products",
-        description="Search the toy store inventory by text query, keywords, age range, or category. Use this when the user wants to find or browse products. Pass an empty string / empty list / 0 for parameters you don't want to filter on.",
+        description="Search the toy store inventory by text query, keywords, age range, or category. Use this when the user wants to find or browse products. Pass an empty string / 0 for parameters you don't want to filter on.",
     )
     def search_products(
         self,
@@ -52,9 +52,15 @@ class WonderToysPlugin:
             "Free-text search query to match against product names and descriptions; empty string to skip",
         ] = "",
         keywords: Annotated[
-            list[str],
-            "Specific keywords to match against product keyword tags; empty list to skip",
-        ] = [],
+            str,
+            # NOTE: We accept a single comma-separated string rather than `list[str]`
+            # because SK's parameter validator rejects partial / single-element
+            # streamed lists from the Anthropic connector with
+            # `FunctionExecutionException: Parameter ... expected to be parsed to
+            # list[str] but is not`. Splitting on commas inside the tool dodges that
+            # validation path while keeping the schema natural to Claude.
+            "Comma-separated keywords to match against product keyword tags (e.g. 'dragon,plush'); empty string to skip",
+        ] = "",
         min_age: Annotated[
             int,
             "Minimum age in years for the target child; 0 to skip",
@@ -70,7 +76,10 @@ class WonderToysPlugin:
     ) -> dict:
         # Normalize "no-op" sentinels back to Python None semantics.
         query = query or None
-        keywords = list(keywords) if keywords else None
+        keywords_list = (
+            [k.strip() for k in keywords.split(",") if k.strip()] if keywords else None
+        )
+        keywords = keywords_list  # type: ignore[assignment] — rebind below uses list semantics
         min_age = min_age if min_age else None
         max_age = max_age if max_age else None
         category = category or None
@@ -184,11 +193,16 @@ class WonderToysPlugin:
     # ---------------------------------------------------------------------
     # 3. purchase_product
     # ---------------------------------------------------------------------
-    # NOTE: Semantic Kernel's Anthropic connector ships the raw Pydantic-derived
-    # JSON Schema to Claude. Using a Pydantic model directly for `items` (e.g.
-    # `list[PurchaseItem]`) emits a "Ge(ge=1)" description string that Claude
-    # rejects as "JSON schema is invalid; must match draft 2020-12". Two parallel
-    # lists of plain `str` / `int` sidestep the issue.
+    # NOTE: Semantic Kernel's Anthropic connector has two known parser issues
+    # we work around here:
+    #  1. Pydantic-derived JSON Schema for `list[PurchaseItem]` emits a
+    #     "Ge(ge=1)" description string Claude rejects as
+    #     "JSON schema is invalid; must match draft 2020-12".
+    #  2. SK's parameter validator throws `FunctionExecutionException: Parameter
+    #     <name> expected to be parsed to list[str|int] but is not` for streamed
+    #     list args from the Anthropic connector.
+    # Both are sidestepped by accepting comma-separated strings and splitting
+    # inside the tool.
     @kernel_function(
         name="purchase_product",
         description="Purchase one or more products. The user's credit card is on file, so only shipping details are needed. Use this after the user has confirmed they want to buy and has provided shipping information.",
@@ -196,12 +210,12 @@ class WonderToysPlugin:
     def purchase_product(
         self,
         product_ids: Annotated[
-            list[str],
-            "Product IDs to purchase (e.g. ['toy-001', 'toy-042']) — order must align with quantities",
+            str,
+            "Comma-separated product IDs to purchase (e.g. 'toy-001,toy-042') — order must align with quantities",
         ],
         quantities: Annotated[
-            list[int],
-            "Quantities to purchase for each product, aligned with product_ids",
+            str,
+            "Comma-separated quantities to purchase for each product, aligned with product_ids (e.g. '1,2')",
         ],
         shipping_name: Annotated[str, "Recipient full name"],
         shipping_street: Annotated[str, "Street address"],
@@ -211,6 +225,16 @@ class WonderToysPlugin:
         shipping_country: Annotated[str, "Country"],
     ) -> dict:
         user_id = current_user_id.get()
+
+        # Parse the comma-separated lists.
+        product_ids = [pid.strip() for pid in product_ids.split(",") if pid.strip()]
+        try:
+            quantities = [int(q.strip()) for q in quantities.split(",") if q.strip()]
+        except ValueError:
+            return {
+                "success": False,
+                "error": "quantities must be comma-separated integers",
+            }
 
         if len(product_ids) != len(quantities):
             return {
