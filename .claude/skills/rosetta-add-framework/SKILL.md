@@ -15,14 +15,14 @@ End-to-end workflow for bringing a new agent framework into the repo. Mirrors th
 
 ## TODO — frameworks not yet implemented
 
-Snapshot (last refreshed 2026-05-18 from `https://arize.com/docs/llms.txt`). Each phase-1 `discover` run re-fetches and shows the diff.
+Snapshot (last refreshed 2026-05-19 from `https://arize.com/docs/llms.txt`). Each phase-1 `discover` run re-fetches and shows the diff.
 
 ### Python (Tier A — clear agent frameworks)
 - [ ] Agno
 - [ ] AutoGen
 - [!] AWS Strands — failed: two autonomous sub-agent attempts stalled (watchdog killed at 600s no-progress); each had built 2-3 tiers but never committed. Retry serially (not in a parallel batch) or build manually.
 - [x] CrewAI
-- [ ] DSPy
+- [x] DSPy
 - [x] Google ADK
 - [ ] Haystack
 - [!] LlamaIndex Workflows — failed: two autonomous sub-agent attempts stalled (watchdog killed at 600s no-progress); each had built 2-3 tiers but never committed. Retry serially (not in a parallel batch) or build manually.

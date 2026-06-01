@@ -12,6 +12,7 @@ Every framework below is implemented across all three observability tiers (no-ob
 |---|:---:|:---:|
 | [BeeAI](https://framework.beeai.dev/) | ✅ | — |
 | [CrewAI](https://www.crewai.com/) | ✅ | — |
+| [DSPy](https://dspy.ai/) | ✅ | — |
 | [Google ADK](https://google.github.io/adk-docs/) | ✅ | — |
 | [LangChain / LangGraph](https://www.langchain.com/) | ✅ | ✅ |
 | [LlamaIndex](https://www.llamaindex.ai/) | ✅ | — |
@@ -27,6 +28,7 @@ rosetta/
 ├── no-observability/          No instrumentation (baseline)
 │   ├── beeai-py/                BeeAI (Python + Next.js)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
+│   ├── dspy-py/                 DSPy (Python + Next.js)
 │   ├── google-adk-py/           Google ADK (Python + Next.js)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
 │   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
@@ -38,6 +40,7 @@ rosetta/
 ├── phoenix/                   Arize Phoenix Cloud instrumentation
 │   ├── beeai-py/                BeeAI (Python + Next.js)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
+│   ├── dspy-py/                 DSPy (Python + Next.js)
 │   ├── google-adk-py/           Google ADK (Python + Next.js)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
 │   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
@@ -49,6 +52,7 @@ rosetta/
 ├── ax/                        Arize AX instrumentation
 │   ├── beeai-py/                BeeAI (Python + Next.js)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
+│   ├── dspy-py/                 DSPy (Python + Next.js)
 │   ├── google-adk-py/           Google ADK (Python + Next.js)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
 │   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
@@ -81,6 +85,7 @@ The UI includes a home page with featured products and category chips, product d
 |-----------|---------------|------------|---------------|--------------|
 | **BeeAI** | `beeai_framework` `RequirementAgent` + `UnconstrainedMemory` | `ChatModel.from_name("anthropic:claude-sonnet-4")` (litellm) | `agent.run(...).observe(...)` over `RequirementAgentFinalAnswerEvent.delta` | Python FastAPI backend + Next.js frontend |
 | **CrewAI** | `crewai` Agent + Task + Crew | `crewai.LLM("anthropic/claude-sonnet-4-5")` (litellm) | `crewai_event_bus` `LLMStreamChunkEvent` | Python FastAPI backend + Next.js frontend |
+| **DSPy** | `dspy.ReAct` over a `dspy.Signature` + `dspy.History` | `dspy.LM("anthropic/claude-sonnet-4")` (litellm) | `dspy.streamify` + `StreamListener(signature_field_name="answer")` | Python FastAPI backend + Next.js frontend |
 | **Google ADK** | `google.adk` Agent + Runner + `InMemorySessionService` | `LiteLlm("anthropic/claude-sonnet-4")` | `Runner.run_async(streaming_mode=SSE)` over `Event` (`event.partial`) | Python FastAPI backend + Next.js frontend |
 | **LangChain.js** | `@langchain/langgraph` ReAct agent | `@langchain/anthropic` | `streamEvents` (v2) | Next.js monolith |
 | **LangChain Python** | `langgraph` ReAct agent | `langchain-anthropic` | `astream_events` (v2) | Python FastAPI backend + Next.js frontend |
@@ -127,6 +132,14 @@ For **CrewAI**, only these files differ:
 - `backend/main.py` — imports `backend.tracing` before other backend modules
 - `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-crewai`)
 - `env.example` — observability environment variables
+
+For **DSPy**, only these files differ:
+
+- `backend/tracing.py` — tracing initialization (new file, imported before `dspy`). Uses the standard `register()` pattern plus **both** `DSPyInstrumentor` and `LiteLLMInstrumentor` (DSPy is built on LiteLLM, so installing both gives complete coverage from the agent layer down to each LLM call).
+- `backend/main.py` — imports `backend.tracing` before other backend modules
+- `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-dspy` + `openinference-instrumentation-litellm`)
+- `env.example` — observability environment variables
+- Session.id: the OpenInference DSPy instrumentor does not emit `session.id` automatically, so `agent.py` wraps the streaming call in `with using_session(user_id):` across all three tiers (the no-observability tier falls back to a no-op contextmanager when `openinference` isn't installed).
 
 For **Google ADK**, only these files differ:
 
