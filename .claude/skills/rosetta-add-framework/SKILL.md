@@ -28,7 +28,7 @@ Snapshot (last refreshed 2026-05-19 from `https://arize.com/docs/llms.txt`). Eac
 - [!] LlamaIndex Workflows — failed: two autonomous sub-agent attempts stalled (watchdog killed at 600s no-progress); each had built 2-3 tiers but never committed. Retry serially (not in a parallel batch) or build manually.
 - [ ] Pipecat
 - [x] Pydantic AI
-- [ ] Semantic Kernel
+- [x] Semantic Kernel
 - [x] Smolagents (Hugging Face)
 - [x] BeeAI
 
@@ -45,9 +45,9 @@ Snapshot (last refreshed 2026-05-19 from `https://arize.com/docs/llms.txt`). Eac
 - Adjustments to `scripts/start.sh` patterns since the existing one is `uv`/`npm`-only
 
 Decide whether the project wants this dimension before starting. If yes, the per-framework work is then:
-- [ ] LangChain4j
-- [ ] Spring AI
-- [ ] Arconia
+- [x] LangChain4j
+- [x] Spring AI
+- [x] Arconia
 
 ### Borderline — decide before building
 - [ ] Guardrails AI (output validation)
@@ -55,7 +55,7 @@ Decide whether the project wants this dimension before starting. If yes, the per
 - [ ] MCP / Model Context Protocol (wire protocol)
 - [ ] Portkey (LLM gateway)
 - [ ] Together AI (LLM provider)
-- [ ] OpenInference Annotation Tracing (Java) — `@Chain`/`@LLM`/`@Tool`/`@Agent` decorators applied via ByteBuddy for hand-built agents; not a framework
+- [x] OpenInference Annotation Tracing (Java) — `@Chain`/`@LLM`/`@Tool`/`@Agent` decorators applied via ByteBuddy for hand-built agents; not a framework
 
 ## Phases
 
