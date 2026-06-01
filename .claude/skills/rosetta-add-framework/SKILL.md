@@ -15,18 +15,19 @@ End-to-end workflow for bringing a new agent framework into the repo. Mirrors th
 
 ## TODO — frameworks not yet implemented
 
-Snapshot (last refreshed 2026-05-19 from `https://arize.com/docs/llms.txt`). Each phase-1 `discover` run re-fetches and shows the diff.
+Snapshot (last refreshed 2026-06-01 from `https://arize.com/docs/llms.txt`). Each phase-1 `discover` run re-fetches and shows the diff.
 
 ### Python (Tier A — clear agent frameworks)
 - [x] Agno
 - [x] AutoGen
-- [!] AWS Strands — failed: two autonomous sub-agent attempts stalled (watchdog killed at 600s no-progress); each had built 2-3 tiers but never committed. Retry serially (not in a parallel batch) or build manually.
+- [x] AWS Strands
+- [ ] Bedrock AgentCore — new Arize page under aws-strands docs path; investigate whether it's a distinct framework from AWS Strands or a Bedrock-specific variant
 - [x] CrewAI
 - [x] DSPy
 - [x] Google ADK
 - [x] Haystack
 - [!] LlamaIndex Workflows — failed: two autonomous sub-agent attempts stalled (watchdog killed at 600s no-progress); each had built 2-3 tiers but never committed. Retry serially (not in a parallel batch) or build manually.
-- [ ] Pipecat
+- [~] Pipecat — skipped: not-chat-shaped (real-time voice/multimodal framework; audio I/O pipeline only, no text-only chat mode)
 - [x] Pydantic AI
 - [x] Semantic Kernel
 - [x] Smolagents (Hugging Face)
