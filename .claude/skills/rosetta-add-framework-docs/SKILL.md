@@ -128,7 +128,7 @@ EOF
 git push -u origin "$BRANCH"
 ```
 
-### 8. Open the PR
+### 8. Open the PR (initial body, screenshots appended in step 9)
 
 ```bash
 gh pr create --title "Add <FRAMEWORK_DISPLAY>" --body "$(cat <<EOF
@@ -146,11 +146,30 @@ gh pr create --title "Add <FRAMEWORK_DISPLAY>" --body "$(cat <<EOF
 - [x] ax: trace lands in configured AX project; 25 synthetic requests green
 - [x] session.id: <auto-tagged | tagged via \`using_session(user_id)\` wrap in agent.py>
 - [x] Playwright public-flow smoke green
+- [x] Screenshots attached (appended below by rosetta-pr-screenshots)
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 EOF
 )"
 ```
+
+### 9. Capture and attach screenshots
+
+After the PR opens, invoke the `rosetta-pr-screenshots` skill to:
+- Run a canned 3-turn conversation through the AX and Phoenix backends
+- Screenshot the session view + each trace in both AX and Phoenix
+- Screenshot the Wonder Toys app UI via Playwright (public pages)
+- Upload all images as a GitHub release asset (`screenshots-pr-<N>`)
+- Append a `## Screenshots` section to the PR body referencing the asset URLs
+
+Inputs to pass:
+- `FRAMEWORK` — same slug used here
+- `FRAMEWORK_DIR` — same dir name
+- `PR_NUMBER` — from the `gh pr create` output
+- `AX_PORT` / `PHOENIX_PORT` / `NEXT_PORT` — match the ports the orchestrator assigned for this run
+- `BRANCH` — the feature branch we just pushed
+
+The skill is idempotent — safe to re-run if screenshots need refreshing.
 
 ## Output
 
@@ -161,4 +180,5 @@ PR opened: <URL>
   README updated: supported-frameworks, tree, frameworks-table, what-differs
   TODO marked off in orchestrator skill
   Memory saved: <count> framework gotchas
+  Screenshots attached: <count> AX + <count> Phoenix + <count> UI (via release <tag>)
 ```
