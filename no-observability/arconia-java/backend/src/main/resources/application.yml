@@ -1,0 +1,35 @@
+server:
+  # 18005 to coexist with the other Java tiers on the same host.
+  port: ${SERVER_PORT:18005}
+  # Long timeouts because LLM responses can take a while to start streaming.
+  servlet:
+    session:
+      timeout: 30m
+
+spring:
+  application:
+    name: wonder-toys-arconia-java
+  # Keep noise low by default; bump via WONDER_TOYS_LOG_LEVEL env.
+  output:
+    ansi:
+      enabled: detect
+  ai:
+    anthropic:
+      api-key: ${ANTHROPIC_API_KEY:}
+      chat:
+        options:
+          model: claude-sonnet-4-20250514
+          max-tokens: 4096
+
+logging:
+  level:
+    root: INFO
+    com.wondertoys: ${WONDER_TOYS_LOG_LEVEL:INFO}
+    org.springframework.ai: WARN
+    org.springframework.web: WARN
+
+wondertoys:
+  chroma:
+    url: ${CHROMA_URL:http://localhost:8000}
+  backend:
+    secret: ${BACKEND_SECRET:}
