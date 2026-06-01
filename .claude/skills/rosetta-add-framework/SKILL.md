@@ -19,7 +19,7 @@ Snapshot (last refreshed 2026-05-19 from `https://arize.com/docs/llms.txt`). Eac
 
 ### Python (Tier A — clear agent frameworks)
 - [x] Agno
-- [ ] AutoGen
+- [x] AutoGen
 - [!] AWS Strands — failed: two autonomous sub-agent attempts stalled (watchdog killed at 600s no-progress); each had built 2-3 tiers but never committed. Retry serially (not in a parallel batch) or build manually.
 - [x] CrewAI
 - [x] DSPy
