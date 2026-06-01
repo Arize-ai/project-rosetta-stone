@@ -10,6 +10,7 @@ Every framework below is implemented across all three observability tiers (no-ob
 
 | Framework | Python | TypeScript |
 |---|:---:|:---:|
+| [Agno](https://docs.agno.com/) | ✅ | — |
 | [BeeAI](https://framework.beeai.dev/) | ✅ | — |
 | [CrewAI](https://www.crewai.com/) | ✅ | — |
 | [DSPy](https://dspy.ai/) | ✅ | — |
@@ -26,6 +27,7 @@ Every framework below is implemented across all three observability tiers (no-ob
 ```tree
 rosetta/
 ├── no-observability/          No instrumentation (baseline)
+│   ├── agno-py/                 Agno (Python + Next.js)
 │   ├── beeai-py/                BeeAI (Python + Next.js)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── dspy-py/                 DSPy (Python + Next.js)
@@ -38,6 +40,7 @@ rosetta/
 │   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
 │   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── phoenix/                   Arize Phoenix Cloud instrumentation
+│   ├── agno-py/                 Agno (Python + Next.js)
 │   ├── beeai-py/                BeeAI (Python + Next.js)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── dspy-py/                 DSPy (Python + Next.js)
@@ -50,6 +53,7 @@ rosetta/
 │   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
 │   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── ax/                        Arize AX instrumentation
+│   ├── agno-py/                 Agno (Python + Next.js)
 │   ├── beeai-py/                BeeAI (Python + Next.js)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── dspy-py/                 DSPy (Python + Next.js)
@@ -83,6 +87,7 @@ The UI includes a home page with featured products and category chips, product d
 
 | Framework | Agent library | LLM client | Streaming API | Architecture |
 |-----------|---------------|------------|---------------|--------------|
+| **Agno** | `agno.agent.Agent` + `InMemoryDb` | `agno.models.anthropic.Claude` | `agent.arun(stream=True, stream_events=True)` over `RunContentEvent` / `ToolCallStartedEvent` | Python FastAPI backend + Next.js frontend |
 | **BeeAI** | `beeai_framework` `RequirementAgent` + `UnconstrainedMemory` | `ChatModel.from_name("anthropic:claude-sonnet-4")` (litellm) | `agent.run(...).observe(...)` over `RequirementAgentFinalAnswerEvent.delta` | Python FastAPI backend + Next.js frontend |
 | **CrewAI** | `crewai` Agent + Task + Crew | `crewai.LLM("anthropic/claude-sonnet-4-5")` (litellm) | `crewai_event_bus` `LLMStreamChunkEvent` | Python FastAPI backend + Next.js frontend |
 | **DSPy** | `dspy.ReAct` over a `dspy.Signature` + `dspy.History` | `dspy.LM("anthropic/claude-sonnet-4")` (litellm) | `dspy.streamify` + `StreamListener(signature_field_name="answer")` | Python FastAPI backend + Next.js frontend |
@@ -117,6 +122,13 @@ For **LangChain.js**, only these files differ:
 - `src/langchain/agent.ts` — observability setup at the top of the file (before LangChain imports)
 - `next.config.ts` — `serverExternalPackages` for observability packages
 - `package.json` — observability dependencies
+- `env.example` — observability environment variables
+
+For **Agno**, only these files differ:
+
+- `backend/tracing.py` — tracing initialization (new file, imported before `agno`). Uses the standard `register()` + `AgnoInstrumentor().instrument(tracer_provider=...)` pattern. The OpenInference Agno instrumentation auto-emits `session.id` and `user.id` from the values passed to `agent.arun(session_id=..., user_id=...)` — no `using_session()` wrap needed.
+- `backend/main.py` — imports `backend.tracing` before other backend modules
+- `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-agno`)
 - `env.example` — observability environment variables
 
 For **BeeAI**, only these files differ:
