@@ -20,6 +20,7 @@ Every framework below is implemented across all three observability tiers (no-ob
 | [Mastra](https://mastra.ai/) | — | ✅ |
 | [Microsoft Agent Framework](https://learn.microsoft.com/en-us/agent-framework/) | ✅ | — |
 | [Pydantic AI](https://ai.pydantic.dev/) | ✅ | — |
+| [Smolagents](https://huggingface.co/docs/smolagents/) | ✅ | — |
 | [Vercel AI SDK](https://ai-sdk.dev/) | — | ✅ |
 
 ## What's in the box
@@ -38,6 +39,7 @@ rosetta/
 │   ├── mastra/                  Mastra framework (TypeScript)
 │   ├── microsoft-agent-py/      Microsoft Agent Framework (Python + Next.js)
 │   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
+│   ├── smolagents-py/           Smolagents (Python + Next.js)
 │   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── phoenix/                   Arize Phoenix Cloud instrumentation
 │   ├── agno-py/                 Agno (Python + Next.js)
@@ -51,6 +53,7 @@ rosetta/
 │   ├── mastra/                  Mastra framework (TypeScript)
 │   ├── microsoft-agent-py/      Microsoft Agent Framework (Python + Next.js)
 │   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
+│   ├── smolagents-py/           Smolagents (Python + Next.js)
 │   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── ax/                        Arize AX instrumentation
 │   ├── agno-py/                 Agno (Python + Next.js)
@@ -64,6 +67,7 @@ rosetta/
 │   ├── mastra/                  Mastra framework (TypeScript)
 │   ├── microsoft-agent-py/      Microsoft Agent Framework (Python + Next.js)
 │   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
+│   ├── smolagents-py/           Smolagents (Python + Next.js)
 │   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── product-images/            200 AI-generated product images (shared)
 └── chroma-data/               ChromaDB vector store (gitignored, auto-created)
@@ -98,6 +102,7 @@ The UI includes a home page with featured products and category chips, product d
 | **Mastra** | `@mastra/core` Agent | `@ai-sdk/anthropic` (Vercel AI SDK) | `stream.fullStream` | Next.js monolith |
 | **Microsoft Agent Framework** | `agent_framework` Agent + AgentSession | `agent_framework.anthropic.AnthropicClient` | `agent.run(stream=True)` over `AgentResponseUpdate` events | Python FastAPI backend + Next.js frontend |
 | **Pydantic AI** | `pydantic_ai` Agent | `"anthropic:claude-sonnet-4"` model string | `agent.run_stream_events()` over PartStart/PartDelta events | Python FastAPI backend + Next.js frontend |
+| **Smolagents** | `smolagents.ToolCallingAgent` | `LiteLLMModel("anthropic/claude-sonnet-4")` | `agent.run(stream=True)` over `ChatMessageStreamDelta` events with `stream_outputs=True` | Python FastAPI backend + Next.js frontend |
 | **Vercel AI SDK** | Vercel AI SDK `streamText` | `@ai-sdk/anthropic` | `result.fullStream` | Next.js monolith |
 
 ## Observability Tiers
@@ -187,6 +192,13 @@ For **Pydantic AI**, only these files differ:
 - `backend/tracing.py` — tracing initialization (new file, imported before `pydantic_ai`). Calls `Agent.instrument_all(InstrumentationSettings(tracer_provider=…))` after registering the tracer provider — Pydantic AI doesn't emit OTel spans without this. `OpenInferenceSpanProcessor` reshapes the spans before export.
 - `backend/main.py` — imports `backend.tracing` before other backend modules
 - `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-pydantic-ai`)
+- `env.example` — observability environment variables
+
+For **Smolagents**, only these files differ:
+
+- `backend/tracing.py` — tracing initialization (new file, imported before `smolagents`). Uses the standard `register()` + `SmolagentsInstrumentor().instrument(tracer_provider=…)` pattern. The smolagents OpenInference instrumentor does not auto-emit `session.id` — `agent.py` wraps every `agent.run(...)` in `using_session(user_id)` so traces are grouped by user (the no-observability tier falls back to a `nullcontext()` shim, so the wrap is identical across all three tiers).
+- `backend/main.py` — imports `backend.tracing` before other backend modules
+- `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-smolagents`)
 - `env.example` — observability environment variables
 
 For **Vercel AI SDK**, only these files differ:
