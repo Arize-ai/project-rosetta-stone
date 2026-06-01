@@ -8,23 +8,27 @@ Project Rosetta Stone implements an identical AI shopping agent across multiple 
 
 Every framework below is implemented across all three observability tiers (no-observability, Phoenix, AX).
 
-| Framework | Python | TypeScript |
-|---|:---:|:---:|
-| [Agno](https://docs.agno.com/) | ✅ | — |
-| [AutoGen AgentChat](https://microsoft.github.io/autogen/stable/) | ✅ | — |
-| [BeeAI](https://framework.beeai.dev/) | ✅ | ✅ |
-| [CrewAI](https://www.crewai.com/) | ✅ | — |
-| [DSPy](https://dspy.ai/) | ✅ | — |
-| [Google ADK](https://google.github.io/adk-docs/) | ✅ | — |
-| [Haystack](https://haystack.deepset.ai/) | ✅ | — |
-| [LangChain / LangGraph](https://www.langchain.com/) | ✅ | ✅ |
-| [LlamaIndex](https://www.llamaindex.ai/) | ✅ | — |
-| [Mastra](https://mastra.ai/) | — | ✅ |
-| [Microsoft Agent Framework](https://learn.microsoft.com/en-us/agent-framework/) | ✅ | — |
-| [Microsoft Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/) | ✅ | — |
-| [Pydantic AI](https://ai.pydantic.dev/) | ✅ | — |
-| [Smolagents](https://huggingface.co/docs/smolagents/) | ✅ | — |
-| [Vercel AI SDK](https://ai-sdk.dev/) | — | ✅ |
+| Framework | Python | TypeScript | Java |
+|---|:---:|:---:|:---:|
+| [Agno](https://docs.agno.com/) | ✅ | — | — |
+| [Arconia](https://github.com/arconia-io/arconia) | — | — | ✅ |
+| [AutoGen AgentChat](https://microsoft.github.io/autogen/stable/) | ✅ | — | — |
+| [BeeAI](https://framework.beeai.dev/) | ✅ | ✅ | — |
+| [CrewAI](https://www.crewai.com/) | ✅ | — | — |
+| [DSPy](https://dspy.ai/) | ✅ | — | — |
+| [Google ADK](https://google.github.io/adk-docs/) | ✅ | — | — |
+| [Haystack](https://haystack.deepset.ai/) | ✅ | — | — |
+| [LangChain / LangGraph](https://www.langchain.com/) | ✅ | ✅ | — |
+| [LangChain4j](https://docs.langchain4j.dev/) | — | — | ✅ |
+| [LlamaIndex](https://www.llamaindex.ai/) | ✅ | — | — |
+| [Mastra](https://mastra.ai/) | — | ✅ | — |
+| [Microsoft Agent Framework](https://learn.microsoft.com/en-us/agent-framework/) | ✅ | — | — |
+| [Microsoft Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/) | ✅ | — | — |
+| [OpenInference Annotation Tracing](https://arize.com/docs/ax/integrations/java/annotation/annotation-tracing) | — | — | ✅ |
+| [Pydantic AI](https://ai.pydantic.dev/) | ✅ | — | — |
+| [Smolagents](https://huggingface.co/docs/smolagents/) | ✅ | — | — |
+| [Spring AI](https://docs.spring.io/spring-ai/reference/) | — | — | ✅ |
+| [Vercel AI SDK](https://ai-sdk.dev/) | — | ✅ | — |
 
 ## What's in the box
 
@@ -32,6 +36,8 @@ Every framework below is implemented across all three observability tiers (no-ob
 rosetta/
 ├── no-observability/          No instrumentation (baseline)
 │   ├── agno-py/                 Agno (Python + Next.js)
+│   ├── annotation-java/         OpenInference Annotation Tracing (Java + Next.js)
+│   ├── arconia-java/            Arconia (Java + Next.js)
 │   ├── autogen-py/              AutoGen AgentChat (Python + Next.js)
 │   ├── beeai-py/                BeeAI (Python + Next.js)
 │   ├── beeai-ts/                BeeAI framework (TypeScript)
@@ -41,15 +47,19 @@ rosetta/
 │   ├── haystack-py/             Haystack (Python + Next.js)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
 │   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
+│   ├── langchain4j-java/        LangChain4j (Java + Next.js)
 │   ├── llamaindex-py/           LlamaIndex (Python + Next.js)
 │   ├── mastra/                  Mastra framework (TypeScript)
 │   ├── microsoft-agent-py/      Microsoft Agent Framework (Python + Next.js)
 │   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
 │   ├── semantic-kernel-py/      Microsoft Semantic Kernel (Python + Next.js)
 │   ├── smolagents-py/           Smolagents (Python + Next.js)
+│   ├── spring-ai-java/          Spring AI (Java + Next.js)
 │   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── phoenix/                   Arize Phoenix Cloud instrumentation
 │   ├── agno-py/                 Agno (Python + Next.js)
+│   ├── annotation-java/         OpenInference Annotation Tracing (Java + Next.js)
+│   ├── arconia-java/            Arconia (Java + Next.js)
 │   ├── autogen-py/              AutoGen AgentChat (Python + Next.js)
 │   ├── beeai-py/                BeeAI (Python + Next.js)
 │   ├── beeai-ts/                BeeAI framework (TypeScript)
@@ -59,15 +69,19 @@ rosetta/
 │   ├── haystack-py/             Haystack (Python + Next.js)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
 │   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
+│   ├── langchain4j-java/        LangChain4j (Java + Next.js)
 │   ├── llamaindex-py/           LlamaIndex (Python + Next.js)
 │   ├── mastra/                  Mastra framework (TypeScript)
 │   ├── microsoft-agent-py/      Microsoft Agent Framework (Python + Next.js)
 │   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
 │   ├── semantic-kernel-py/      Microsoft Semantic Kernel (Python + Next.js)
 │   ├── smolagents-py/           Smolagents (Python + Next.js)
+│   ├── spring-ai-java/          Spring AI (Java + Next.js)
 │   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── ax/                        Arize AX instrumentation
 │   ├── agno-py/                 Agno (Python + Next.js)
+│   ├── annotation-java/         OpenInference Annotation Tracing (Java + Next.js)
+│   ├── arconia-java/            Arconia (Java + Next.js)
 │   ├── autogen-py/              AutoGen AgentChat (Python + Next.js)
 │   ├── beeai-py/                BeeAI (Python + Next.js)
 │   ├── beeai-ts/                BeeAI framework (TypeScript)
@@ -77,12 +91,14 @@ rosetta/
 │   ├── haystack-py/             Haystack (Python + Next.js)
 │   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
 │   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
+│   ├── langchain4j-java/        LangChain4j (Java + Next.js)
 │   ├── llamaindex-py/           LlamaIndex (Python + Next.js)
 │   ├── mastra/                  Mastra framework (TypeScript)
 │   ├── microsoft-agent-py/      Microsoft Agent Framework (Python + Next.js)
 │   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
 │   ├── semantic-kernel-py/      Microsoft Semantic Kernel (Python + Next.js)
 │   ├── smolagents-py/           Smolagents (Python + Next.js)
+│   ├── spring-ai-java/          Spring AI (Java + Next.js)
 │   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
 ├── product-images/            200 AI-generated product images (shared)
 └── chroma-data/               ChromaDB vector store (gitignored, auto-created)
@@ -107,6 +123,7 @@ The UI includes a home page with featured products and category chips, product d
 | Framework | Agent library | LLM client | Streaming API | Architecture |
 |-----------|---------------|------------|---------------|--------------|
 | **Agno** | `agno.agent.Agent` + `InMemoryDb` | `agno.models.anthropic.Claude` | `agent.arun(stream=True, stream_events=True)` over `RunContentEvent` / `ToolCallStartedEvent` | Python FastAPI backend + Next.js frontend |
+| **Arconia** | Spring AI `ChatClient` + `@Tool` methods (Spring Boot 4) | `spring-ai-starter-model-anthropic` | `chatClient.prompt().stream().chatResponse()` returns `Flux<ChatResponse>` | Spring Boot Java backend + Next.js frontend |
 | **AutoGen AgentChat** | `autogen_agentchat` AssistantAgent | `autogen_ext.models.anthropic.AnthropicChatCompletionClient` | `agent.run_stream()` over `ModelClientStreamingChunkEvent` (requires `model_client_stream=True`) | Python FastAPI backend + Next.js frontend |
 | **BeeAI** | `beeai_framework` `RequirementAgent` + `UnconstrainedMemory` | `ChatModel.from_name("anthropic:claude-sonnet-4")` (litellm) | `agent.run(...).observe(...)` over `RequirementAgentFinalAnswerEvent.delta` | Python FastAPI backend + Next.js frontend |
 | **BeeAI (TypeScript)** | `beeai-framework` ReActAgent + UnconstrainedMemory | `AnthropicChatModel` (BeeAI's wrapper around `@ai-sdk/anthropic`) | `agent.run().observe(emitter)` — `partialUpdate` event with `update.key === "final_answer"` | Next.js monolith |
@@ -116,12 +133,15 @@ The UI includes a home page with featured products and category chips, product d
 | **Haystack** | `haystack.components.agents.Agent` | `AnthropicChatGenerator` (`anthropic-haystack`) | `streaming_callback(StreamingChunk)` bridged into an asyncio queue | Python FastAPI backend + Next.js frontend |
 | **LangChain.js** | `@langchain/langgraph` ReAct agent | `@langchain/anthropic` | `streamEvents` (v2) | Next.js monolith |
 | **LangChain Python** | `langgraph` ReAct agent | `langchain-anthropic` | `astream_events` (v2) | Python FastAPI backend + Next.js frontend |
+| **LangChain4j** | `dev.langchain4j.service.AiServices` (Java declarative AI services) | `dev.langchain4j.model.anthropic.AnthropicStreamingChatModel` | `AiServices` `TokenStream` callback | Spring Boot Java backend + Next.js frontend |
 | **LlamaIndex Python** | `llama_index` FunctionAgent | `llama-index-llms-anthropic` | `stream_events` | Python FastAPI backend + Next.js frontend |
 | **Mastra** | `@mastra/core` Agent | `@ai-sdk/anthropic` (Vercel AI SDK) | `stream.fullStream` | Next.js monolith |
 | **Microsoft Agent Framework** | `agent_framework` Agent + AgentSession | `agent_framework.anthropic.AnthropicClient` | `agent.run(stream=True)` over `AgentResponseUpdate` events | Python FastAPI backend + Next.js frontend |
 | **Microsoft Semantic Kernel** | `semantic_kernel.agents` `ChatCompletionAgent` + `ChatHistoryAgentThread` | `semantic_kernel.connectors.ai.anthropic.AnthropicChatCompletion` | `agent.invoke_stream()` over `StreamingChatMessageContent` chunks | Python FastAPI backend + Next.js frontend |
+| **OpenInference Annotation Tracing** | Hand-rolled tool-loop calling the Anthropic Java SDK directly, with `@Agent` / `@Chain` / `@LLM` / `@Tool` annotations applied via ByteBuddy at startup | `com.anthropic:anthropic-java` SDK | Anthropic SDK `messages.stream(...)` `MessageStreamEvent` | Spring Boot Java backend + Next.js frontend |
 | **Pydantic AI** | `pydantic_ai` Agent | `"anthropic:claude-sonnet-4"` model string | `agent.run_stream_events()` over PartStart/PartDelta events | Python FastAPI backend + Next.js frontend |
 | **Smolagents** | `smolagents.ToolCallingAgent` | `LiteLLMModel("anthropic/claude-sonnet-4")` | `agent.run(stream=True)` over `ChatMessageStreamDelta` events with `stream_outputs=True` | Python FastAPI backend + Next.js frontend |
+| **Spring AI** | `spring-ai-anthropic` `ChatClient` + `@Tool` methods | `spring-ai-starter-model-anthropic` | `chatClient.prompt().stream().chatResponse()` returns `Flux<ChatResponse>` | Spring Boot Java backend + Next.js frontend |
 | **Vercel AI SDK** | Vercel AI SDK `streamText` | `@ai-sdk/anthropic` | `result.fullStream` | Next.js monolith |
 
 ## Observability Tiers
@@ -247,6 +267,36 @@ For **Smolagents**, only these files differ:
 - `backend/main.py` — imports `backend.tracing` before other backend modules
 - `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-smolagents`)
 - `env.example` — observability environment variables
+
+For **LangChain4j**, only these files differ:
+
+- `backend/src/main/java/com/wondertoys/Tracing.java` — **new file** in observability tiers. Builds an OpenTelemetry `SdkTracerProvider` + OTLP exporter (HTTP/protobuf for Phoenix, gRPC for AX), registers an `AiServiceRequestIssuedListener` that bridges LangChain4j's request lifecycle into OpenInference spans.
+- `backend/build.gradle.kts` — adds `openinference-instrumentation-langchain4j` + tier-appropriate OTLP exporter
+- `backend/src/main/resources/application.yml` — Phoenix or AX endpoint + project name properties
+- `env.example` — observability environment variables
+
+For **Spring AI**, only these files differ:
+
+- `backend/src/main/java/com/wondertoys/Tracing.java` — **new file** in observability tiers. Builds an OpenTelemetry SDK + OTLP exporter and exposes a Micrometer `ObservationRegistry` bean with `SpringAIInstrumentor` registered on it. Spring AI's auto-config picks up the registry via `ObjectProvider<ObservationRegistry>` and emits OpenInference-shaped LLM spans automatically.
+- `backend/build.gradle.kts` — adds `openinference-instrumentation-springAI` + OTel SDK + tier-appropriate OTLP exporter
+- `backend/src/main/resources/application.yml` — Phoenix or AX endpoint + project name properties
+- `env.example` — observability environment variables
+
+For **Arconia**, only these files differ:
+
+- `backend/src/main/resources/application.yml` — adds an `arconia.otel.*` block (endpoint, headers, resource attributes). Arconia's `arconia-opentelemetry-spring-boot-starter` auto-configures the OTel SDK + OTLP exporter from these properties, and `arconia-openinference-ai-semantic-conventions` reshapes Spring AI's built-in micrometer observations into OpenInference span attributes — so there is **no `Tracing.java` Java code in this tier** at all.
+- `backend/build.gradle.kts` — adds `arconia-bom` + `arconia-opentelemetry-spring-boot-starter` + `arconia-openinference-ai-semantic-conventions` (and `opentelemetry-exporter-sender-okhttp` for the AX gRPC tier). Bumps Spring Boot to 4.0.x and Spring AI to 2.0.0-M8 because Arconia 0.27 requires Spring Boot 4.
+- `env.example` — observability environment variables. Note that `PHOENIX_COLLECTOR_ENDPOINT` here is the *base* URL (no `/v1/traces`) because Arconia auto-appends it; this differs from the other tiers.
+
+For **OpenInference Annotation Tracing**, only these files differ:
+
+- `backend/src/main/java/com/wondertoys/App.java` — calls `OpenInferenceAgentInstaller.install()` **before** `SpringApplication.run()` so the ByteBuddy Java agent retransforms `@Agent` / `@Chain` / `@LLM` / `@Tool` annotated methods before Spring loads them
+- `backend/src/main/java/com/wondertoys/Tracing.java` — **new file** in observability tiers. Builds the OTel SDK, wraps it in an `OITracer`, and hands it to `OpenInferenceAgent.register(...)` so the ByteBuddy advice has a tracer to emit through.
+- `backend/build.gradle.kts` — adds `com.arize:openinference-instrumentation-annotation` + OTel SDK + tier-appropriate OTLP exporter
+- `backend/src/main/resources/application.yml` — Phoenix or AX endpoint + project name properties
+- `env.example` — observability environment variables
+
+Annotation Tracing isn't really a framework — it's a library for instrumenting hand-built agents. The agent loop in this tier is a hand-rolled tool-use loop calling Claude directly via the official `com.anthropic:anthropic-java` SDK, with the annotations applied to the methods that participate in the loop.
 
 For **Vercel AI SDK**, only these files differ:
 
