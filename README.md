@@ -13,6 +13,7 @@ Every framework below is implemented across all three observability tiers (no-ob
 | [Agno](https://docs.agno.com/) | ✅ | — | — |
 | [Arconia](https://github.com/arconia-io/arconia) | — | — | ✅ |
 | [AutoGen AgentChat](https://microsoft.github.io/autogen/stable/) | ✅ | — | — |
+| [AWS Strands](https://strandsagents.com/) | ✅ | — | — |
 | [BeeAI](https://framework.beeai.dev/) | ✅ | ✅ | — |
 | [CrewAI](https://www.crewai.com/) | ✅ | — | — |
 | [DSPy](https://dspy.ai/) | ✅ | — | — |
@@ -39,6 +40,7 @@ rosetta/
 │   ├── annotation-java/         OpenInference Annotation Tracing (Java + Next.js)
 │   ├── arconia-java/            Arconia (Java + Next.js)
 │   ├── autogen-py/              AutoGen AgentChat (Python + Next.js)
+│   ├── aws-strands-py/          AWS Strands (Python + Next.js)
 │   ├── beeai-py/                BeeAI (Python + Next.js)
 │   ├── beeai-ts/                BeeAI framework (TypeScript)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
@@ -61,6 +63,7 @@ rosetta/
 │   ├── annotation-java/         OpenInference Annotation Tracing (Java + Next.js)
 │   ├── arconia-java/            Arconia (Java + Next.js)
 │   ├── autogen-py/              AutoGen AgentChat (Python + Next.js)
+│   ├── aws-strands-py/          AWS Strands (Python + Next.js)
 │   ├── beeai-py/                BeeAI (Python + Next.js)
 │   ├── beeai-ts/                BeeAI framework (TypeScript)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
@@ -83,6 +86,7 @@ rosetta/
 │   ├── annotation-java/         OpenInference Annotation Tracing (Java + Next.js)
 │   ├── arconia-java/            Arconia (Java + Next.js)
 │   ├── autogen-py/              AutoGen AgentChat (Python + Next.js)
+│   ├── aws-strands-py/          AWS Strands (Python + Next.js)
 │   ├── beeai-py/                BeeAI (Python + Next.js)
 │   ├── beeai-ts/                BeeAI framework (TypeScript)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
@@ -125,6 +129,7 @@ The UI includes a home page with featured products and category chips, product d
 | **Agno** | `agno.agent.Agent` + `InMemoryDb` | `agno.models.anthropic.Claude` | `agent.arun(stream=True, stream_events=True)` over `RunContentEvent` / `ToolCallStartedEvent` | Python FastAPI backend + Next.js frontend |
 | **Arconia** | Spring AI `ChatClient` + `@Tool` methods (Spring Boot 4) | `spring-ai-starter-model-anthropic` | `chatClient.prompt().stream().chatResponse()` returns `Flux<ChatResponse>` | Spring Boot Java backend + Next.js frontend |
 | **AutoGen AgentChat** | `autogen_agentchat` AssistantAgent | `autogen_ext.models.anthropic.AnthropicChatCompletionClient` | `agent.run_stream()` over `ModelClientStreamingChunkEvent` (requires `model_client_stream=True`) | Python FastAPI backend + Next.js frontend |
+| **AWS Strands** | `strands.Agent` with per-user instance + `@tool`-decorated functions | `strands.models.anthropic.AnthropicModel` (direct Anthropic API, not Bedrock) | `agent.stream_async(prompt)` over `{"data": ...}` text-delta events + `{"current_tool_use": ...}` tool events | Python FastAPI backend + Next.js frontend |
 | **BeeAI** | `beeai_framework` `RequirementAgent` + `UnconstrainedMemory` | `ChatModel.from_name("anthropic:claude-sonnet-4")` (litellm) | `agent.run(...).observe(...)` over `RequirementAgentFinalAnswerEvent.delta` | Python FastAPI backend + Next.js frontend |
 | **BeeAI (TypeScript)** | `beeai-framework` ReActAgent + UnconstrainedMemory | `AnthropicChatModel` (BeeAI's wrapper around `@ai-sdk/anthropic`) | `agent.run().observe(emitter)` — `partialUpdate` event with `update.key === "final_answer"` | Next.js monolith |
 | **CrewAI** | `crewai` Agent + Task + Crew | `crewai.LLM("anthropic/claude-sonnet-4-5")` (litellm) | `crewai_event_bus` `LLMStreamChunkEvent` | Python FastAPI backend + Next.js frontend |
@@ -184,6 +189,15 @@ For **AutoGen AgentChat**, only these files differ:
 - `env.example` — observability environment variables
 
 Note: AutoGen's `FunctionTool` requires plain-string Annotated tool descriptions (`Annotated[str, "what this is"]`) instead of the Pydantic `Annotated[..., Field(description=...)]` style the other Python tiers use, so `backend/tools.py` is also rewritten in the same way across all three AutoGen tiers.
+
+For **AWS Strands**, only these files differ:
+
+- `backend/tracing.py` — tracing initialization (new file, imported before `strands`). Builds a `TracerProvider` with **two span processors in order**: `StrandsAgentsToOpenInferenceProcessor` (mutates Strands' native gen_ai-conventioned spans in place into OpenInference shape) **then** the OTLP exporter (Phoenix or AX). Processor order matters — the OpenInference processor must run before the exporter sees the spans, otherwise gen_ai-only attributes ship.
+- `backend/main.py` — imports `backend.tracing` before other backend modules so the global TracerProvider is set before Strands' singleton tracer caches its reference.
+- `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-strands-agents`)
+- `env.example` — observability environment variables
+
+`backend/agent.py` is shared across all three tiers. Two notable bits: the Strands `Agent` is built with `trace_attributes={"session.id": user_id, "user.id": user_id}` so every span the agent emits carries the IDs (the Strands OpenInference processor doesn't propagate baggage from `using_session()` to span attributes). And the agent loop wraps `agent.stream_async()` in `using_session(user_id)` as a belt-and-braces fallback for any spans created outside the Agent's own scope.
 
 For **BeeAI**, only these files differ:
 
