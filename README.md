@@ -22,6 +22,7 @@ Every framework below is implemented across all three observability tiers (no-ob
 | [LangChain / LangGraph](https://www.langchain.com/) | ✅ | ✅ | — |
 | [LangChain4j](https://docs.langchain4j.dev/) | — | — | ✅ |
 | [LlamaIndex](https://www.llamaindex.ai/) | ✅ | — | — |
+| [LlamaIndex Workflows](https://developers.llamaindex.ai/python/framework/understanding/workflows/) | ✅ | — | — |
 | [Mastra](https://mastra.ai/) | — | ✅ | — |
 | [Microsoft Agent Framework](https://learn.microsoft.com/en-us/agent-framework/) | ✅ | — | — |
 | [Microsoft Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/) | ✅ | — | — |
@@ -51,6 +52,7 @@ rosetta/
 │   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
 │   ├── langchain4j-java/        LangChain4j (Java + Next.js)
 │   ├── llamaindex-py/           LlamaIndex (Python + Next.js)
+│   ├── llamaindex-workflows-py/ LlamaIndex Workflows (Python + Next.js)
 │   ├── mastra/                  Mastra framework (TypeScript)
 │   ├── microsoft-agent-py/      Microsoft Agent Framework (Python + Next.js)
 │   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
@@ -74,6 +76,7 @@ rosetta/
 │   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
 │   ├── langchain4j-java/        LangChain4j (Java + Next.js)
 │   ├── llamaindex-py/           LlamaIndex (Python + Next.js)
+│   ├── llamaindex-workflows-py/ LlamaIndex Workflows (Python + Next.js)
 │   ├── mastra/                  Mastra framework (TypeScript)
 │   ├── microsoft-agent-py/      Microsoft Agent Framework (Python + Next.js)
 │   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
@@ -97,6 +100,7 @@ rosetta/
 │   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
 │   ├── langchain4j-java/        LangChain4j (Java + Next.js)
 │   ├── llamaindex-py/           LlamaIndex (Python + Next.js)
+│   ├── llamaindex-workflows-py/ LlamaIndex Workflows (Python + Next.js)
 │   ├── mastra/                  Mastra framework (TypeScript)
 │   ├── microsoft-agent-py/      Microsoft Agent Framework (Python + Next.js)
 │   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
@@ -140,6 +144,7 @@ The UI includes a home page with featured products and category chips, product d
 | **LangChain Python** | `langgraph` ReAct agent | `langchain-anthropic` | `astream_events` (v2) | Python FastAPI backend + Next.js frontend |
 | **LangChain4j** | `dev.langchain4j.service.AiServices` (Java declarative AI services) | `dev.langchain4j.model.anthropic.AnthropicStreamingChatModel` | `AiServices` `TokenStream` callback | Spring Boot Java backend + Next.js frontend |
 | **LlamaIndex Python** | `llama_index` FunctionAgent | `llama-index-llms-anthropic` | `stream_events` | Python FastAPI backend + Next.js frontend |
+| **LlamaIndex Workflows** | Hand-rolled `Workflow` with `@step` methods + custom `Event` types | `llama-index-llms-anthropic` (`Anthropic.astream_chat_with_tools`) | `handler.stream_events()` over a workflow's `StreamEvent` events written by `ctx.write_event_to_stream(...)` | Python FastAPI backend + Next.js frontend |
 | **Mastra** | `@mastra/core` Agent | `@ai-sdk/anthropic` (Vercel AI SDK) | `stream.fullStream` | Next.js monolith |
 | **Microsoft Agent Framework** | `agent_framework` Agent + AgentSession | `agent_framework.anthropic.AnthropicClient` | `agent.run(stream=True)` over `AgentResponseUpdate` events | Python FastAPI backend + Next.js frontend |
 | **Microsoft Semantic Kernel** | `semantic_kernel.agents` `ChatCompletionAgent` + `ChatHistoryAgentThread` | `semantic_kernel.connectors.ai.anthropic.AnthropicChatCompletion` | `agent.invoke_stream()` over `StreamingChatMessageContent` chunks | Python FastAPI backend + Next.js frontend |
@@ -248,6 +253,14 @@ For **LlamaIndex Python**, these files differ:
 
 - `backend/tracing.py` — tracing initialization (new file, imported before LlamaIndex)
 - `backend/agent.py` — manual root span + OTel context management for proper trace boundaries
+- `backend/main.py` — imports `backend.tracing` before other backend modules
+- `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-llama-index`)
+- `env.example` — observability environment variables
+
+For **LlamaIndex Workflows**, these files differ:
+
+- `backend/tracing.py` — tracing initialization (new file, imported before LlamaIndex). Uses `phoenix.otel.register` / `arize.otel.register` + `LlamaIndexInstrumentor` — the same OpenInference instrumentor that covers `llamaindex-py` also covers Workflow / `@step` machinery, so workflow steps surface as CHAIN spans (`WonderToysWorkflow.prepare_chat_history`, `.handle_llm_input`, `.handle_tool_calls`) with `Anthropic.astream_chat` as nested LLM spans and `FunctionTool.acall` as TOOL spans.
+- `backend/agent.py` — manual `agent` root span tagged with `openinference.span.kind=AGENT`, `input.value`, `output.value`, `session.id`, and `user.id`. Same three LlamaIndex-tracing workarounds as the `llamaindex-py` tier (clean OTel context per request, manual root span, `await handler` after `stream_events()`).
 - `backend/main.py` — imports `backend.tracing` before other backend modules
 - `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-llama-index`)
 - `env.example` — observability environment variables
