@@ -12,18 +12,21 @@ rosetta/
 │   ├── langchain-js/      — LangChain.js / LangGraph (TypeScript)
 │   ├── langchain-py/      — LangChain / LangGraph (Python + Next.js)
 │   ├── llamaindex-py/     — LlamaIndex (Python + Next.js)
-│   └── microsoft-agent-py/ — Microsoft Agent Framework (Python + Next.js)
+│   ├── microsoft-agent-py/ — Microsoft Agent Framework (Python + Next.js)
+│   └── openai-voice/      — OpenAI Realtime API + Chat Completions (Python + Next.js)
 ├── phoenix/             — Agents instrumented with Arize Phoenix Cloud
 │   ├── mastra/            — Mastra framework (TypeScript)
 │   ├── langchain-js/      — LangChain.js / LangGraph (TypeScript)
 │   ├── langchain-py/      — LangChain / LangGraph (Python + Next.js)
 │   ├── llamaindex-py/     — LlamaIndex (Python + Next.js)
-│   └── microsoft-agent-py/ — Microsoft Agent Framework (Python + Next.js)
+│   ├── microsoft-agent-py/ — Microsoft Agent Framework (Python + Next.js)
+│   └── openai-voice/      — OpenAI Realtime API + Chat Completions (Python + Next.js)
 └── ax/                  — Agents instrumented with Arize AX
     ├── mastra/            — Mastra framework (TypeScript)
     ├── langchain-js/      — LangChain.js / LangGraph (TypeScript)
     ├── langchain-py/      — LangChain / LangGraph (Python + Next.js)
-    └── llamaindex-py/     — LlamaIndex (Python + Next.js)
+    ├── llamaindex-py/     — LlamaIndex (Python + Next.js)
+    └── openai-voice/      — OpenAI Realtime API + Chat Completions (Python + Next.js)
 ```
 
 Each top-level directory represents an observability tier. Within each, subdirectories hold the same agent implemented in different frameworks.
@@ -43,7 +46,7 @@ The home page shows the top 5 products by best seller rank and category browse c
 
 The chat UI renders product results as custom `ProductCard` components (image + "Add to Cart" button on the left, product details on the right) by pre-parsing the agent's markdown into typed segments before rendering.
 
-The agent uses Claude (Anthropic) as the LLM and X (Twitter) OAuth for authentication.
+The agent uses Claude (Anthropic) as the LLM for most tiers and X (Twitter) OAuth for authentication. The `openai-voice` tier is the exception — it uses OpenAI's `gpt-realtime` (voice mode) and `gpt-4o` (text-mode fallback) since the OpenAI Realtime API is what makes the voice flow possible.
 
 ## Editing Rules
 
@@ -74,6 +77,18 @@ The agent uses Claude (Anthropic) as the LLM and X (Twitter) OAuth for authentic
 - `backend/requirements.txt` — observability packages added
 - `env.example` — observability environment variables
 - `evals/` — **New directory** in observability tiers (synthetic requests + eval harness)
+
+**OpenAI Voice** (Python FastAPI backend + Next.js frontend; all three tiers):
+- `backend/tracing.py` — **New file** in observability tiers. AX uses `arize.otel.register(...)`, Phoenix uses `phoenix.otel.register(...)`. Exposes a shared `VoiceTracer` helper that hand-rolls spans following the Arize audio cookbook — no auto-instrumentor exists for raw OpenAI Realtime WebSocket use, so spans are emitted manually but the OpenInference attributes are identical across both backends.
+- `backend/main.py` — `import backend.tracing` added at the top
+- `backend/voice_agent.py` — same handlers; the `voice_tracer` factory wraps lifecycle events with OTel spans
+- `backend/chat_agent.py` — text-mode Chat Completions calls wrapped in an `AGENT` + `LLM` + `TOOL` span tree
+- `backend/audio.py` — `persist_wav` writes WAVs under `public/voice-audio/` and returns served URLs (no-op in no-obs tier)
+- `backend/requirements.txt` — adds `arize-otel` (ax) or `arize-phoenix-otel` (phoenix), plus `opentelemetry-api`, `opentelemetry-sdk`
+- `env.example` — adds `ARIZE_*` (ax) or `PHOENIX_*` (phoenix) + optional `VOICE_AUDIO_PUBLIC_BASE`
+- `src/app/api/chat/route.ts` — eval-bypass header check (ax only)
+
+The `ax/openai-voice` and `phoenix/openai-voice` tiers' `VoiceTracer` code is byte-identical; only the tracer-provider registration in `tracing.py` differs because both Phoenix and AX consume the same OpenInference attributes.
 
 Do not let non-observability code drift between the tiers.
 
@@ -127,6 +142,17 @@ Do not let non-observability code drift between the tiers.
 - **Sessions**: Per-user `AgentSession` stored in memory; `**kwargs` injects `user_id` at runtime via `additional_function_arguments`
 - **Observability** (phoenix): `arize-phoenix-otel` + `openinference-instrumentation-agent-framework` + `agent_framework.observability.enable_instrumentation`
 
+### OpenAI Voice (Python)
+- **Framework**: OpenAI Realtime API (voice) + OpenAI Chat Completions (text fallback), wired up by hand — no agent abstraction
+- **LLM**: `gpt-realtime` for voice and `gpt-4o` for text — both via the `openai` Python SDK
+- **Backend**: FastAPI + uvicorn (port 8001) with a `/voice` WebSocket endpoint that proxies to the OpenAI Realtime WebSocket (via the `websockets` library)
+- **Frontend**: Next.js (App Router, Tailwind CSS) with a text/voice toggle in the chat header. Voice mode opens a browser WebSocket to the FastAPI backend, captures mic audio via an `AudioWorklet` (24 kHz mono PCM16), and plays back assistant audio via `AudioContext`-scheduled buffers
+- **Auth**: NextAuth v4 with Twitter/X OAuth 2.0. WS auth uses a token + user_id in the query string (browsers can't set headers on WS upgrade), validated against the same `BACKEND_SECRET` the HTTP `/chat` route uses
+- **Vector Search**: ChromaDB (local server, default embeddings) — shared with all other Python tiers
+- **Tools**: 5 plain Python functions in `backend/tools.py`, exposed via OpenAI tool-call JSON schemas. Same tool set is used by both voice and text mode
+- **Observability** (phoenix): `arize-phoenix-otel` + raw OpenTelemetry; same hand-rolled spans as the ax tier (only the tracer-provider registration differs — both backends consume the same OpenInference audio attributes)
+- **Observability** (ax): `arize-otel` + raw OpenTelemetry; hand-rolled spans following the Arize ["Tracing & Evaluating Audio"](https://arize.com/docs/ax/cookbooks/evaluation/tracing-and-evaluating-audio) cookbook. A `session.lifecycle` root span owns `input.audio`, `llm.tool`, and `output.audio` child spans per turn, with `input.audio.url|transcript|mime_type` / `output.audio.url|transcript|mime_type` / `llm.tools.{i}.tool.*` attributes. WAVs are persisted to `public/voice-audio/` and served by Next.js so trace URLs are clickable
+
 ## Running
 
 `npm run dev` handles everything automatically via `scripts/start.sh`:
@@ -135,7 +161,7 @@ Do not let non-observability code drift between the tiers.
 3. Indexes all 200 products if the collection is missing or incomplete
 4. Starts the dev server (Next.js for JS frameworks; Python backend + Next.js for Python frameworks)
 
-For Python frameworks (`langchain-py`, `llamaindex-py`, `microsoft-agent-py`), the start script also installs Python backend dependencies and starts a FastAPI server on port 8001. The Next.js frontend proxies API calls to it.
+For Python frameworks (`langchain-py`, `llamaindex-py`, `microsoft-agent-py`, `openai-voice`), the start script also installs Python backend dependencies and starts a FastAPI server on port 8001. The Next.js frontend proxies HTTP API calls to it, and the `openai-voice` voice mode opens a WebSocket directly to `ws://localhost:8001/voice`.
 
 The ChromaDB data (`chroma-data/`) and Python venv (`.venv/`) live at the repo root and are gitignored. All tiers share the same ChromaDB instance.
 
@@ -148,7 +174,9 @@ See `env.example` in each directory. Key variables:
 - `NEXTAUTH_SECRET` — session encryption (`openssl rand -base64 32`)
 - `TWITTER_CLIENT_ID` / `TWITTER_CLIENT_SECRET` — X OAuth app credentials
 - `CHROMA_URL` — ChromaDB server URL (default: `http://localhost:8000`)
-- `BACKEND_SECRET` / `BACKEND_URL` — Python backend auth (langchain-py, llamaindex-py, and microsoft-agent-py only)
+- `BACKEND_SECRET` / `BACKEND_URL` — Python backend auth (langchain-py, llamaindex-py, microsoft-agent-py, openai-voice only)
+- `OPENAI_API_KEY` — OpenAI API key (openai-voice only)
+- `NEXT_PUBLIC_VOICE_WS_URL` — Browser-side WS URL (openai-voice only; default `ws://localhost:8001/voice`)
 - `PHOENIX_COLLECTOR_ENDPOINT` / `PHOENIX_API_KEY` / `PHOENIX_PROJECT_NAME` — Phoenix Cloud (phoenix tier only); Mastra and LangChain.js need the full OTLP URL including `/v1/traces`, Python frameworks expect just the base URL
 - `ARIZE_SPACE_ID` / `ARIZE_API_KEY` / `ARIZE_PROJECT_NAME` — Arize AX (ax tier only)
 

@@ -5,6 +5,9 @@
 chroma-data/
 chroma-data.bak/
 
+# Voice-mode WAVs persisted by the openai-voice tier
+**/public/voice-audio/
+
 # Local TODO
 TODO.md
 
