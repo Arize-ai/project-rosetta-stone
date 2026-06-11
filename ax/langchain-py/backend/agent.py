@@ -1,11 +1,26 @@
 import os
 import json
 from collections.abc import AsyncIterator
+from contextlib import nullcontext
 
 from langchain_anthropic import ChatAnthropic
 from langgraph.prebuilt import create_react_agent
 
 from backend.tools import all_tools
+
+# The openinference langchain instrumentor does not auto-emit
+# ``session.id`` / ``user.id`` span attributes, so we wrap the agent call in
+# ``using_session`` + ``using_user`` to tag spans manually. When the
+# instrumentation package isn't installed (no-observability tier) we fall
+# back to no-op context managers.
+try:
+    from openinference.instrumentation import using_session, using_user
+except ImportError:  # pragma: no cover — only hit in no-observability tier
+    def using_session(session_id: str):  # type: ignore[no-redef]
+        return nullcontext()
+
+    def using_user(user_id: str):  # type: ignore[no-redef]
+        return nullcontext()
 
 SYSTEM_PROMPT = """You are a friendly and helpful shopping assistant for "Wonder Toys", a children's toy store. Your job is to help customers find the perfect toys, answer questions about products, and help them complete purchases.
 
@@ -112,37 +127,41 @@ async def stream_agent(messages: list[dict], user_id: str) -> AsyncIterator[str]
     had_text_before = False
     in_tool_call = False
 
-    async for event in agent.astream_events(
-        {"messages": lc_messages},
-        version="v2",
-        config={"recursion_limit": 25},
-    ):
-        kind = event["event"]
+    # using_session/using_user tag every span produced inside this block with
+    # ``session.id`` / ``user.id`` attributes. Without this wrap, AX sees the
+    # spans as orphans with no way to group them into sessions.
+    with using_session(user_id), using_user(user_id):
+        async for event in agent.astream_events(
+            {"messages": lc_messages},
+            version="v2",
+            config={"recursion_limit": 25},
+        ):
+            kind = event["event"]
 
-        if kind == "on_chat_model_stream":
-            chunk = event["data"]["chunk"]
-            # Check for tool call chunks
-            if hasattr(chunk, "tool_call_chunks") and chunk.tool_call_chunks:
+            if kind == "on_chat_model_stream":
+                chunk = event["data"]["chunk"]
+                # Check for tool call chunks
+                if hasattr(chunk, "tool_call_chunks") and chunk.tool_call_chunks:
+                    in_tool_call = True
+                    continue
+
+                # Check for text content
+                text = ""
+                if isinstance(chunk.content, str):
+                    text = chunk.content
+                elif isinstance(chunk.content, list):
+                    for block in chunk.content:
+                        if isinstance(block, dict) and block.get("type") == "text":
+                            text += block.get("text", "")
+
+                if text:
+                    if in_tool_call and had_text_before:
+                        yield f"data: {json.dumps({'text': chr(10) + chr(10)})}\n\n"
+                    in_tool_call = False
+                    had_text_before = True
+                    yield f"data: {json.dumps({'text': text})}\n\n"
+
+            elif kind == "on_tool_start":
                 in_tool_call = True
-                continue
-
-            # Check for text content
-            text = ""
-            if isinstance(chunk.content, str):
-                text = chunk.content
-            elif isinstance(chunk.content, list):
-                for block in chunk.content:
-                    if isinstance(block, dict) and block.get("type") == "text":
-                        text += block.get("text", "")
-
-            if text:
-                if in_tool_call and had_text_before:
-                    yield f"data: {json.dumps({'text': chr(10) + chr(10)})}\n\n"
-                in_tool_call = False
-                had_text_before = True
-                yield f"data: {json.dumps({'text': text})}\n\n"
-
-        elif kind == "on_tool_start":
-            in_tool_call = True
 
     yield "data: [DONE]\n\n"
