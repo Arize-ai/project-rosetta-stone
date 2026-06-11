@@ -40,11 +40,18 @@ import json
 import os
 from typing import Any
 
-from arize.otel import register
-from opentelemetry import context as otel_context, trace
-from opentelemetry.trace import Span, Status, StatusCode
+# A WAV data URI for a few-second voice clip is ~100–500 KB. The default
+# OTel attribute-value length limit (when set by the SDK or env) would
+# truncate the base64 payload mid-stream, leaving the AX UI with a
+# malformed `data:` URI that won't decode. Bump the limit BEFORE the
+# arize-otel SDK initialises.
+os.environ.setdefault("OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT", "10485760")  # 10 MB
 
-from backend.audio import persist_wav
+from arize.otel import register  # noqa: E402
+from opentelemetry import context as otel_context, trace  # noqa: E402
+from opentelemetry.trace import Span, Status, StatusCode  # noqa: E402
+
+from backend.audio import persist_wav  # noqa: E402, F401
 
 _tracer_provider = register(
     space_id=os.environ.get("ARIZE_SPACE_ID", ""),
