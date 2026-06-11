@@ -79,9 +79,14 @@ Description or marketing copy
 
 
 def _build_agent():
+    # max_retries handles Anthropic 529 ``overloaded_error`` and other
+    # transient failures via exponential backoff inside the SDK. Without this
+    # an overload kills the LangGraph agent mid-run with no recovery.
     model = ChatAnthropic(
         model="claude-sonnet-4-20250514",
         api_key=os.environ.get("ANTHROPIC_API_KEY"),
+        max_retries=10,
+        timeout=60.0,
     )
     return create_react_agent(model, all_tools, prompt=SYSTEM_PROMPT)
 
