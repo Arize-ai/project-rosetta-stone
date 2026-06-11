@@ -243,17 +243,26 @@ class VoiceTracer:
             self._turn_span.set_attribute("output.value", transcript)
 
     def on_response_done(self, usage: dict[str, Any]) -> None:
+        # OpenAI Realtime emits MULTIPLE `response.done` events per logical
+        # user turn when tool calls are involved: one for the tool-call-only
+        # response, then another for the final response with audio. Only
+        # close the turn when this response had actual assistant audio
+        # (signalled by `on_assistant_transcript_done` having set
+        # `_last_output_span`). Tool-only responses leave the turn open so
+        # the subsequent audio response lands inside the same trace.
         span = self._last_output_span
-        if span is not None:
-            prompt = usage.get("input_tokens") or usage.get("prompt_tokens")
-            completion = usage.get("output_tokens") or usage.get("completion_tokens")
-            if prompt is not None:
-                span.set_attribute("llm.token_count.prompt", int(prompt))
-            if completion is not None:
-                span.set_attribute("llm.token_count.completion", int(completion))
-            span.end()
-            self._last_output_span = None
-        # Turn complete — close the root span so AX shows the full trace.
+        if span is None:
+            return  # tool-only response — turn stays open
+
+        prompt = usage.get("input_tokens") or usage.get("prompt_tokens")
+        completion = usage.get("output_tokens") or usage.get("completion_tokens")
+        if prompt is not None:
+            span.set_attribute("llm.token_count.prompt", int(prompt))
+        if completion is not None:
+            span.set_attribute("llm.token_count.completion", int(completion))
+        span.end()
+        self._last_output_span = None
+        # Audio response complete — close the turn so AX shows the full trace.
         self._close_turn()
 
     # --- errors ------------------------------------------------------------
