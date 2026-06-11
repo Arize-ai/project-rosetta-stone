@@ -69,6 +69,10 @@ async def stream_agent(messages: list[dict], user_id: str) -> AsyncIterator[str]
             "openinference.span.kind": "AGENT",
             "input.value": last_user_msg[:10_000],
             "user.id": user_id,
+            # Session id mirrors user id so the AX / Phoenix UIs can group
+            # multi-turn conversations from the same user into one session
+            # (same convention as the OpenInference `using_session` wrap).
+            "session.id": user_id,
         },
     ) as turn_span:
         full_response_parts: list[str] = []
