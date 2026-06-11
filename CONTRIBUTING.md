@@ -8,45 +8,12 @@ The repo ships with a small set of Claude Code skills under `.claude/skills/` th
 
 ## Repo layout
 
-```tree
-rosetta/
-├── no-observability/          No instrumentation (baseline)
-│   ├── agno-py/                 Agno (Python + Next.js)
-│   ├── annotation-java/         OpenInference Annotation Tracing (Java + Next.js)
-│   ├── arconia-java/            Arconia (Java + Next.js)
-│   ├── autogen-py/              AutoGen AgentChat (Python + Next.js)
-│   ├── aws-strands-py/          AWS Strands (Python + Next.js)
-│   ├── beeai-py/                BeeAI (Python + Next.js)
-│   ├── beeai-ts/                BeeAI framework (TypeScript)
-│   ├── crewai-py/               CrewAI (Python + Next.js)
-│   ├── dspy-py/                 DSPy (Python + Next.js)
-│   ├── google-adk-py/           Google ADK (Python + Next.js)
-│   ├── haystack-py/             Haystack (Python + Next.js)
-│   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
-│   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
-│   ├── langchain4j-java/        LangChain4j (Java + Next.js)
-│   ├── llamaindex-py/           LlamaIndex (Python + Next.js)
-│   ├── llamaindex-workflows-py/ LlamaIndex Workflows (Python + Next.js)
-│   ├── mastra/                  Mastra framework (TypeScript)
-│   ├── microsoft-agent-py/      Microsoft Agent Framework (Python + Next.js)
-│   ├── openai-voice/            OpenAI Realtime API + Chat Completions (Python + Next.js)
-│   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
-│   ├── semantic-kernel-py/      Microsoft Semantic Kernel (Python + Next.js)
-│   ├── smolagents-py/           Smolagents (Python + Next.js)
-│   ├── spring-ai-java/          Spring AI (Java + Next.js)
-│   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
-├── phoenix/                   Arize Phoenix Cloud instrumentation (same 23 dirs)
-├── ax/                        Arize AX instrumentation (same 23 dirs)
-├── evals/                     Shared synthetic requests + eval harness
-├── product-images/            200 AI-generated product images (shared via symlinks)
-├── chroma-data/               ChromaDB vector store (gitignored, auto-created)
-├── README.md
-├── CONTRIBUTING.md            ← this file
-├── CLAUDE.md                  Agent-facing instructions (Claude Code reads this)
-└── TODO.md                    Frameworks left to add
-```
+See the [README's Repo layout section](./README.md#repo-layout) for the full directory tree. In addition to the per-framework tier directories, contributors will work with:
 
-Each tier × framework directory is a fully self-contained Next.js app. The only differences between tiers are observability instrumentation — agent logic, tools, UI, and data are identical.
+- `CLAUDE.md` — agent-facing project instructions (Claude Code reads this)
+- `TODO.md` — frameworks left to add (gitignored, local to your checkout)
+- `evals/` — shared synthetic-requests harness (text + voice), eval scripts, and the 6 evaluator templates
+- `skills-lock.json` — version pin for the externally-synced `arize-*` skills
 
 ## Editing rules
 
@@ -236,7 +203,7 @@ Shape:
 
 - `evals/voice-prompts/*.mp3` — 8 pre-generated TTS clips committed to the repo. Regenerate by running `python evals/generate-voice-prompts.py` (requires `OPENAI_API_KEY`).
 - `evals/generate-voice-prompts.py` — TTS generator using `tts-1` + voice=alloy. Mirrors the categories from `synthetic-requests.ts` (search, filtered, purchase, status, edge cases). Multi-turn prompts are skipped — each MP3 is a single user utterance.
-- `evals/run-voice-requests.py` — async WebSocket replay. Decodes each MP3 to PCM16 24 kHz mono, streams it to `ws://localhost:8001/voice` paced at real time (so server-side VAD behaves like it would for a real speaker), sends `audio.commit`, collects the transcript + tool calls + response audio.
+- `evals/run-voice-requests.py` — async WebSocket replay. Decodes each MP3 to PCM16 24 kHz mono, streams it to `ws://localhost:8001/voice` paced at real time and appends ~800 ms of trailing silence so the server-side VAD reliably commits. Collects the transcript + tool calls + response audio. Has a single retry on transient errors (OpenAI service restarts, brief WS drops).
 - `evals/run-voice-requests.sh` — bash wrapper that loads `.env.local`, installs `evals/requirements.txt` (pydub + websockets) into the shared venv, boots the dev server if needed, then runs the Python script.
 
 Adding new prompts: edit the `PROMPTS` list in `generate-voice-prompts.py`, re-run it, commit the new MP3s.

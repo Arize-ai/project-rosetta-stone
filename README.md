@@ -30,6 +30,7 @@ Read the no-obs version to see the bare agent. Diff the phoenix or ax version ag
 | [Mastra](https://mastra.ai/) | — | ✅ | — |
 | [Microsoft Agent Framework](https://learn.microsoft.com/en-us/agent-framework/) | ✅ | — | — |
 | [Microsoft Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/) | ✅ | — | — |
+| [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) | ✅ | — | — |
 | [OpenAI Realtime API (Voice)](https://platform.openai.com/docs/guides/realtime) | ✅ | — | — |
 | [OpenInference Annotation Tracing](https://arize.com/docs/ax/integrations/java/annotation/annotation-tracing) | — | — | ✅ |
 | [Pydantic AI](https://ai.pydantic.dev/) | ✅ | — | — |
@@ -39,7 +40,7 @@ Read the no-obs version to see the bare agent. Diff the phoenix or ax version ag
 
 ## The agent — Wonder Toys
 
-Every directory in the repo runs the same chat-to-purchase toy-store assistant, powered by Claude (Anthropic) for most tiers and OpenAI for the voice tier. It can:
+Every directory in the repo runs the same chat-to-purchase toy-store assistant, powered by Claude (Anthropic) for most tiers and OpenAI for the voice and agents-SDK tiers. It can:
 
 - **Search** a 200-product inventory via semantic vector search (ChromaDB) with keyword fallback
 - **Browse** products with rich markdown cards — images, prices, ratings, age ranges, descriptions
@@ -48,6 +49,45 @@ Every directory in the repo runs the same chat-to-purchase toy-store assistant, 
 - **Cancel** orders that haven't been delivered yet
 
 The UI includes a home page with featured products and category chips, product detail pages, a shopping cart, and a streaming chat interface that renders product cards inline. The `openai-voice` tier adds a text/voice toggle that streams audio in and out via the OpenAI Realtime API.
+
+## Repo layout
+
+```tree
+rosetta/
+├── no-observability/          No instrumentation (baseline)
+│   ├── agno-py/                 Agno (Python + Next.js)
+│   ├── annotation-java/         OpenInference Annotation Tracing (Java + Next.js)
+│   ├── arconia-java/            Arconia (Java + Next.js)
+│   ├── autogen-py/              AutoGen AgentChat (Python + Next.js)
+│   ├── aws-strands-py/          AWS Strands (Python + Next.js)
+│   ├── beeai-py/                BeeAI (Python + Next.js)
+│   ├── beeai-ts/                BeeAI framework (TypeScript)
+│   ├── crewai-py/               CrewAI (Python + Next.js)
+│   ├── dspy-py/                 DSPy (Python + Next.js)
+│   ├── google-adk-py/           Google ADK (Python + Next.js)
+│   ├── haystack-py/             Haystack (Python + Next.js)
+│   ├── langchain-js/            LangChain.js / LangGraph (TypeScript)
+│   ├── langchain-py/            LangChain / LangGraph (Python + Next.js)
+│   ├── langchain4j-java/        LangChain4j (Java + Next.js)
+│   ├── llamaindex-py/           LlamaIndex (Python + Next.js)
+│   ├── llamaindex-workflows-py/ LlamaIndex Workflows (Python + Next.js)
+│   ├── mastra/                  Mastra framework (TypeScript)
+│   ├── microsoft-agent-py/      Microsoft Agent Framework (Python + Next.js)
+│   ├── openai-agents-py/        OpenAI Agents SDK (Python + Next.js)
+│   ├── openai-voice/            OpenAI Realtime API + Chat Completions (Python + Next.js)
+│   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
+│   ├── semantic-kernel-py/      Microsoft Semantic Kernel (Python + Next.js)
+│   ├── smolagents-py/           Smolagents (Python + Next.js)
+│   ├── spring-ai-java/          Spring AI (Java + Next.js)
+│   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
+├── phoenix/                   Arize Phoenix Cloud instrumentation (same set of frameworks)
+├── ax/                        Arize AX instrumentation (same set of frameworks)
+├── evals/                     Shared synthetic requests + eval harness (text + voice)
+├── product-images/            200 AI-generated product images (shared via symlinks)
+└── chroma-data/               ChromaDB vector store (gitignored, auto-created)
+```
+
+Every tier × framework directory is a fully functional, self-contained Next.js app. The only differences between observability tiers are the instrumentation setup — agent logic, tools, UI, and data are identical.
 
 ## Quick start
 
@@ -253,6 +293,15 @@ If you're instrumenting your own app, find the framework you use, read what file
 
 > `backend/agent.py` is shared across all three tiers and wraps `ChatCompletionAgent.invoke_stream` in `using_session(user_id)`. SK emits its own native OTel `agent` / `AutoFunctionInvocationLoop` / `execute_tool` spans automatically, so the trace tree gets AGENT + CHAIN + TOOL + LLM kinds without manual wrapping. Note: SK's Anthropic connector parser rejects `list[T]` tool args from Claude (`FunctionExecutionException: expected to be parsed to list[str] but is not`), so `backend/tools.py` declares list args as comma-separated strings and splits them inside each tool.
 
+### OpenAI Agents SDK
+
+- `backend/tracing.py` — tracing initialization (new file, imported before `agents`). Uses the standard `register()` + `OpenAIAgentsInstrumentor().instrument(tracer_provider=...)` pattern. **Phoenix tier quirk**: `register()` must be called with `protocol="http/protobuf"` — the default `grpc` protocol mis-routes the configured `PHOENIX_COLLECTOR_ENDPOINT=http://localhost:6006/v1/traces` to the gRPC port 4317 and traces never land.
+- `backend/main.py` — imports `backend.tracing` before other backend modules
+- `backend/requirements.txt` — adds `arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-openai-agents`
+- `env.example` — observability environment variables
+
+> `backend/agent.py` is shared across all three tiers and is the only Python tier whose LLM is **not** Anthropic Claude — it uses OpenAI's native Responses API via `model="gpt-5.4-mini"`, because the OpenAI Agents SDK is OpenAI's own SDK and the LiteLLM-to-Anthropic adapter bypasses the SDK's native tracing hooks. The agent loop wraps `Runner.run_streamed()` in `using_session(user_id)` so `session.id` lands on spans (the OpenInference instrumentor for openai-agents does not emit it automatically). Observability tiers call `flush_traces()` in the streaming generator's `finally` block — without it, spans buffer in the trace processor across FastAPI requests and never reach the OTel BatchSpanProcessor. The no-observability tier falls back to a `nullcontext()` shim when `openinference.instrumentation` isn't installed.
+
 ### OpenAI Voice
 
 The voice tier wires up the OpenAI Realtime API (audio in, audio out) plus a text-mode fallback. There's no OpenInference auto-instrumentor for raw Realtime WebSocket use (the `openinference-instrumentation-openai-agents` package covers the Agents SDK runtime instead), so spans are emitted manually following the [Arize "Tracing & Evaluating Audio" cookbook](https://arize.com/docs/ax/cookbooks/evaluation/tracing-and-evaluating-audio) — the recipe is hosted under AX docs but the OpenInference attributes apply to Phoenix equally.
@@ -336,6 +385,7 @@ If you're picking which framework to read first, this table is a quick compariso
 | **Mastra** | `@mastra/core` Agent | `@ai-sdk/anthropic` (Vercel AI SDK) | `stream.fullStream` | Next.js monolith |
 | **Microsoft Agent Framework** | `agent_framework` Agent + AgentSession | `agent_framework.anthropic.AnthropicClient` | `agent.run(stream=True)` over `AgentResponseUpdate` events | Python FastAPI backend + Next.js frontend |
 | **Microsoft Semantic Kernel** | `semantic_kernel.agents` `ChatCompletionAgent` + `ChatHistoryAgentThread` | `semantic_kernel.connectors.ai.anthropic.AnthropicChatCompletion` | `agent.invoke_stream()` over `StreamingChatMessageContent` chunks | Python FastAPI backend + Next.js frontend |
+| **OpenAI Agents SDK** | `agents.Agent` + `SQLiteSession` + `@function_tool` | Native OpenAI Responses API (`model="gpt-5.4-mini"`) — not Anthropic | `Runner.run_streamed().stream_events()` filtered on `raw_response_event` + `ResponseTextDeltaEvent` | Python FastAPI backend + Next.js frontend |
 | **OpenAI Voice** | Hand-rolled WebSocket bridge to the OpenAI Realtime API + Chat Completions for text fallback. Same 5 Python tools serve both | `openai` Python SDK (`gpt-realtime` voice, `gpt-4o` text) | Realtime: WebSocket `response.output_audio.delta` / `response.output_audio_transcript.*`. Text: Chat Completions `ChatCompletionChunk` stream | Python FastAPI backend (HTTP `/chat` + WS `/voice`) + Next.js frontend |
 | **OpenInference Annotation Tracing** | Hand-rolled tool-loop using the Anthropic Java SDK, with `@Agent` / `@Chain` / `@LLM` / `@Tool` annotations applied via ByteBuddy at startup | `com.anthropic:anthropic-java` SDK | Anthropic SDK `messages.stream(...)` `MessageStreamEvent` | Spring Boot Java backend + Next.js frontend |
 | **Pydantic AI** | `pydantic_ai` Agent | `"anthropic:claude-sonnet-4"` model string | `agent.run_stream_events()` over PartStart/PartDelta events | Python FastAPI backend + Next.js frontend |
