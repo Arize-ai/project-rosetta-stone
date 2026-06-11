@@ -26,6 +26,7 @@ Every framework below is implemented across all three observability tiers (no-ob
 | [Mastra](https://mastra.ai/) | — | ✅ | — |
 | [Microsoft Agent Framework](https://learn.microsoft.com/en-us/agent-framework/) | ✅ | — | — |
 | [Microsoft Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/) | ✅ | — | — |
+| [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) | ✅ | — | — |
 | [OpenInference Annotation Tracing](https://arize.com/docs/ax/integrations/java/annotation/annotation-tracing) | — | — | ✅ |
 | [Pydantic AI](https://ai.pydantic.dev/) | ✅ | — | — |
 | [Smolagents](https://huggingface.co/docs/smolagents/) | ✅ | — | — |
@@ -55,6 +56,7 @@ rosetta/
 │   ├── llamaindex-workflows-py/ LlamaIndex Workflows (Python + Next.js)
 │   ├── mastra/                  Mastra framework (TypeScript)
 │   ├── microsoft-agent-py/      Microsoft Agent Framework (Python + Next.js)
+│   ├── openai-agents-py/        OpenAI Agents SDK (Python + Next.js)
 │   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
 │   ├── semantic-kernel-py/      Microsoft Semantic Kernel (Python + Next.js)
 │   ├── smolagents-py/           Smolagents (Python + Next.js)
@@ -79,6 +81,7 @@ rosetta/
 │   ├── llamaindex-workflows-py/ LlamaIndex Workflows (Python + Next.js)
 │   ├── mastra/                  Mastra framework (TypeScript)
 │   ├── microsoft-agent-py/      Microsoft Agent Framework (Python + Next.js)
+│   ├── openai-agents-py/        OpenAI Agents SDK (Python + Next.js)
 │   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
 │   ├── semantic-kernel-py/      Microsoft Semantic Kernel (Python + Next.js)
 │   ├── smolagents-py/           Smolagents (Python + Next.js)
@@ -103,6 +106,7 @@ rosetta/
 │   ├── llamaindex-workflows-py/ LlamaIndex Workflows (Python + Next.js)
 │   ├── mastra/                  Mastra framework (TypeScript)
 │   ├── microsoft-agent-py/      Microsoft Agent Framework (Python + Next.js)
+│   ├── openai-agents-py/        OpenAI Agents SDK (Python + Next.js)
 │   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
 │   ├── semantic-kernel-py/      Microsoft Semantic Kernel (Python + Next.js)
 │   ├── smolagents-py/           Smolagents (Python + Next.js)
@@ -148,6 +152,7 @@ The UI includes a home page with featured products and category chips, product d
 | **Mastra** | `@mastra/core` Agent | `@ai-sdk/anthropic` (Vercel AI SDK) | `stream.fullStream` | Next.js monolith |
 | **Microsoft Agent Framework** | `agent_framework` Agent + AgentSession | `agent_framework.anthropic.AnthropicClient` | `agent.run(stream=True)` over `AgentResponseUpdate` events | Python FastAPI backend + Next.js frontend |
 | **Microsoft Semantic Kernel** | `semantic_kernel.agents` `ChatCompletionAgent` + `ChatHistoryAgentThread` | `semantic_kernel.connectors.ai.anthropic.AnthropicChatCompletion` | `agent.invoke_stream()` over `StreamingChatMessageContent` chunks | Python FastAPI backend + Next.js frontend |
+| **OpenAI Agents SDK** | `agents.Agent` + `SQLiteSession` + `@function_tool` | Native OpenAI Responses API (`model="gpt-5.4-mini"`) — not Anthropic | `Runner.run_streamed().stream_events()` filtered on `raw_response_event` + `ResponseTextDeltaEvent` | Python FastAPI backend + Next.js frontend |
 | **OpenInference Annotation Tracing** | Hand-rolled tool-loop calling the Anthropic Java SDK directly, with `@Agent` / `@Chain` / `@LLM` / `@Tool` annotations applied via ByteBuddy at startup | `com.anthropic:anthropic-java` SDK | Anthropic SDK `messages.stream(...)` `MessageStreamEvent` | Spring Boot Java backend + Next.js frontend |
 | **Pydantic AI** | `pydantic_ai` Agent | `"anthropic:claude-sonnet-4"` model string | `agent.run_stream_events()` over PartStart/PartDelta events | Python FastAPI backend + Next.js frontend |
 | **Smolagents** | `smolagents.ToolCallingAgent` | `LiteLLMModel("anthropic/claude-sonnet-4")` | `agent.run(stream=True)` over `ChatMessageStreamDelta` events with `stream_outputs=True` | Python FastAPI backend + Next.js frontend |
@@ -280,6 +285,15 @@ For **Microsoft Semantic Kernel**, only these files differ:
 - `env.example` — observability environment variables
 
 `backend/agent.py` is shared across all three tiers and wraps `ChatCompletionAgent.invoke_stream` in `using_session(user_id)` so spans carry `session.id`. SK emits its own native OTel `agent` / `AutoFunctionInvocationLoop` / `execute_tool` spans automatically, so the trace tree contains AGENT + CHAIN + TOOL + LLM kinds without any manual wrapping. Also note: SK's Anthropic connector parser rejects `list[T]` tool args streamed by Claude (`FunctionExecutionException: expected to be parsed to list[str] but is not`), so `backend/tools.py` declares `keywords`, `product_ids`, and `quantities` as comma-separated strings and splits them inside each tool.
+
+For **OpenAI Agents SDK**, only these files differ:
+
+- `backend/tracing.py` — tracing initialization (new file, imported before `agents`). Uses the standard `register()` + `OpenAIAgentsInstrumentor().instrument(tracer_provider=...)` pattern. **Phoenix tier quirk**: `register()` must be called with `protocol="http/protobuf"` — the default `grpc` protocol mis-routes the configured `PHOENIX_COLLECTOR_ENDPOINT=http://localhost:6006/v1/traces` to the gRPC port 4317 and traces never land.
+- `backend/main.py` — imports `backend.tracing` before other backend modules
+- `backend/requirements.txt` — observability packages (`arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-openai-agents`)
+- `env.example` — observability environment variables
+
+`backend/agent.py` is shared across all three tiers and is the only Python tier whose LLM is **not** Anthropic Claude — it uses OpenAI's native Responses API via `model="gpt-5.4-mini"`, because the OpenAI Agents SDK is OpenAI's own SDK and the LiteLLM-to-Anthropic adapter bypasses the SDK's native tracing hooks. The agent loop wraps `Runner.run_streamed()` in `using_session(user_id)` so `session.id` lands on spans (the OpenInference instrumentor for openai-agents does not emit it automatically). The observability tiers also call `flush_traces()` in the streaming generator's `finally` block — without it, spans buffer in the trace processor across FastAPI requests and never reach the OTel BatchSpanProcessor. The no-observability tier falls back to a `nullcontext()` shim when `openinference.instrumentation` isn't installed, so the same `agent.py` works in all three tiers.
 
 For **Pydantic AI**, only these files differ:
 
