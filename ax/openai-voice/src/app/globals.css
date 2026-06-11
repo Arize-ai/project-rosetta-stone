@@ -1,0 +1,7 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@source not "../../public/**";
+
+body {
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
