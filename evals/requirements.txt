@@ -1,0 +1,11 @@
+# Python deps used by the voice-eval scripts (generate-voice-prompts.py and
+# run-voice-requests.py). Installed into the shared repo-root venv by the
+# `run-voice-requests.sh` wrapper.
+#
+# The `openai` package is also a backend dep so it's normally already
+# installed; listed here so this file is self-contained.
+
+openai>=1.50.0
+pydub>=0.25.1
+websockets>=13.0
+# pydub uses ffmpeg under the hood — install ffmpeg separately (brew install ffmpeg).

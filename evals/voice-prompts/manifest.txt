@@ -1,0 +1,9 @@
+# slug | spoken text
+01-simple-search-dinosaurs | Show me some dinosaur toys.
+02-simple-search-toddlers | What toys do you have for toddlers?
+03-filtered-search-outdoor | I'm looking for outdoor toys for kids aged five to eight.
+04-filtered-search-educational | What educational toys do you have for three year olds?
+05-product-detail-popular-plush | Tell me everything about your most popular stuffed animal.
+06-purchase | I'd like to buy the rainbow stacking rings. Ship it to Jane Doe at one twenty three Main Street, Springfield, Illinois, six two seven zero one, United States.
+07-order-status | Can you check the status of all my orders?
+08-edge-vague | I need a gift but I have no idea what to get.
