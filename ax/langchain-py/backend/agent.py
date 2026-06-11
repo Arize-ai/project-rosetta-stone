@@ -130,38 +130,44 @@ async def stream_agent(messages: list[dict], user_id: str) -> AsyncIterator[str]
     # using_session/using_user tag every span produced inside this block with
     # ``session.id`` / ``user.id`` attributes. Without this wrap, AX sees the
     # spans as orphans with no way to group them into sessions.
-    with using_session(user_id), using_user(user_id):
-        async for event in agent.astream_events(
-            {"messages": lc_messages},
-            version="v2",
-            config={"recursion_limit": 25},
-        ):
-            kind = event["event"]
+    try:
+        with using_session(user_id), using_user(user_id):
+            async for event in agent.astream_events(
+                {"messages": lc_messages},
+                version="v2",
+                config={"recursion_limit": 25},
+            ):
+                kind = event["event"]
 
-            if kind == "on_chat_model_stream":
-                chunk = event["data"]["chunk"]
-                # Check for tool call chunks
-                if hasattr(chunk, "tool_call_chunks") and chunk.tool_call_chunks:
+                if kind == "on_chat_model_stream":
+                    chunk = event["data"]["chunk"]
+                    # Check for tool call chunks
+                    if hasattr(chunk, "tool_call_chunks") and chunk.tool_call_chunks:
+                        in_tool_call = True
+                        continue
+
+                    # Check for text content
+                    text = ""
+                    if isinstance(chunk.content, str):
+                        text = chunk.content
+                    elif isinstance(chunk.content, list):
+                        for block in chunk.content:
+                            if isinstance(block, dict) and block.get("type") == "text":
+                                text += block.get("text", "")
+
+                    if text:
+                        if in_tool_call and had_text_before:
+                            yield f"data: {json.dumps({'text': chr(10) + chr(10)})}\n\n"
+                        in_tool_call = False
+                        had_text_before = True
+                        yield f"data: {json.dumps({'text': text})}\n\n"
+
+                elif kind == "on_tool_start":
                     in_tool_call = True
-                    continue
-
-                # Check for text content
-                text = ""
-                if isinstance(chunk.content, str):
-                    text = chunk.content
-                elif isinstance(chunk.content, list):
-                    for block in chunk.content:
-                        if isinstance(block, dict) and block.get("type") == "text":
-                            text += block.get("text", "")
-
-                if text:
-                    if in_tool_call and had_text_before:
-                        yield f"data: {json.dumps({'text': chr(10) + chr(10)})}\n\n"
-                    in_tool_call = False
-                    had_text_before = True
-                    yield f"data: {json.dumps({'text': text})}\n\n"
-
-            elif kind == "on_tool_start":
-                in_tool_call = True
+    finally:
+        # Ensure spans for this request reach AX before the next one starts,
+        # rather than waiting on the span processor's flush interval.
+        from backend.tracing import force_flush
+        force_flush()
 
     yield "data: [DONE]\n\n"
