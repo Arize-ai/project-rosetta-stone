@@ -28,6 +28,14 @@ export function useAudioCapture(onChunk: (b64: string) => void) {
     if (ctxRef.current) return;
     setError(null);
     try {
+      // Create the AudioContext FIRST inside the user-gesture handler so
+      // it's not left in the "suspended" state after `await getUserMedia`
+      // consumes the gesture. Mic-permission-grant takes a few seconds and
+      // an AudioContext created after that point may never auto-resume on
+      // Chromium/Safari.
+      const ctx = new AudioContext();
+      ctxRef.current = ctx;
+
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -38,8 +46,12 @@ export function useAudioCapture(onChunk: (b64: string) => void) {
       });
       streamRef.current = stream;
 
-      const ctx = new AudioContext();
-      ctxRef.current = ctx;
+      // Belt-and-braces: explicitly resume if the context is suspended for
+      // any reason (Safari often is even after a gesture).
+      if (ctx.state === "suspended") {
+        await ctx.resume();
+      }
+
       await ctx.audioWorklet.addModule("/audio-worklets/pcm16-encoder.js");
 
       const source = ctx.createMediaStreamSource(stream);
@@ -57,10 +69,20 @@ export function useAudioCapture(onChunk: (b64: string) => void) {
       };
 
       source.connect(node);
-      // Don't connect to destination — we don't want to hear ourselves.
+      // AudioWorkletNode without a downstream connection still has its
+      // process() invoked, but Chromium's optimizer can decide not to
+      // schedule it if nothing pulls from it. Route through a muted gain
+      // node connected to destination so the audio graph stays "live".
+      const sink = ctx.createGain();
+      sink.gain.value = 0;
+      node.connect(sink);
+      sink.connect(ctx.destination);
+
       setIsCapturing(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
+      // eslint-disable-next-line no-console
+      console.error("[useAudioCapture] start failed:", e);
     }
   }, []);
 

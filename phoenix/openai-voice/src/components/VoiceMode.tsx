@@ -167,12 +167,19 @@ export function VoiceMode({
   const toggleMic = useCallback(async () => {
     if (muted) {
       await capture.start();
+      // Only mark as unmuted if the capture pipeline actually came up.
+      // If start() failed (mic permission, AudioWorklet load, etc.),
+      // capture.error will be set and we surface it instead.
+      if (capture.error) {
+        onError(`Mic capture failed: ${capture.error}`);
+        return;
+      }
       setMuted(false);
     } else {
       capture.stop();
       setMuted(true);
     }
-  }, [capture, muted]);
+  }, [capture, muted, onError]);
 
   const interrupt = useCallback(() => {
     const ws = wsRef.current;
