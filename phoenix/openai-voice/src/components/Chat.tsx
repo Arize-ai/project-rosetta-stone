@@ -264,10 +264,26 @@ export function Chat() {
 
   const appendUserVoiceMessage = useCallback((text: string) => {
     if (!text.trim()) return;
-    setMessages((prev) => [
-      ...prev,
-      { id: `u-${Date.now()}`, role: "user", content: text },
-    ]);
+    // OpenAI's response audio + transcript arrive BEFORE Whisper's
+    // user-transcription completes, so the assistant message gets
+    // pushed first and the user message arrives last. Splice the user
+    // message in just before the in-flight assistant message so the
+    // visible order matches the actual conversation order.
+    const userMsg = {
+      id: `u-${Date.now()}`,
+      role: "user" as const,
+      content: text,
+    };
+    const assistantId = voiceAssistantIdRef.current;
+    setMessages((prev) => {
+      if (assistantId) {
+        const idx = prev.findIndex((m) => m.id === assistantId);
+        if (idx >= 0) {
+          return [...prev.slice(0, idx), userMsg, ...prev.slice(idx)];
+        }
+      }
+      return [...prev, userMsg];
+    });
   }, []);
 
   const startAssistantVoiceMessage = useCallback(() => {
