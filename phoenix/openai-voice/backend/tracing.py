@@ -1,20 +1,29 @@
 """Phoenix tracing setup for the OpenAI Voice tier.
 
-There is no OpenInference auto-instrumentor for the OpenAI Realtime API, so
-we register a tracer provider here (via `arize-otel`) and hand-roll spans
-in the voice agent following the spirit of the Arize "Tracing & Evaluating
-Audio" cookbook:
+There is no OpenInference auto-instrumentor for raw OpenAI Realtime API
+WebSocket use, so we register a tracer provider here (via `arize-phoenix-otel`)
+and hand-roll spans following the OpenInference voice convention used by
+the official OpenAI Agents SDK instrumentor:
 
   https://arize.com/docs/ax/cookbooks/evaluation/tracing-and-evaluating-audio
+  https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-openai-agents
 
-Departure from the cookbook: instead of one long-lived `session.lifecycle`
-root span for the whole WebSocket session, we emit ONE TRACE PER TURN.
-A voice session can stay open for minutes; with a single long-lived
-parent the children land in AX while the parent is still in flight, which
-the AX UI surfaces as orphaned spans. Per-turn root spans avoid that —
-each turn is a complete trace the moment it ends, and session grouping
-in the UI happens via the `session.id` attribute (already supported
-natively by AX and Phoenix).
+The shape that the AX (and Phoenix) trace UIs key off of for audio
+playback is:
+
+    AUDIO   "conversation.turn"    (root)
+    ├── USER  "user"               input.audio.url / input.audio.transcript
+    └── LLM   "assistant"          output.audio.url / output.audio.transcript
+        └── TOOL "<tool_name>"     nested under the LLM, not the turn
+
+The audio player widget on the trace card is gated by the span KIND
+(`USER` for input, `LLM` with `output.audio.*` for output), not by the
+span name. Tools nest under the LLM span so the UI's "what did the
+model do" view is accurate.
+
+Per-turn (not per-session) traces — each user-assistant exchange is one
+trace, grouped into a session via the `session.id` attribute (which AX
+and Phoenix both group on natively).
 
 For the text-mode fallback we hand-roll a single `chat_completion` span
 per turn, keeping this tier dependency-light.
@@ -31,11 +40,18 @@ import json
 import os
 from typing import Any
 
-from phoenix.otel import register
-from opentelemetry import context as otel_context, trace
-from opentelemetry.trace import Span, Status, StatusCode
+# A WAV data URI for a few-second voice clip is ~100–500 KB. The default
+# OTel attribute-value length limit (when set by the SDK or env) would
+# truncate the base64 payload mid-stream, leaving the Phoenix UI with a
+# malformed `data:` URI that won't decode. Bump the limit BEFORE the
+# arize-phoenix-otel SDK initialises.
+os.environ.setdefault("OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT", "10485760")  # 10 MB
 
-from backend.audio import persist_wav
+from phoenix.otel import register  # noqa: E402
+from opentelemetry import context as otel_context, trace  # noqa: E402
+from opentelemetry.trace import Span, Status, StatusCode  # noqa: E402
+
+from backend.audio import persist_wav  # noqa: E402, F401
 
 _tracer_provider = register(
     project_name=os.environ.get("PHOENIX_PROJECT_NAME", "wonder-toys-openai-voice"),
@@ -60,42 +76,42 @@ def _set_tools_on_span(span: Span, tools: list[dict]) -> None:
 
 
 class VoiceTracer:
-    """Per-session helper. Holds session-level metadata (id, tool catalog,
-    system prompt) and opens a fresh per-turn root span on each user turn.
+    """Per-session helper. Emits one trace per user-assistant turn shaped
+    like:
 
-    Per-turn root spans (rather than one long-lived session span) avoid
-    the "children land in AX before parent ends" orphan-display problem.
+        AUDIO  conversation.turn   (root)
+        ├── USER user
+        └── LLM  assistant
+            └── TOOL <tool_name>...
 
-    Method lifecycle:
-        1. `voice_tracer(session_id_hint)` — instantiate; nothing emitted yet.
-        2. `on_session_created(id)` — capture the authoritative session id.
-        3. `on_session_configured(tools, instructions)` — capture tools +
-           system prompt for later inclusion on each turn's root span.
-        4. `on_input_speech_started()` — open a new `voice.turn` root span
-           AND its child `input.audio` span. Closes the previous turn if
-           the user is interrupting.
-        5. `on_input_speech_stopped(url, pcm)` — set audio URL + mime on
-           the input span.
-        6. `on_user_transcript_done(text)` — set transcript, end input span.
-        7. `on_tool_call_start/end(...)` — open/close `llm.tool` children
-           of the current turn.
-        8. `on_assistant_transcript_done(...)` — open `output.audio` child
-           and close it once the transcript + audio are persisted.
-        9. `on_response_done(usage)` — record token counts on the most
-           recent output.audio span and END the turn root span.
-       10. `close()` — close any open spans (turn aborted by WS close).
+    State machine:
+        on_input_speech_started()      → open turn + user span
+        on_input_speech_stopped(url)   → stamp audio URL on user span
+        on_user_transcript_done(text)  → stamp transcript, close user span;
+                                          open assistant span as next sibling
+        on_tool_call_start/end(...)    → child of assistant span
+        on_assistant_transcript_done() → stamp audio URL + transcript on
+                                          assistant span (don't close yet)
+        on_response_done(usage)        → if this response had audio,
+                                          stamp tokens, close assistant +
+                                          turn; otherwise (tool-only
+                                          response) leave open so the
+                                          subsequent audio response lands
+                                          in the same trace
+        close()                        → close any open spans (WS dropped)
     """
 
     def __init__(self, session_id: str) -> None:
         self._session_id = session_id
         self._tools: list[dict] = []
         self._instructions: str = ""
-        # The currently-open turn span (or None between turns)
+        # Per-turn span tracking
         self._turn_span: Span | None = None
-        self._turn_token: object | None = None  # OTel context detach token
-        # Pending children on the current turn
-        self._last_input_span: Span | None = None
-        self._last_output_span: Span | None = None
+        self._turn_token: object | None = None
+        self._user_span: Span | None = None
+        self._assistant_span: Span | None = None
+        self._assistant_token: object | None = None
+        self._got_audio_this_turn: bool = False
         self._closed = False
 
     # --- lifecycle ---------------------------------------------------------
@@ -115,20 +131,43 @@ class VoiceTracer:
         self._tools = tools
         self._instructions = instructions
 
-    # --- turn lifecycle ---------------------------------------------------
+    # --- turn / assistant lifecycle ---------------------------------------
 
-    def _start_turn(self) -> None:
-        """Open a new root `voice.turn` AGENT span and make it the current
-        OTel context so children attach to it as parent.
-        """
+    def _open_turn(self) -> None:
         if self._turn_span is not None:
-            # Defensive: caller missed an end-turn signal. Close cleanly.
+            # Defensive: previous turn never ended, close cleanly.
             self._close_turn()
         span = tracer.start_span(
-            "voice.turn",
+            "conversation.turn",
             attributes={
-                "openinference.span.kind": "AGENT",
+                "openinference.span.kind": "AUDIO",
                 "session.id": self._session_id,
+            },
+        )
+        ctx = trace.set_span_in_context(span)
+        self._turn_token = otel_context.attach(ctx)
+        self._turn_span = span
+        self._got_audio_this_turn = False
+
+    def _ensure_assistant(self) -> None:
+        """Open the assistant LLM span the first time a response-side event
+        fires for this turn. Subsequent events on the same turn reuse it.
+        """
+        if self._assistant_span is not None:
+            return
+        if self._turn_span is None:
+            # No turn open — start one. Can happen if the very first event
+            # we see is response-related (e.g., we missed speech_started).
+            self._open_turn()
+        span = tracer.start_span(
+            "assistant",
+            attributes={
+                "openinference.span.kind": "LLM",
+                "session.id": self._session_id,
+                "llm.system": "openai",
+                "llm.model_name": os.environ.get(
+                    "OPENAI_REALTIME_MODEL", "gpt-realtime"
+                ),
             },
         )
         if self._tools:
@@ -138,22 +177,29 @@ class VoiceTracer:
             span.set_attribute(
                 "llm.input_messages.0.message.content", self._instructions
             )
-        # Attach span as current context so subsequent `tracer.start_span(...)`
-        # calls inherit it as parent without us having to thread it manually.
         ctx = trace.set_span_in_context(span)
-        self._turn_token = otel_context.attach(ctx)
-        self._turn_span = span
+        self._assistant_token = otel_context.attach(ctx)
+        self._assistant_span = span
+
+    def _close_assistant(self) -> None:
+        if self._assistant_span is not None:
+            self._assistant_span.end()
+            self._assistant_span = None
+        if self._assistant_token is not None:
+            try:
+                otel_context.detach(self._assistant_token)
+            except Exception:
+                pass
+            self._assistant_token = None
 
     def _close_turn(self) -> None:
-        """End any open child spans and the turn root span."""
+        """End any open user / assistant / turn span."""
         try:
-            if self._last_input_span:
-                self._last_input_span.end()
-            if self._last_output_span:
-                self._last_output_span.end()
+            if self._user_span is not None:
+                self._user_span.end()
+                self._user_span = None
+            self._close_assistant()
         finally:
-            self._last_input_span = None
-            self._last_output_span = None
             if self._turn_span is not None:
                 self._turn_span.end()
                 self._turn_span = None
@@ -163,22 +209,22 @@ class VoiceTracer:
                 except Exception:
                     pass
                 self._turn_token = None
+            self._got_audio_this_turn = False
 
-    # --- input audio (user turn) ------------------------------------------
+    # --- user audio (input) -----------------------------------------------
 
     def on_input_speech_started(self) -> None:
-        # New user turn → new trace
-        self._start_turn()
-        self._last_input_span = tracer.start_span(
-            "input.audio",
+        self._open_turn()
+        self._user_span = tracer.start_span(
+            "user",
             attributes={
-                "openinference.span.kind": "LLM",
+                "openinference.span.kind": "USER",
                 "session.id": self._session_id,
             },
         )
 
     def on_input_speech_stopped(self, url: str | None, pcm: bytes) -> None:
-        span = self._last_input_span
+        span = self._user_span
         if span is None:
             return
         if url:
@@ -187,21 +233,22 @@ class VoiceTracer:
         span.set_attribute("audio.bytes", len(pcm))
 
     def on_user_transcript_done(self, transcript: str) -> None:
-        span = self._last_input_span
-        if span is not None:
-            span.set_attribute("input.audio.transcript", transcript)
-            span.set_attribute("input.value", transcript)
-            span.end()
-            self._last_input_span = None
-        # Also stamp the turn root's input.value so AX UI shows it in trace card
+        if self._user_span is not None:
+            self._user_span.set_attribute("input.audio.transcript", transcript)
+            self._user_span.set_attribute("input.value", transcript)
+            self._user_span.end()
+            self._user_span = None
         if self._turn_span is not None:
             self._turn_span.set_attribute("input.value", transcript)
 
-    # --- tool calls --------------------------------------------------------
+    # --- tool calls (children of assistant) -------------------------------
 
     def on_tool_call_start(self, name: str, arguments: dict) -> Span:
+        self._ensure_assistant()
+        # The current OTel context has the assistant span attached, so this
+        # call automatically nests under it.
         span = tracer.start_span(
-            "llm.tool",
+            name,
             attributes={
                 "openinference.span.kind": "TOOL",
                 "tool.name": name,
@@ -217,52 +264,41 @@ class VoiceTracer:
             span.set_status(Status(StatusCode.ERROR, result["error"]))
         span.end()
 
-    # --- output audio (assistant turn) ------------------------------------
+    # --- assistant audio (output) -----------------------------------------
 
     def on_assistant_transcript_done(
         self, transcript: str, url: str | None, pcm: bytes
     ) -> None:
-        span = tracer.start_span(
-            "output.audio",
-            attributes={
-                "openinference.span.kind": "LLM",
-                "session.id": self._session_id,
-                "output.audio.transcript": transcript,
-                "output.audio.mime_type": "audio/wav",
-                "output.value": transcript,
-                "audio.bytes": len(pcm),
-            },
-        )
+        self._ensure_assistant()
+        span = self._assistant_span
+        if span is None:
+            return
         if url:
             span.set_attribute("output.audio.url", url)
-        if self._last_output_span:
-            self._last_output_span.end()
-        self._last_output_span = span
-        # Stamp output.value on the turn root too
+        span.set_attribute("output.audio.mime_type", "audio/wav")
+        span.set_attribute("output.audio.transcript", transcript)
+        span.set_attribute("output.value", transcript)
+        span.set_attribute("audio.bytes", len(pcm))
         if self._turn_span is not None:
             self._turn_span.set_attribute("output.value", transcript)
+        self._got_audio_this_turn = True
 
     def on_response_done(self, usage: dict[str, Any]) -> None:
-        # OpenAI Realtime emits MULTIPLE `response.done` events per logical
-        # user turn when tool calls are involved: one for the tool-call-only
-        # response, then another for the final response with audio. Only
-        # close the turn when this response had actual assistant audio
-        # (signalled by `on_assistant_transcript_done` having set
-        # `_last_output_span`). Tool-only responses leave the turn open so
-        # the subsequent audio response lands inside the same trace.
-        span = self._last_output_span
-        if span is None:
-            return  # tool-only response — turn stays open
+        # OpenAI Realtime emits multiple response.done events per logical
+        # user turn when tool calls are involved. Only close the turn when
+        # this response had user-facing audio (signalled by
+        # on_assistant_transcript_done having set _got_audio_this_turn).
+        if not self._got_audio_this_turn:
+            return  # tool-only response — keep turn + assistant open
 
-        prompt = usage.get("input_tokens") or usage.get("prompt_tokens")
-        completion = usage.get("output_tokens") or usage.get("completion_tokens")
-        if prompt is not None:
-            span.set_attribute("llm.token_count.prompt", int(prompt))
-        if completion is not None:
-            span.set_attribute("llm.token_count.completion", int(completion))
-        span.end()
-        self._last_output_span = None
-        # Audio response complete — close the turn so AX shows the full trace.
+        span = self._assistant_span
+        if span is not None:
+            prompt = usage.get("input_tokens") or usage.get("prompt_tokens")
+            completion = usage.get("output_tokens") or usage.get("completion_tokens")
+            if prompt is not None:
+                span.set_attribute("llm.token_count.prompt", int(prompt))
+            if completion is not None:
+                span.set_attribute("llm.token_count.completion", int(completion))
         self._close_turn()
 
     # --- errors ------------------------------------------------------------
@@ -270,8 +306,8 @@ class VoiceTracer:
     def on_error(self, err: dict) -> None:
         msg = err.get("message", "unknown error")
         for span in (
-            self._last_input_span,
-            self._last_output_span,
+            self._user_span,
+            self._assistant_span,
             self._turn_span,
         ):
             if span is None:
