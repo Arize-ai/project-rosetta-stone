@@ -1,25 +1,111 @@
-"""Tool implementations and OpenAI tool/function-call schemas.
+"""@function_tool wrappers for the OpenAI Agents SDK.
 
-Each tool has:
-- A plain Python function (the implementation)
-- A JSON-schema definition compatible with both the OpenAI Realtime API
-  `tools` field and the OpenAI Chat Completions `tools` parameter
+The same five tools serve both modes:
+- Voice (`RealtimeAgent` via `RealtimeRunner`)
+- Text (`Agent` via `Runner`)
 
-The two consumers (voice agent and text-fallback chat agent) share these
-definitions so a single change updates both.
+User identity is injected via the `current_user_id` contextvar (set by the
+HTTP/WS entry points), not via tool arguments — the model is told it is
+authenticated and that the system handles the user id automatically.
+
+In voice mode the search/product tools also push rendered markdown product
+cards to the browser via the `current_voice_callback` contextvar. In text
+mode that callback is None and the model emits markdown itself in the
+streamed response.
 """
 
-from typing import Any, Optional
+from __future__ import annotations
 
+import json
+from typing import Annotated, Optional
+
+from agents import function_tool
+from pydantic import BaseModel, Field
+
+from backend.chroma_client import vector_search
+from backend.context import current_user_id, current_voice_callback
 from backend.inventory import get_product, products
 from backend.orders import (
     cancel_order as _cancel_order,
+)
+from backend.orders import (
     create_order,
     get_order_by_id,
     get_orders_by_user,
     search_orders_by_product,
 )
-from backend.chroma_client import vector_search
+
+
+# ---------------------------------------------------------------------------
+# Markdown formatters (voice mode only — text mode lets the model do it)
+# ---------------------------------------------------------------------------
+
+
+def _format_search_markdown(result: dict) -> str:
+    results = result.get("results") or []
+    if not results:
+        return "_No matching products found._"
+    lines: list[str] = []
+    for p in results:
+        lines.append(f"![{p['name']}]({p['image']})")
+        lines.append(f"**{p['name']}** — ${p['price']:.2f}")
+        stars = p["rating"]["stars"]
+        count = p["rating"]["numberOfRatings"]
+        lines.append(
+            f"⭐ {stars:.1f} ({count:,} ratings) · Ages {p['ageRange']} "
+            f"· by {p['manufacturer']}"
+        )
+        lines.append(p["description"])
+        lines.append("")
+    return "\n".join(lines).rstrip()
+
+
+def _format_product_markdown(result: dict) -> str:
+    if not result.get("found"):
+        return "_That product could not be found._"
+    p = result["product"]
+    return (
+        f"![{p['name']}]({p['image']})\n"
+        f"## {p['name']}\n"
+        f"**${p['price']:.2f}** · ⭐ {p['rating']['stars']:.1f} "
+        f"({p['rating']['numberOfRatings']:,} ratings) · "
+        f"Best Seller #{p['bestSellersRank']}\n\n"
+        f"**Ages:** {p['ageRange']} · **Category:** {p['category']} · "
+        f"**By:** {p['manufacturer']}\n"
+        f"**Dimensions:** "
+        f"{p['dimensions']['lengthInches']}×{p['dimensions']['widthInches']}×"
+        f"{p['dimensions']['heightInches']} in, "
+        f"{p['dimensions']['weightLbs']} lbs\n"
+        f"**In Stock:** {p['inventory']} available\n\n"
+        f"{p['description']}"
+    )
+
+
+async def _push_voice_markdown(name: str, markdown: Optional[str]) -> None:
+    if not markdown:
+        return
+    cb = current_voice_callback.get()
+    if cb is None:
+        return
+    try:
+        await cb(name, markdown)
+    except Exception:
+        pass
+
+
+def _to_search_result(p: dict) -> dict:
+    return {
+        "id": p["id"],
+        "name": p["name"],
+        "description": p["description"],
+        "price": p["price"],
+        "ageRange": f"{p['ageRange']['min']}-{p['ageRange']['max']} years",
+        "category": p["category"],
+        "inStock": p["inventory"] > 0,
+        "image": p["image"],
+        "rating": p["rating"],
+        "manufacturer": p["manufacturer"],
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -27,14 +113,33 @@ from backend.chroma_client import vector_search
 # ---------------------------------------------------------------------------
 
 
-def search_products(
-    query: Optional[str] = None,
-    keywords: Optional[list[str]] = None,
-    min_age: Optional[int] = None,
-    max_age: Optional[int] = None,
-    category: Optional[str] = None,
-    **_: Any,
+@function_tool
+async def search_products(
+    query: Annotated[
+        Optional[str],
+        Field(
+            description=(
+                "Free-text search query matched against product names and descriptions"
+            )
+        ),
+    ] = None,
+    keywords: Annotated[
+        Optional[list[str]],
+        Field(description="Specific keyword tags to match against product keywords"),
+    ] = None,
+    min_age: Annotated[
+        Optional[int],
+        Field(description="Minimum age in years for the target child"),
+    ] = None,
+    max_age: Annotated[
+        Optional[int],
+        Field(description="Maximum age in years for the target child"),
+    ] = None,
+    category: Annotated[
+        Optional[str], Field(description="Product category to filter by")
+    ] = None,
 ) -> dict:
+    """Search the toy store inventory by free-text query, keyword tags, age range, or category. Returns up to 10 products ranked by relevance. Always use this when the customer describes what they're looking for."""
     filtered = list(products)
 
     if query:
@@ -71,9 +176,12 @@ def search_products(
                 ]
 
             results = [_to_search_result(p) for p in filtered[:10]]
-            return {"results": results, "totalFound": len(filtered)}
+            result = {"results": results, "totalFound": len(filtered)}
+            await _push_voice_markdown(
+                "search_products", _format_search_markdown(result)
+            )
+            return result
 
-        # Vector search unavailable or empty — fall back to substring match
         q = query.lower()
         filtered = [
             p for p in filtered if q in p["name"].lower() or q in p["description"].lower()
@@ -98,52 +206,50 @@ def search_products(
         filtered = [p for p in filtered if cat in p["category"].lower()]
 
     results = [_to_search_result(p) for p in filtered[:10]]
-    return {"results": results, "totalFound": len(filtered)}
-
-
-def _to_search_result(p: dict) -> dict:
-    return {
-        "id": p["id"],
-        "name": p["name"],
-        "description": p["description"],
-        "price": p["price"],
-        "ageRange": f"{p['ageRange']['min']}-{p['ageRange']['max']} years",
-        "category": p["category"],
-        "inStock": p["inventory"] > 0,
-        "image": p["image"],
-        "rating": p["rating"],
-        "manufacturer": p["manufacturer"],
-    }
+    result = {"results": results, "totalFound": len(filtered)}
+    await _push_voice_markdown("search_products", _format_search_markdown(result))
+    return result
 
 
 # ---------------------------------------------------------------------------
-# 2. get_product_detail
+# 2. get_product
 # ---------------------------------------------------------------------------
 
 
-def get_product_detail(product_id: str, **_: Any) -> dict:
+@function_tool
+async def get_product_detail(
+    product_id: Annotated[
+        str, Field(description="The product ID to look up (e.g. 'toy-001')")
+    ],
+) -> dict:
+    """Get full detail for a specific product by ID, including marketing copy, dimensions, manufacturer, rating, and best-seller rank."""
     product = get_product(product_id)
     if not product:
-        return {"found": False}
-    return {
-        "found": True,
-        "product": {
-            "id": product["id"],
-            "name": product["name"],
-            "description": product["description"],
-            "marketingCopy": product["marketingCopy"],
-            "keywords": product["keywords"],
-            "ageRange": f"{product['ageRange']['min']}-{product['ageRange']['max']} years",
-            "price": product["price"],
-            "inventory": product["inventory"],
-            "category": product["category"],
-            "image": product["image"],
-            "rating": product["rating"],
-            "manufacturer": product["manufacturer"],
-            "dimensions": product["dimensions"],
-            "bestSellersRank": product["bestSellersRank"],
-        },
-    }
+        result = {"found": False}
+    else:
+        result = {
+            "found": True,
+            "product": {
+                "id": product["id"],
+                "name": product["name"],
+                "description": product["description"],
+                "marketingCopy": product["marketingCopy"],
+                "keywords": product["keywords"],
+                "ageRange": (
+                    f"{product['ageRange']['min']}-{product['ageRange']['max']} years"
+                ),
+                "price": product["price"],
+                "inventory": product["inventory"],
+                "category": product["category"],
+                "image": product["image"],
+                "rating": product["rating"],
+                "manufacturer": product["manufacturer"],
+                "dimensions": product["dimensions"],
+                "bestSellersRank": product["bestSellersRank"],
+            },
+        }
+    await _push_voice_markdown("get_product", _format_product_markdown(result))
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -151,16 +257,31 @@ def get_product_detail(product_id: str, **_: Any) -> dict:
 # ---------------------------------------------------------------------------
 
 
+class PurchaseItem(BaseModel):
+    product_id: str = Field(description="The product ID (e.g. 'toy-001')")
+    quantity: int = Field(ge=1, description="Quantity to purchase")
+
+
+@function_tool
 def purchase_product(
-    user_id: str,
-    items: list,
-    shipping_address: dict,
-    **_: Any,
+    items: Annotated[
+        list[PurchaseItem],
+        Field(description="List of products and quantities to purchase"),
+    ],
+    shipping_name: Annotated[str, Field(description="Recipient full name")],
+    shipping_street: Annotated[str, Field(description="Street address")],
+    shipping_city: Annotated[str, Field(description="City")],
+    shipping_state: Annotated[str, Field(description="State or province")],
+    shipping_zip: Annotated[str, Field(description="ZIP or postal code")],
+    shipping_country: Annotated[str, Field(description="Country")],
 ) -> dict:
-    order_items = []
+    """Purchase one or more products. The customer's credit card is already on file, so only the shipping address is needed. Confirm products, quantities, and shipping details with the customer before calling."""
+    user_id = current_user_id.get()
+
+    order_items: list[dict] = []
     for item in items:
-        pid = item["product_id"]
-        qty = item["quantity"]
+        pid = item.product_id if hasattr(item, "product_id") else item["product_id"]
+        qty = item.quantity if hasattr(item, "quantity") else item["quantity"]
         product = get_product(pid)
         if not product:
             return {"success": False, "error": f"Product {pid} not found"}
@@ -182,11 +303,21 @@ def purchase_product(
         )
 
     for item in items:
-        product = get_product(item["product_id"])
-        product["inventory"] -= item["quantity"]
+        pid = item.product_id if hasattr(item, "product_id") else item["product_id"]
+        qty = item.quantity if hasattr(item, "quantity") else item["quantity"]
+        product = get_product(pid)
+        product["inventory"] -= qty
 
-    order = create_order(user_id, order_items, shipping_address)
+    addr = {
+        "name": shipping_name,
+        "street": shipping_street,
+        "city": shipping_city,
+        "state": shipping_state,
+        "zip": shipping_zip,
+        "country": shipping_country,
+    }
 
+    order = create_order(user_id, order_items, addr)
     return {
         "success": True,
         "orderId": order["id"],
@@ -207,12 +338,20 @@ def purchase_product(
 # ---------------------------------------------------------------------------
 
 
+@function_tool
 def check_order_status(
-    user_id: str,
-    order_id: Optional[str] = None,
-    product_search: Optional[str] = None,
-    **_: Any,
+    order_id: Annotated[
+        Optional[str],
+        Field(description="Specific order ID to look up (e.g. 'A1B2C3D4')"),
+    ] = None,
+    product_search: Annotated[
+        Optional[str],
+        Field(description="Search term to match against ordered product names"),
+    ] = None,
 ) -> dict:
+    """Look up an order by ID, or search this user's orders by product name. With no filter, returns all of this user's orders."""
+    user_id = current_user_id.get()
+
     if order_id:
         order = get_order_by_id(order_id)
         matched_orders = [order] if order else []
@@ -256,205 +395,41 @@ def check_order_status(
 # ---------------------------------------------------------------------------
 
 
-def cancel_order_tool(user_id: str, order_id: str, **_: Any) -> dict:
+@function_tool
+def cancel_order_tool(
+    order_id: Annotated[str, Field(description="The order ID to cancel")],
+) -> dict:
+    """Cancel an order that is still processing or shipping. Delivered orders cannot be cancelled."""
+    user_id = current_user_id.get()
     return _cancel_order(order_id, user_id)
 
 
-# ---------------------------------------------------------------------------
-# Tool schemas (shared between Realtime API and Chat Completions API)
-# ---------------------------------------------------------------------------
-
-# Realtime API tool format: top-level {type, name, description, parameters}.
-# Chat Completions tool format: {type: "function", function: {name, description, parameters}}.
-# We define the inner spec once and build both wrappers.
-
-_TOOL_SPECS: list[dict] = [
-    {
-        "name": "search_products",
-        "description": (
-            "Search the toy store inventory by free-text query, keyword tags, age range, "
-            "or category. Returns up to 10 products ranked by relevance. Always use this "
-            "when the customer describes what they're looking for."
-        ),
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "type": "string",
-                    "description": "Free-text search query matched against product names and descriptions",
-                },
-                "keywords": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "Specific keyword tags to match",
-                },
-                "min_age": {
-                    "type": "integer",
-                    "description": "Minimum age in years for the target child",
-                },
-                "max_age": {
-                    "type": "integer",
-                    "description": "Maximum age in years for the target child",
-                },
-                "category": {
-                    "type": "string",
-                    "description": "Product category to filter by",
-                },
-            },
-        },
-    },
-    {
-        "name": "get_product",
-        "description": (
-            "Get full detail for a specific product by ID, including marketing copy, "
-            "dimensions, manufacturer, rating, and best-seller rank."
-        ),
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "product_id": {
-                    "type": "string",
-                    "description": "The product ID (e.g. 'toy-001')",
-                }
-            },
-            "required": ["product_id"],
-        },
-    },
-    {
-        "name": "purchase_product",
-        "description": (
-            "Purchase one or more products. The customer's credit card is already on "
-            "file, so only the shipping address is needed. Confirm products, quantities, "
-            "and shipping details with the customer before calling."
-        ),
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "user_id": {
-                    "type": "string",
-                    "description": "The authenticated user's ID (from the system context)",
-                },
-                "items": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "product_id": {"type": "string"},
-                            "quantity": {"type": "integer", "minimum": 1},
-                        },
-                        "required": ["product_id", "quantity"],
-                    },
-                    "description": "Products and quantities to purchase",
-                },
-                "shipping_address": {
-                    "type": "object",
-                    "properties": {
-                        "name": {"type": "string", "description": "Recipient full name"},
-                        "street": {"type": "string"},
-                        "city": {"type": "string"},
-                        "state": {"type": "string", "description": "State or province"},
-                        "zip": {"type": "string", "description": "ZIP or postal code"},
-                        "country": {"type": "string"},
-                    },
-                    "required": ["name", "street", "city", "state", "zip", "country"],
-                },
-            },
-            "required": ["user_id", "items", "shipping_address"],
-        },
-    },
-    {
-        "name": "check_order_status",
-        "description": (
-            "Look up an order by ID, or search this user's orders by product name. "
-            "With no filter, returns all of this user's orders."
-        ),
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "user_id": {
-                    "type": "string",
-                    "description": "The authenticated user's ID",
-                },
-                "order_id": {
-                    "type": "string",
-                    "description": "Specific order ID to look up (e.g. 'A1B2C3D4')",
-                },
-                "product_search": {
-                    "type": "string",
-                    "description": "Search term to match against ordered product names",
-                },
-            },
-            "required": ["user_id"],
-        },
-    },
-    {
-        "name": "cancel_order",
-        "description": (
-            "Cancel an order that is still processing or shipping. Delivered orders "
-            "cannot be cancelled. Confirm with the customer first."
-        ),
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "user_id": {
-                    "type": "string",
-                    "description": "The authenticated user's ID",
-                },
-                "order_id": {
-                    "type": "string",
-                    "description": "The order ID to cancel",
-                },
-            },
-            "required": ["user_id", "order_id"],
-        },
-    },
+# All tools (same list passed to RealtimeAgent and Agent)
+all_tools = [
+    search_products,
+    get_product_detail,
+    purchase_product,
+    check_order_status,
+    cancel_order_tool,
 ]
 
 
-def realtime_tools() -> list[dict]:
-    """Tools formatted for the OpenAI Realtime API session.update event."""
-    return [
-        {
-            "type": "function",
-            "name": spec["name"],
-            "description": spec["description"],
-            "parameters": spec["parameters"],
-        }
-        for spec in _TOOL_SPECS
-    ]
+__all__ = [
+    "all_tools",
+    "search_products",
+    "get_product_detail",
+    "purchase_product",
+    "check_order_status",
+    "cancel_order_tool",
+    "_format_search_markdown",
+    "_format_product_markdown",
+]
 
 
-def chat_tools() -> list[dict]:
-    """Tools formatted for the OpenAI Chat Completions API."""
-    return [
-        {
-            "type": "function",
-            "function": {
-                "name": spec["name"],
-                "description": spec["description"],
-                "parameters": spec["parameters"],
-            },
-        }
-        for spec in _TOOL_SPECS
-    ]
-
-
-# Dispatch table — maps OpenAI tool names to Python implementations
-_HANDLERS = {
-    "search_products": search_products,
-    "get_product": get_product_detail,
-    "purchase_product": purchase_product,
-    "check_order_status": check_order_status,
-    "cancel_order": cancel_order_tool,
-}
-
-
-def call_tool(name: str, arguments: dict) -> dict:
-    """Dispatch a tool call by name with parsed JSON arguments."""
-    handler = _HANDLERS.get(name)
-    if handler is None:
-        return {"error": f"Unknown tool: {name}"}
-    try:
-        return handler(**arguments)
-    except Exception as e:
-        return {"error": f"Tool '{name}' raised: {type(e).__name__}: {e}"}
+# Backwards-compat shim — kept so external code (notebooks, eval scripts)
+# that imported `call_tool(...)` doesn't break. The SDK owns dispatch now.
+def call_tool(name: str, arguments: dict) -> dict:  # pragma: no cover
+    raise RuntimeError(
+        "call_tool() is no longer used — tool dispatch is owned by the OpenAI "
+        "Agents SDK. Invoke tools via Runner.run(...) or RealtimeRunner instead."
+    )

@@ -1,8 +1,8 @@
 # Wonder Toys — OpenAI Voice (Arize Phoenix)
 
-This is the Arize-Phoenix-instrumented version of the voice-enabled Wonder Toys shopping agent, built on the **OpenAI Realtime API** with a Python FastAPI backend.
+This is the Phoenix-instrumented version of the voice-enabled Wonder Toys shopping agent. The agent itself is the same as the no-observability tier: OpenAI Agents SDK `RealtimeAgent` for voice and `Agent` + `Runner` for the text fallback.
 
-The Arize ["Tracing & Evaluating Audio" cookbook](https://arize.com/docs/ax/cookbooks/evaluation/tracing-and-evaluating-audio) is hosted under the AX docs, but the OpenInference audio attributes it uses (`input.audio.*`, `output.audio.*`, `llm.tools.{i}.tool.*`) are equally valid for Phoenix — only the tracer-provider registration differs.
+The whole observability surface in this tier is `OpenAIAgentsInstrumentor().instrument(...)` plus a `phoenix.otel.register(...)` provider — the instrumentor patches both the realtime `RealtimeSession` and the regular `Runner`, emitting the canonical OpenInference voice span tree automatically.
 
 ## What differs from `no-observability/openai-voice`
 
@@ -10,41 +10,43 @@ Only observability-related files:
 
 | File | Difference |
 |------|------------|
-| `backend/tracing.py` | **New** — `phoenix.otel.register(...)` + `VoiceTracer` helper |
-| `backend/main.py` | Adds `import backend.tracing` at the top |
-| `backend/voice_agent.py` | Same handlers; the imported `voice_tracer` factory wraps them with OTel spans |
-| `backend/chat_agent.py` | Wraps Chat Completions call + tool dispatch in OTel spans |
-| `backend/audio.py` | `persist_wav` actually writes WAVs under `public/voice-audio/` and returns served URLs |
-| `backend/requirements.txt` | Adds `arize-phoenix-otel`, `opentelemetry-api`, `opentelemetry-sdk` |
-| `env.example` | Adds `PHOENIX_COLLECTOR_ENDPOINT`, `PHOENIX_API_KEY`, `PHOENIX_PROJECT_NAME`, optional `VOICE_AUDIO_PUBLIC_BASE` |
+| `backend/tracing.py` | **New** — `phoenix.otel.register(...)` + `OpenAIAgentsInstrumentor().instrument(...)` |
+| `backend/main.py` | Adds `import backend.tracing` at the top so the instrumentor patches `agents.realtime` before the runtime imports it |
+| `backend/voice_agent.py` | Imports `flush_traces` and calls it on session end so spans reach the OTel `BatchSpanProcessor` |
+| `backend/chat_agent.py` | Same — `flush_traces()` in the `finally` block per text-mode request |
+| `backend/requirements.txt` | Adds `arize-phoenix-otel` + `openinference-instrumentation-openai-agents` |
+| `env.example` | Adds `PHOENIX_COLLECTOR_ENDPOINT`, `PHOENIX_API_KEY`, `PHOENIX_PROJECT_NAME` |
 | `src/app/api/chat/route.ts` | Adds eval-bypass header check (`x-eval-secret` / `x-eval-user-id`) |
 
-Everything else (5 tools, UI, ChromaDB, auth, start.sh) is identical to the no-observability tier.
+Everything else (`backend/tools.py`, `backend/context.py`, `backend/voice_agent.py` dispatch logic, the React UI, ChromaDB, auth, `scripts/start.sh`) is identical to the no-observability tier.
 
 ## What differs from `ax/openai-voice`
 
-Only the tracer-provider registration:
+Only the tracer-provider registration. Both tiers call the same `OpenAIAgentsInstrumentor` — the only difference is the provider it sends spans to:
 
-- `backend/tracing.py` imports `phoenix.otel.register` (not `arize.otel.register`) and calls it with `project_name` + `batch=True` — Phoenix reads `PHOENIX_COLLECTOR_ENDPOINT` and `PHOENIX_API_KEY` from the environment.
+- `backend/tracing.py` imports `phoenix.otel.register` (not `arize.otel.register`) and calls it with `protocol="http/protobuf"` + `batch=True`. The `http/protobuf` protocol is required — the gRPC default would rewrite the port from 6006 to 4317 and traces would never land.
 - `backend/requirements.txt` ships `arize-phoenix-otel` (not `arize-otel`).
 - `env.example` uses `PHOENIX_*` (not `ARIZE_*`).
 - `package.json` name is `openai-voice-phoenix`.
 
-The span-building code (`VoiceTracer`, the chat-turn span tree, the audio persistence) is byte-identical to the AX tier because both backends consume the same OpenInference attributes.
-
 ## Trace shape
 
-Per voice session a single root `session.lifecycle` span owns:
+The `OpenAIAgentsInstrumentor` emits the canonical OpenInference voice span tree per turn — no hand-rolled spans, no per-event glue code:
 
 ```
-session.lifecycle           [session.id, llm.tools.{i}.tool.{name,type,description,json_schema}]
-├── input.audio   (× turns) [input.audio.url, input.audio.mime_type, input.audio.transcript]
-├── llm.tool      (× calls) [tool.name, tool.parameters, tool.output]
-└── output.audio  (× turns) [output.audio.url, output.audio.mime_type,
-                             output.audio.transcript, llm.token_count.{prompt,completion}]
+AUDIO  "conversation.turn"     [session.id, aggregated transcripts, llm.model_name,
+│                               llm.invocation_parameters, end_reason]
+├─ USER  "user"                [input.audio.url (WAV data URI), input.audio.mime_type,
+│                               input.audio.transcript]
+├─ LLM   "assistant"           [output.audio.url, output.audio.mime_type, output.audio.transcript,
+│                               llm.token_count.{prompt,completion}, time_to_first_token_ms]
+│  └─ TOOL "<tool_name>"       [tool.name, tool.parameters, tool.output]  ← one per call
+└─ ...                          ← additional USER / LLM siblings for split input or tool round-trips
 ```
 
-The text-mode fallback creates a `chat_turn` AGENT span with a child `chat_completion` LLM span and child `llm.tool` spans per function call.
+For text-mode requests the same instrumentor emits the standard `AGENT` + `LLM` + `TOOL` tree from a `Runner.run_streamed(...)` call.
+
+Audio is embedded inline as `data:audio/wav;base64,...` URIs so the Phoenix trace card audio player renders without needing any external file hosting.
 
 ## Running
 
@@ -53,7 +55,5 @@ cp env.example .env.local   # fill in OPENAI_API_KEY + PHOENIX_* + TWITTER_*
 npm install
 npm run dev                 # ChromaDB + Python deps + backend + Next.js
 ```
-
-WAVs are written to `public/voice-audio/` (gitignored) so Next.js can serve them at `/voice-audio/...`. Set `VOICE_AUDIO_PUBLIC_BASE` if Phoenix needs to fetch them from outside localhost.
 
 See the [root README](../../README.md) for full details.
