@@ -42,3 +42,4 @@ node_modules/
 .claude/skills/arize-*
 .claude/skills/phoenix-*
 skills-lock.json
+.arize-tmp-traces/

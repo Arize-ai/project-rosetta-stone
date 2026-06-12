@@ -79,16 +79,16 @@ The agent uses Claude (Anthropic) as the LLM for most tiers and X (Twitter) OAut
 - `evals/` — **New directory** in observability tiers (synthetic requests + eval harness)
 
 **OpenAI Voice** (Python FastAPI backend + Next.js frontend; all three tiers):
-- `backend/tracing.py` — **New file** in observability tiers. AX uses `arize.otel.register(...)`, Phoenix uses `phoenix.otel.register(...)`. Exposes a shared `VoiceTracer` helper that hand-rolls spans following the Arize audio cookbook — no auto-instrumentor exists for raw OpenAI Realtime WebSocket use, so spans are emitted manually but the OpenInference attributes are identical across both backends.
-- `backend/main.py` — `import backend.tracing` added at the top
-- `backend/voice_agent.py` — same handlers; the `voice_tracer` factory wraps lifecycle events with OTel spans
-- `backend/chat_agent.py` — text-mode Chat Completions calls wrapped in an `AGENT` + `LLM` + `TOOL` span tree
-- `backend/audio.py` — `persist_wav` writes WAVs under `public/voice-audio/` and returns served URLs (no-op in no-obs tier)
-- `backend/requirements.txt` — adds `arize-otel` (ax) or `arize-phoenix-otel` (phoenix), plus `opentelemetry-api`, `opentelemetry-sdk`
-- `env.example` — adds `ARIZE_*` (ax) or `PHOENIX_*` (phoenix) + optional `VOICE_AUDIO_PUBLIC_BASE`
+- `backend/tracing.py` — **New file** in observability tiers. AX uses `arize.otel.register(...)`, Phoenix uses `phoenix.otel.register(...)`, then both call `OpenAIAgentsInstrumentor().instrument(...)`. That instrumentor auto-traces both `agents.realtime.RealtimeSession` (voice) and `Agent` + `Runner` (text), producing the canonical OpenInference `AUDIO conversation.turn → USER user + LLM assistant → TOOL <tool_name>` span tree with no per-event glue code.
+- `backend/main.py` — `import backend.tracing` added at the top so the instrumentor patches `agents.realtime` before the runtime imports it
+- `backend/voice_agent.py` and `backend/chat_agent.py` — call `flush_traces()` in their `finally` blocks (the Agents SDK trace processors don't auto-flush in long-running servers)
+- `backend/requirements.txt` — adds `arize-otel` (ax) or `arize-phoenix-otel` (phoenix), plus `openinference-instrumentation-openai-agents`
+- `env.example` — adds `ARIZE_*` (ax) or `PHOENIX_*` (phoenix)
 - `src/app/api/chat/route.ts` — eval-bypass header check (ax only)
 
-The `ax/openai-voice` and `phoenix/openai-voice` tiers' `VoiceTracer` code is byte-identical; only the tracer-provider registration in `tracing.py` differs because both Phoenix and AX consume the same OpenInference attributes.
+Phoenix's `register(...)` call needs `protocol="http/protobuf"` — the gRPC default would rewrite the port from 6006 to 4317 and traces would never land. The AX call doesn't.
+
+The shared `backend/tools.py` defines five `@function_tool` wrappers used by both the `RealtimeAgent` and the text `Agent`. Voice-mode result rendering happens via the `current_voice_callback` contextvar: tools that produce visual results (`search_products`, `get_product`) push markdown to the browser through that callback so product cards render in the chat panel alongside the spoken response. Text mode leaves the callback as `None` and the model emits markdown directly in its streamed response.
 
 Do not let non-observability code drift between the tiers.
 
@@ -143,15 +143,15 @@ Do not let non-observability code drift between the tiers.
 - **Observability** (phoenix): `arize-phoenix-otel` + `openinference-instrumentation-agent-framework` + `agent_framework.observability.enable_instrumentation`
 
 ### OpenAI Voice (Python)
-- **Framework**: OpenAI Realtime API (voice) + OpenAI Chat Completions (text fallback), wired up by hand — no agent abstraction
-- **LLM**: `gpt-realtime` for voice and `gpt-4o` for text — both via the `openai` Python SDK
-- **Backend**: FastAPI + uvicorn (port 8001) with a `/voice` WebSocket endpoint that proxies to the OpenAI Realtime WebSocket (via the `websockets` library)
+- **Framework**: OpenAI Agents SDK with the `realtime` extras — `agents.realtime.RealtimeAgent` + `RealtimeRunner` for voice, `agents.Agent` + `Runner` for the text fallback. Same `@function_tool` set drives both
+- **LLM**: `gpt-realtime` for voice and `gpt-4o` for text
+- **Backend**: FastAPI + uvicorn (port 8001) with a `/voice` WebSocket endpoint that bridges the browser to a `RealtimeSession`. The SDK owns the OpenAI Realtime WebSocket, VAD wiring, and tool dispatch — our handler only translates browser frames to/from SDK events
 - **Frontend**: Next.js (App Router, Tailwind CSS) with a text/voice toggle in the chat header. Voice mode opens a browser WebSocket to the FastAPI backend, captures mic audio via an `AudioWorklet` (24 kHz mono PCM16), and plays back assistant audio via `AudioContext`-scheduled buffers
 - **Auth**: NextAuth v4 with Twitter/X OAuth 2.0. WS auth uses a token + user_id in the query string (browsers can't set headers on WS upgrade), validated against the same `BACKEND_SECRET` the HTTP `/chat` route uses
 - **Vector Search**: ChromaDB (local server, default embeddings) — shared with all other Python tiers
-- **Tools**: 5 plain Python functions in `backend/tools.py`, exposed via OpenAI tool-call JSON schemas. Same tool set is used by both voice and text mode
-- **Observability** (phoenix): `arize-phoenix-otel` + raw OpenTelemetry; same hand-rolled spans as the ax tier (only the tracer-provider registration differs — both backends consume the same OpenInference audio attributes)
-- **Observability** (ax): `arize-otel` + raw OpenTelemetry; hand-rolled spans following the Arize ["Tracing & Evaluating Audio"](https://arize.com/docs/ax/cookbooks/evaluation/tracing-and-evaluating-audio) cookbook. A `session.lifecycle` root span owns `input.audio`, `llm.tool`, and `output.audio` child spans per turn, with `input.audio.url|transcript|mime_type` / `output.audio.url|transcript|mime_type` / `llm.tools.{i}.tool.*` attributes. WAVs are persisted to `public/voice-audio/` and served by Next.js so trace URLs are clickable
+- **Tools**: 5 `@function_tool`-decorated functions in `backend/tools.py`, shared between voice and text mode. The Agents SDK derives JSON schemas from the type hints and handles dispatch
+- **Observability** (phoenix): `arize-phoenix-otel` + `openinference-instrumentation-openai-agents`. The instrumentor patches both `RealtimeSession` and `Runner`, emitting the canonical OpenInference voice span tree (`AUDIO conversation.turn → USER + LLM + TOOL`) with audio captured as inline WAV data URIs on `input.audio.url` / `output.audio.url`
+- **Observability** (ax): `arize-otel` + `openinference-instrumentation-openai-agents`. Same instrumentor as phoenix — only the tracer-provider `register(...)` call differs. Audio embeds as data URIs so the AX trace card audio player renders inline
 
 ## Running
 

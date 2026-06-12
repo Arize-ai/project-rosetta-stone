@@ -1,10 +1,9 @@
-"""Text-mode chat agent — OpenAI Chat Completions with tool calling.
+"""Text-mode chat agent — OpenAI Agents SDK `Agent` + `Runner`.
 
-This is the SSE-streaming text fallback used by the existing chat UI when
-the user has not switched into voice mode. It mirrors the behavior of the
-other Python tiers' agent.py: builds chat history, calls the LLM, iterates
-events, yields SSE chunks, dispatches tool calls in a loop until the model
-emits a final text response.
+The same five `@function_tool` wrappers from `backend.tools` are reused
+here, so a single change updates both voice and text modes. This is the
+text fallback used by the chat UI when the user hasn't toggled into voice
+mode; it streams SSE events shaped like the other Python tiers' agents.
 """
 
 from __future__ import annotations
@@ -13,22 +12,38 @@ import json
 import os
 from collections.abc import AsyncIterator
 
-from openai import AsyncOpenAI
+from agents import Agent, Runner, SQLiteSession, flush_traces
+from openai.types.responses import ResponseTextDeltaEvent
 
+from backend.context import current_user_id
 from backend.prompt import text_system_prompt
-from backend.tools import call_tool, chat_tools
-from backend.tracing import start_chat_span, tracer
+from backend.tools import all_tools
 
 MODEL = os.environ.get("OPENAI_TEXT_MODEL", "gpt-4o")
 
-_client: AsyncOpenAI | None = None
+_agent: Agent | None = None
+_sessions: dict[str, SQLiteSession] = {}
+_session_turns: dict[str, int] = {}
 
 
-def _get_client() -> AsyncOpenAI:
-    global _client
-    if _client is None:
-        _client = AsyncOpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-    return _client
+def _get_agent(user_id: str) -> Agent:
+    global _agent
+    if _agent is None:
+        _agent = Agent(
+            name="WonderToys",
+            instructions=text_system_prompt(user_id),
+            model=MODEL,
+            tools=all_tools,
+        )
+    return _agent
+
+
+def _get_session(user_id: str) -> SQLiteSession:
+    session = _sessions.get(user_id)
+    if session is None:
+        session = SQLiteSession(f"wonder-toys-openai-voice-{user_id}")
+        _sessions[user_id] = session
+    return session
 
 
 def _sse(text: str) -> str:
@@ -36,153 +51,58 @@ def _sse(text: str) -> str:
 
 
 async def stream_agent(messages: list[dict], user_id: str) -> AsyncIterator[str]:
-    """Stream the assistant's response as SSE events.
+    """Stream the assistant's response as SSE events."""
+    agent = _get_agent(user_id)
 
-    Yields strings shaped like 'data: {"text":"..."}\n\n' and finishes
-    with 'data: [DONE]\n\n'. Handles tool-call cycles internally.
-    """
-    client = _get_client()
+    # Detect conversation reset (browser refresh): if the client sends a
+    # message list with fewer assistant turns than we've recorded for this
+    # user, drop the per-user SQLite session and start fresh.
+    assistant_turns = len([m for m in messages if m.get("role") == "assistant"])
+    existing_turns = _session_turns.get(user_id, 0)
 
-    chat_history: list[dict] = [
-        {"role": "system", "content": text_system_prompt(user_id)},
-    ]
-    for msg in messages:
-        role = msg.get("role", "user")
-        content = msg.get("content", "")
-        if role in ("user", "assistant", "system") and content:
-            chat_history.append({"role": role, "content": content})
+    if user_id not in _sessions or assistant_turns < existing_turns:
+        old = _sessions.pop(user_id, None)
+        if old is not None:
+            await old.clear_session()
+        _session_turns[user_id] = 0
 
-    if not any(m["role"] == "user" for m in chat_history):
-        yield _sse("No message provided.")
+    session = _get_session(user_id)
+
+    user_messages = [m for m in messages if m.get("role") == "user"]
+    if not user_messages:
         yield "data: [DONE]\n\n"
         return
 
+    last_message = user_messages[-1].get("content", "")
+
     had_text_before = False
     in_tool_call = False
-    last_user_msg = next(
-        (m["content"] for m in reversed(chat_history) if m["role"] == "user"), ""
-    )
 
-    with tracer.start_as_current_span(
-        "chat_turn",
-        attributes={
-            "openinference.span.kind": "AGENT",
-            "input.value": last_user_msg[:10_000],
-            "user.id": user_id,
-            # Session id mirrors user id so the AX / Phoenix UIs can group
-            # multi-turn conversations from the same user into one session
-            # (same convention as the OpenInference `using_session` wrap).
-            "session.id": user_id,
-        },
-    ) as turn_span:
-        full_response_parts: list[str] = []
+    token = current_user_id.set(user_id)
+    try:
+        result = Runner.run_streamed(agent, last_message, session=session)
+        async for event in result.stream_events():
+            if event.type == "run_item_stream_event":
+                if event.item.type == "tool_call_item":
+                    in_tool_call = True
+                continue
+            if event.type == "raw_response_event" and isinstance(
+                event.data, ResponseTextDeltaEvent
+            ):
+                delta = event.data.delta
+                if not delta:
+                    continue
+                if in_tool_call and had_text_before:
+                    yield _sse("\n\n")
+                in_tool_call = False
+                had_text_before = True
+                yield _sse(delta)
+    finally:
+        current_user_id.reset(token)
+        # Long-running servers don't auto-flush the Agents SDK trace processors;
+        # call flush_traces() in the finally block so spans reach the OTel
+        # BatchSpanProcessor (which then flushes to Arize AX).
+        flush_traces()
 
-        # Loop: stream → handle tool calls → re-stream → ... until finish_reason=stop
-        for _ in range(8):  # bounded to prevent runaway tool loops
-            llm_span = start_chat_span(MODEL, chat_history)
-            stream = await client.chat.completions.create(
-                model=MODEL,
-                messages=chat_history,
-                tools=chat_tools(),
-                tool_choice="auto",
-                stream=True,
-            )
-
-            assistant_text = ""
-            tool_calls: dict[int, dict] = {}
-            finish_reason: str | None = None
-
-            try:
-                async for chunk in stream:
-                    if not chunk.choices:
-                        continue
-                    choice = chunk.choices[0]
-                    delta = choice.delta
-
-                    if delta.content:
-                        if in_tool_call and had_text_before:
-                            yield _sse("\n\n")
-                        in_tool_call = False
-                        had_text_before = True
-                        assistant_text += delta.content
-                        yield _sse(delta.content)
-
-                    if delta.tool_calls:
-                        for tc in delta.tool_calls:
-                            idx = tc.index
-                            entry = tool_calls.setdefault(
-                                idx,
-                                {"id": None, "name": "", "arguments": ""},
-                            )
-                            if tc.id:
-                                entry["id"] = tc.id
-                            if tc.function and tc.function.name:
-                                entry["name"] = tc.function.name
-                            if tc.function and tc.function.arguments:
-                                entry["arguments"] += tc.function.arguments
-
-                    if choice.finish_reason:
-                        finish_reason = choice.finish_reason
-            finally:
-                llm_span.set_attribute("output.value", assistant_text[:10_000])
-                if tool_calls:
-                    llm_span.set_attribute(
-                        "llm.tool_calls",
-                        json.dumps([{"name": t["name"]} for t in tool_calls.values()]),
-                    )
-                llm_span.end()
-
-            full_response_parts.append(assistant_text)
-
-            if not tool_calls:
-                break
-
-            chat_history.append(
-                {
-                    "role": "assistant",
-                    "content": assistant_text or None,
-                    "tool_calls": [
-                        {
-                            "id": tc["id"],
-                            "type": "function",
-                            "function": {
-                                "name": tc["name"],
-                                "arguments": tc["arguments"],
-                            },
-                        }
-                        for tc in tool_calls.values()
-                    ],
-                }
-            )
-
-            in_tool_call = True
-
-            for tc in tool_calls.values():
-                try:
-                    args = json.loads(tc["arguments"] or "{}")
-                except json.JSONDecodeError:
-                    args = {}
-                with tracer.start_as_current_span(
-                    "llm.tool",
-                    attributes={
-                        "openinference.span.kind": "TOOL",
-                        "tool.name": tc["name"],
-                        "tool.parameters": json.dumps(args)[:5_000],
-                    },
-                ) as tool_span:
-                    result = call_tool(tc["name"], args)
-                    tool_span.set_attribute("tool.output", json.dumps(result)[:10_000])
-                chat_history.append(
-                    {
-                        "role": "tool",
-                        "tool_call_id": tc["id"],
-                        "content": json.dumps(result),
-                    }
-                )
-
-            if finish_reason != "tool_calls":
-                break
-
-        turn_span.set_attribute("output.value", "".join(full_response_parts)[:10_000])
-
+    _session_turns[user_id] = assistant_turns + 1
     yield "data: [DONE]\n\n"

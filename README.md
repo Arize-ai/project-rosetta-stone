@@ -304,18 +304,19 @@ If you're instrumenting your own app, find the framework you use, read what file
 
 ### OpenAI Voice
 
-The voice tier wires up the OpenAI Realtime API (audio in, audio out) plus a text-mode fallback. There's no OpenInference auto-instrumentor for raw Realtime WebSocket use (the `openinference-instrumentation-openai-agents` package covers the Agents SDK runtime instead), so spans are emitted manually following the [Arize "Tracing & Evaluating Audio" cookbook](https://arize.com/docs/ax/cookbooks/evaluation/tracing-and-evaluating-audio) — the recipe is hosted under AX docs but the OpenInference attributes apply to Phoenix equally.
+The voice tier is built on the OpenAI Agents SDK with the `realtime` extras — `RealtimeAgent` + `RealtimeRunner` for voice, `Agent` + `Runner` for the text fallback. The same `@function_tool`-decorated functions in `backend/tools.py` serve both modes. `OpenAIAgentsInstrumentor().instrument(...)` patches both runtimes, so all tracing is automatic — no per-event handlers, no hand-rolled span tree.
 
-- `backend/tracing.py` — **new file** in observability tiers. AX calls `arize.otel.register(...)`; Phoenix calls `phoenix.otel.register(...)`. The file then exports a `VoiceTracer` helper (byte-identical between phoenix and ax) that hand-rolls the cookbook span tree: `session.lifecycle` root + `input.audio`, `llm.tool`, `output.audio` children with `input.audio.url|transcript|mime_type`, `output.audio.url|transcript|mime_type`, and `llm.tools.{i}.tool.*` attributes.
-- `backend/main.py` — imports `backend.tracing` at the top, before anything else
-- `backend/voice_agent.py` — same Realtime ⇄ browser bridge as no-obs; the imported `voice_tracer` factory wraps lifecycle events with OTel spans
-- `backend/chat_agent.py` — text-mode Chat Completions calls wrapped in an `AGENT` + `LLM` + `TOOL` span tree
-- `backend/audio.py` — `persist_wav` writes WAVs under `public/voice-audio/` (gitignored) and returns served URLs so the trace's `input.audio.url` / `output.audio.url` are clickable
-- `backend/requirements.txt` — adds `arize-otel` (ax) or `arize-phoenix-otel` (phoenix), plus `opentelemetry-api`, `opentelemetry-sdk`
-- `env.example` — adds `ARIZE_*` (ax) or `PHOENIX_*` (phoenix), plus optional `VOICE_AUDIO_PUBLIC_BASE` (used behind a tunnel so the backend can fetch WAVs from outside localhost)
+- `backend/tracing.py` — **new file** in observability tiers. AX calls `arize.otel.register(...)`; Phoenix calls `phoenix.otel.register(..., protocol="http/protobuf", batch=True)`. Both then call `OpenAIAgentsInstrumentor().instrument(tracer_provider=provider)`. That's the entire tracing surface.
+- `backend/main.py` — imports `backend.tracing` at the top so the instrumentor patches `agents.realtime` before the runtime imports it
+- `backend/voice_agent.py` — calls `flush_traces()` on session end so the per-turn spans reach the OTel `BatchSpanProcessor` (long-running servers don't auto-flush)
+- `backend/chat_agent.py` — same — `flush_traces()` in the streaming generator's `finally` block per text-mode request
+- `backend/requirements.txt` — adds `arize-otel` (ax) or `arize-phoenix-otel` (phoenix), plus `openinference-instrumentation-openai-agents`
+- `env.example` — adds `ARIZE_*` (ax) or `PHOENIX_*` (phoenix)
 - `src/app/api/chat/route.ts` — eval-bypass header check (`x-eval-secret` / `x-eval-user-id`) in the ax tier
 
-> The `ax/openai-voice` and `phoenix/openai-voice` tiers' `VoiceTracer` code is byte-identical — only the tracer-provider registration in `tracing.py` differs, since both backends consume the same OpenInference attributes.
+The instrumentor emits the canonical OpenInference voice span tree per turn — `AUDIO conversation.turn` → `USER user` + `LLM assistant` → `TOOL <tool_name>` — with audio captured inline as `data:audio/wav;base64,...` URIs on `input.audio.url` / `output.audio.url`. Phoenix and AX both render the trace card audio player from those data URIs (Arize re-hosts to its multimodal bucket on ingest), so no external file hosting is needed.
+
+> The `ax/openai-voice` and `phoenix/openai-voice` tiers' Python code is byte-identical apart from the `register(...)` call in `tracing.py` and the corresponding requirements + env vars. Phoenix needs `protocol="http/protobuf"` — the gRPC default rewrites the port from 6006 to 4317 and traces never land.
 
 ### Pydantic AI
 
@@ -386,7 +387,7 @@ If you're picking which framework to read first, this table is a quick compariso
 | **Microsoft Agent Framework** | `agent_framework` Agent + AgentSession | `agent_framework.anthropic.AnthropicClient` | `agent.run(stream=True)` over `AgentResponseUpdate` events | Python FastAPI backend + Next.js frontend |
 | **Microsoft Semantic Kernel** | `semantic_kernel.agents` `ChatCompletionAgent` + `ChatHistoryAgentThread` | `semantic_kernel.connectors.ai.anthropic.AnthropicChatCompletion` | `agent.invoke_stream()` over `StreamingChatMessageContent` chunks | Python FastAPI backend + Next.js frontend |
 | **OpenAI Agents SDK** | `agents.Agent` + `SQLiteSession` + `@function_tool` | Native OpenAI Responses API (`model="gpt-5.4-mini"`) — not Anthropic | `Runner.run_streamed().stream_events()` filtered on `raw_response_event` + `ResponseTextDeltaEvent` | Python FastAPI backend + Next.js frontend |
-| **OpenAI Voice** | Hand-rolled WebSocket bridge to the OpenAI Realtime API + Chat Completions for text fallback. Same 5 Python tools serve both | `openai` Python SDK (`gpt-realtime` voice, `gpt-4o` text) | Realtime: WebSocket `response.output_audio.delta` / `response.output_audio_transcript.*`. Text: Chat Completions `ChatCompletionChunk` stream | Python FastAPI backend (HTTP `/chat` + WS `/voice`) + Next.js frontend |
+| **OpenAI Voice** | OpenAI Agents SDK with the `realtime` extras — `RealtimeAgent` + `RealtimeRunner` for voice, `Agent` + `Runner` for text fallback. Same 5 `@function_tool` wrappers serve both | `openai-agents` (`gpt-realtime` voice, `gpt-4o` text) | Voice: `async for event in session` over `RealtimeAudio` / `RealtimeHistoryAdded` / `RealtimeRawModelEvent`. Text: `Runner.run_streamed().stream_events()` | Python FastAPI backend (HTTP `/chat` + WS `/voice`) + Next.js frontend |
 | **OpenInference Annotation Tracing** | Hand-rolled tool-loop using the Anthropic Java SDK, with `@Agent` / `@Chain` / `@LLM` / `@Tool` annotations applied via ByteBuddy at startup | `com.anthropic:anthropic-java` SDK | Anthropic SDK `messages.stream(...)` `MessageStreamEvent` | Spring Boot Java backend + Next.js frontend |
 | **Pydantic AI** | `pydantic_ai` Agent | `"anthropic:claude-sonnet-4"` model string | `agent.run_stream_events()` over PartStart/PartDelta events | Python FastAPI backend + Next.js frontend |
 | **Smolagents** | `smolagents.ToolCallingAgent` | `LiteLLMModel("anthropic/claude-sonnet-4")` | `agent.run(stream=True)` over `ChatMessageStreamDelta` (`stream_outputs=True`) | Python FastAPI backend + Next.js frontend |
@@ -418,7 +419,7 @@ Then configure the same 6 evaluators in the [Arize AX console](https://app.arize
 
 ### Voice harness (openai-voice tier only)
 
-The `openai-voice` tier ships a synthetic *voice* runner too. Instead of text prompts hitting `/api/chat`, pre-generated MP3 prompts are streamed through the voice WebSocket — same path a real microphone uses, so every prompt produces a full `session.lifecycle` → `input.audio` → `llm.tool` → `output.audio` trace tree.
+The `openai-voice` tier ships a synthetic *voice* runner too. Instead of text prompts hitting `/api/chat`, pre-generated MP3 prompts are streamed through the voice WebSocket — same path a real microphone uses, so every prompt produces a full `AUDIO conversation.turn` → `USER` + `LLM` → `TOOL` trace tree.
 
 ```bash
 cd phoenix/openai-voice         # or ax/openai-voice, or no-observability/openai-voice
