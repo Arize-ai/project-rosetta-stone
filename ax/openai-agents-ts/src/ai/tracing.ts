@@ -11,6 +11,10 @@
 // `NodeTracerProvider` configured to ship to AX's OTLP endpoint with the
 // `openinference.project.name` resource attribute set so AX routes spans
 // to the right project.
+//
+// We use our own `OpenInferenceFilteredBatchSpanProcessor` (subclass of
+// the standard OTel `BatchSpanProcessor`) so any span without an
+// `openinference.span.kind` attribute is dropped before export.
 
 let _initialised = false;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,12 +38,8 @@ export async function initTracing() {
   const { OpenAIAgentsInstrumentation } = await import(
     "@arizeai/openinference-instrumentation-openai-agents"
   );
-  // The OI-Vercel span processor wraps the OTLP exporter so OpenInference
-  // semconv attributes are normalised on the wire. Without it, AX receives
-  // spans missing the `openinference.project.name` resource hint and routes
-  // them to the catch-all bucket instead of our project.
-  const { OpenInferenceSimpleSpanProcessor } = await import(
-    "@arizeai/openinference-vercel"
+  const { OpenInferenceFilteredBatchSpanProcessor } = await import(
+    "./oi-filter-processor"
   );
   // Whole-namespace import so the instrumentor can swap in its trace
   // processor before any Agent / run() calls fire.
@@ -55,15 +55,15 @@ export async function initTracing() {
       [SEMRESATTRS_PROJECT_NAME]: projectName,
     }),
     spanProcessors: [
-      new OpenInferenceSimpleSpanProcessor({
-        exporter: new OTLPTraceExporter({
+      new OpenInferenceFilteredBatchSpanProcessor(
+        new OTLPTraceExporter({
           url: "https://otlp.arize.com/v1/traces",
           headers: {
             space_id: spaceId,
             api_key: apiKey,
           },
         }),
-      }),
+      ),
     ],
   });
 

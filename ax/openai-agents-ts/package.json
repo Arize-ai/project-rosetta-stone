@@ -13,7 +13,6 @@
   "dependencies": {
     "@arizeai/openinference-instrumentation-openai-agents": "^0.2.0",
     "@arizeai/openinference-semantic-conventions": "^2.5.0",
-    "@arizeai/openinference-vercel": "^2.7.6",
     "@chroma-core/default-embed": "^0.1.9",
     "@openai/agents": "^0.11.6",
     "@opentelemetry/exporter-trace-otlp-proto": "^0.218.0",

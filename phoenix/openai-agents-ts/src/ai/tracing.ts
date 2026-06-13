@@ -10,12 +10,13 @@
 // `setTraceProcessors` / `addTraceProcessor` APIs. We hand it the
 // Phoenix-aware tracer provider returned by `@arizeai/phoenix-otel`.
 //
-// We pass a custom `spanProcessors` array so we can attach the
-// `isOpenInferenceSpan` filter — Next.js's built-in OTel emits its own
-// HTTP / page-render / fetch spans through whatever global provider is
-// registered, and they'd otherwise pollute the Phoenix project alongside
-// the agent spans. Only spans with an `openinference.span.kind` attribute
-// (AGENT / LLM / TOOL / GUARDRAIL / CHAIN) reach the exporter.
+// We override `register()`'s default span processor with our own
+// `OpenInferenceFilteredBatchSpanProcessor` (subclass of the standard OTel
+// `BatchSpanProcessor`) that drops any span without an
+// `openinference.span.kind` attribute. Next.js's built-in OTel
+// auto-instrumentation otherwise emits its own HTTP / page-render / fetch
+// spans through whatever global provider is registered, and they'd
+// otherwise pollute the Phoenix project alongside the agent spans.
 
 let _initialised = false;
 
@@ -27,11 +28,11 @@ export async function initTracing() {
   const { OpenAIAgentsInstrumentation } = await import(
     "@arizeai/openinference-instrumentation-openai-agents"
   );
-  const { OpenInferenceBatchSpanProcessor, isOpenInferenceSpan } = await import(
-    "@arizeai/openinference-vercel"
-  );
   const { OTLPTraceExporter } = await import(
     "@opentelemetry/exporter-trace-otlp-proto"
+  );
+  const { OpenInferenceFilteredBatchSpanProcessor } = await import(
+    "./oi-filter-processor"
   );
   // Whole-namespace import so the instrumentor can swap in its trace
   // processor before any Agent / run() calls fire.
@@ -54,12 +55,7 @@ export async function initTracing() {
     projectName,
     url: baseUrl,
     apiKey,
-    spanProcessors: [
-      new OpenInferenceBatchSpanProcessor({
-        exporter,
-        spanFilter: isOpenInferenceSpan,
-      }),
-    ],
+    spanProcessors: [new OpenInferenceFilteredBatchSpanProcessor(exporter)],
   });
 
   const instrumentation = new OpenAIAgentsInstrumentation({
