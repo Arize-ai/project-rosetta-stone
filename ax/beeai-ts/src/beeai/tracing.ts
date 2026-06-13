@@ -12,6 +12,12 @@
 // `manuallyInstrument(...)` — required under ESM because Next.js doesn't
 // load modules via CommonJS, so the auto-instrumentor's require-time hook
 // misses.
+//
+// Uses our own `OpenInferenceFilteredSimpleSpanProcessor` (subclass of OTel's
+// standard `SimpleSpanProcessor`, defined in `./oi-filter-processor.ts`) so any
+// span without an `openinference.span.kind` attribute is dropped before
+// export — keeps Next.js's HTTP / fetch / page-render spans out of the AX
+// project bucket.
 
 let _initialised = false;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,11 +41,9 @@ export async function initTracing() {
   const { BeeAIInstrumentation } = await import(
     "@arizeai/openinference-instrumentation-beeai"
   );
-  // Wraps the OTLP exporter so BeeAI's emitter-based spans are normalised into
-  // OpenInference semconv (adds the missing instrumentationScope.name which
-  // the OTel transformer otherwise can't serialise — Phoenix's
-  // `@arizeai/phoenix-otel` register() uses this same processor by default).
-  const { OpenInferenceSimpleSpanProcessor } = await import("@arizeai/openinference-vercel");
+  const { OpenInferenceFilteredSimpleSpanProcessor } = await import(
+    "./oi-filter-processor"
+  );
   // Whole namespace import so the instrumentor can patch all exported classes.
   const beeaiFramework = await import("beeai-framework");
 
@@ -53,15 +57,15 @@ export async function initTracing() {
       [SEMRESATTRS_PROJECT_NAME]: projectName,
     }),
     spanProcessors: [
-      new OpenInferenceSimpleSpanProcessor({
-        exporter: new OTLPTraceExporter({
+      new OpenInferenceFilteredSimpleSpanProcessor(
+        new OTLPTraceExporter({
           url: "https://otlp.arize.com/v1/traces",
           headers: {
             space_id: spaceId,
             api_key: apiKey,
           },
         }),
-      }),
+      ),
     ],
   });
 

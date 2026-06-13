@@ -5,10 +5,13 @@
 //     modules load)
 //   - by the standalone smoke script (`scripts/smoke-agent.ts`)
 //
-// Uses `@arizeai/phoenix-otel`'s `register()` with its default span
-// processor (`OpenInferenceSimpleSpanProcessor`). Passing a custom
-// SimpleSpanProcessor breaks Phoenix's project-name routing — the OI-
-// wrapped processor knows how to thread the resource through correctly.
+// Uses `@arizeai/phoenix-otel`'s `register()` with our own
+// `OpenInferenceFilteredSimpleSpanProcessor` — a local subclass of OTel's
+// standard `SimpleSpanProcessor` defined in `./oi-filter-processor.ts` that
+// drops any span without an `openinference.span.kind` attribute. Without
+// this filter, Next.js's built-in OTel auto-instrumentation pipes its
+// HTTP / fetch / page-render spans through the global provider and into
+// the Phoenix project alongside the agent spans.
 //
 // Then patches `beeai-framework` via the OpenInference instrumentor's
 // `manuallyInstrument(...)` — required under ESM because Next.js doesn't
@@ -25,6 +28,12 @@ export async function initTracing() {
   const { BeeAIInstrumentation } = await import(
     "@arizeai/openinference-instrumentation-beeai"
   );
+  const { OTLPTraceExporter } = await import(
+    "@opentelemetry/exporter-trace-otlp-proto"
+  );
+  const { OpenInferenceFilteredSimpleSpanProcessor } = await import(
+    "./oi-filter-processor"
+  );
   // Whole namespace import so the instrumentor can patch all exported classes.
   const beeaiFramework = await import("beeai-framework");
 
@@ -34,17 +43,20 @@ export async function initTracing() {
   const baseUrl = rawEndpoint.replace(/\/v1\/traces\/?$/, "");
   const apiKey = process.env.PHOENIX_API_KEY ?? undefined;
 
+  const exporter = new OTLPTraceExporter({
+    url: `${baseUrl.replace(/\/$/, "")}/v1/traces`,
+    headers: apiKey ? { authorization: `Bearer ${apiKey}` } : undefined,
+  });
+
   const provider = register({
     projectName,
-    url: baseUrl,
-    apiKey,
-    batch: false,
+    spanProcessors: [new OpenInferenceFilteredSimpleSpanProcessor(exporter)],
   });
 
   const instrumentation = new BeeAIInstrumentation({ tracerProvider: provider });
   instrumentation.manuallyInstrument(beeaiFramework);
 
   console.log(
-    `[tracing] Phoenix tracing initialised for BeeAI → ${baseUrl} (project: ${projectName})`,
+    `[tracing] Phoenix tracing initialised for BeeAI → ${baseUrl} (project: ${projectName}, OI-filtered)`,
   );
 }
