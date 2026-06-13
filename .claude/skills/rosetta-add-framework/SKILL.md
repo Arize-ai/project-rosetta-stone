@@ -15,7 +15,7 @@ End-to-end workflow for bringing a new agent framework into the repo. Mirrors th
 
 ## TODO — frameworks not yet implemented
 
-Snapshot (last refreshed 2026-06-10 from `https://arize.com/docs/llms.txt`). Each phase-1 `discover` run re-fetches and shows the diff.
+Snapshot (last refreshed 2026-06-12 from `https://arize.com/docs/llms.txt`). Each phase-1 `discover` run re-fetches and shows the diff.
 
 ### Python (Tier A — clear agent frameworks)
 - [x] Agno
@@ -36,6 +36,7 @@ Snapshot (last refreshed 2026-06-10 from `https://arize.com/docs/llms.txt`). Eac
 
 ### TypeScript (Tier A)
 - [x] BeeAI
+- [x] OpenAI Agents SDK
 
 ### Java (Tier A)
 

@@ -31,6 +31,7 @@ Read the no-obs version to see the bare agent. Diff the phoenix or ax version ag
 | [Microsoft Agent Framework](https://learn.microsoft.com/en-us/agent-framework/) | ✅ | — | — |
 | [Microsoft Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/) | ✅ | — | — |
 | [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) | ✅ | — | — |
+| [OpenAI Agents SDK (TypeScript)](https://openai.github.io/openai-agents-js/) | — | ✅ | — |
 | [OpenAI Realtime API (Voice)](https://platform.openai.com/docs/guides/realtime) | ✅ | — | — |
 | [OpenInference Annotation Tracing](https://arize.com/docs/ax/integrations/java/annotation/annotation-tracing) | — | — | ✅ |
 | [Pydantic AI](https://ai.pydantic.dev/) | ✅ | — | — |
@@ -74,6 +75,7 @@ rosetta/
 │   ├── mastra/                  Mastra framework (TypeScript)
 │   ├── microsoft-agent-py/      Microsoft Agent Framework (Python + Next.js)
 │   ├── openai-agents-py/        OpenAI Agents SDK (Python + Next.js)
+│   ├── openai-agents-ts/        OpenAI Agents SDK (TypeScript)
 │   ├── openai-voice/            OpenAI Realtime API + Chat Completions (Python + Next.js)
 │   ├── pydantic-ai-py/          Pydantic AI (Python + Next.js)
 │   ├── semantic-kernel-py/      Microsoft Semantic Kernel (Python + Next.js)
@@ -302,6 +304,17 @@ If you're instrumenting your own app, find the framework you use, read what file
 
 > `backend/agent.py` is shared across all three tiers and is the only Python tier whose LLM is **not** Anthropic Claude — it uses OpenAI's native Responses API via `model="gpt-5.4-mini"`, because the OpenAI Agents SDK is OpenAI's own SDK and the LiteLLM-to-Anthropic adapter bypasses the SDK's native tracing hooks. The agent loop wraps `Runner.run_streamed()` in `using_session(user_id)` so `session.id` lands on spans (the OpenInference instrumentor for openai-agents does not emit it automatically). Observability tiers call `flush_traces()` in the streaming generator's `finally` block — without it, spans buffer in the trace processor across FastAPI requests and never reach the OTel BatchSpanProcessor. The no-observability tier falls back to a `nullcontext()` shim when `openinference.instrumentation` isn't installed.
 
+### OpenAI Agents SDK (TypeScript)
+
+- `src/ai/tracing.ts` — **new file** in observability tiers. Phoenix calls `register({ projectName, url, apiKey, spanProcessors: [...] })` from `@arizeai/phoenix-otel`, passing a local `OpenInferenceFilteredBatchSpanProcessor` (a ~15-line subclass of OTel's standard `BatchSpanProcessor` defined in `src/ai/oi-filter-processor.ts` that drops any span without an `openinference.span.kind` attribute) — this filter is **load-bearing**, because Next.js's auto-OTel would otherwise pipe its HTTP / fetch / page-render spans through the same global provider and pollute the Phoenix project. AX builds a `NodeTracerProvider` by hand with the same filter processor wrapping an `OTLPTraceExporter` pointed at `https://otlp.arize.com/v1/traces` with `space_id` + `api_key` headers and the `openinference.project.name` resource attribute set — and deliberately does **not** call `provider.register()`, sidestepping the Next.js-pollution problem at the registration layer too. The filter is defined locally rather than imported from `@arizeai/openinference-vercel` so the OpenAI Agents tiers don't carry a Vercel-specific dependency. Both then run `new OpenAIAgentsInstrumentation({ tracerProvider }).manuallyInstrument(agents)` — the instrumentor doesn't monkey-patch the SDK; it implements the agents SDK's first-class `TracingProcessor` interface and registers via the SDK's own `setTraceProcessors` API.
+- `instrumentation.ts` — Next.js auto-detects this file at the root and runs `register()` once per server process at startup, before user-land modules load. It delegates to `initTracing()` in `src/ai/tracing.ts`.
+- `next.config.ts` — adds `@openai/agents` + `@openai/agents-core` + `@arizeai/openinference-instrumentation-openai-agents` (+ `@arizeai/phoenix-otel` for the Phoenix tier) to `serverExternalPackages` so Turbopack doesn't try to bundle them.
+- `package.json` — adds the OpenInference instrumentor + OTel SDK packages; bumps `zod` to v4 (peer-dep requirement of `@openai/agents`).
+- `env.example` — observability environment variables.
+- `src/app/api/chat/route.ts` (AX tier only) — calls `getTracerProvider()?.forceFlush()` after the stream completes so spans are pushed out of the OTel batch buffer before the route handler exits.
+
+> Both tiers use OpenAI's native Responses API (`model="gpt-5.4-mini"`), matching the Python `openai-agents-py` tier — the JS SDK could route through `@ai-sdk/anthropic` via `@openai/agents-extensions`, but using the native path keeps the tracing surface honest. The **AX tier intentionally does *not* call `provider.register()`** — making the provider global would otherwise let Next.js's built-in OTel auto-instrumentation pump its own HTTP infra spans into our project. The OpenInference instrumentor resolves its tracer directly off the provider we hand it, so the global-registration step isn't needed. Phoenix's `register()` does its own snapshot/restore of the global state, so the same caveat doesn't apply.
+
 ### OpenAI Voice
 
 The voice tier is built on the OpenAI Agents SDK with the `realtime` extras — `RealtimeAgent` + `RealtimeRunner` for voice, `Agent` + `Runner` for the text fallback. The same `@function_tool`-decorated functions in `backend/tools.py` serve both modes. `OpenAIAgentsInstrumentor().instrument(...)` patches both runtimes, so all tracing is automatic — no per-event handlers, no hand-rolled span tree.
@@ -387,6 +400,7 @@ If you're picking which framework to read first, this table is a quick compariso
 | **Microsoft Agent Framework** | `agent_framework` Agent + AgentSession | `agent_framework.anthropic.AnthropicClient` | `agent.run(stream=True)` over `AgentResponseUpdate` events | Python FastAPI backend + Next.js frontend |
 | **Microsoft Semantic Kernel** | `semantic_kernel.agents` `ChatCompletionAgent` + `ChatHistoryAgentThread` | `semantic_kernel.connectors.ai.anthropic.AnthropicChatCompletion` | `agent.invoke_stream()` over `StreamingChatMessageContent` chunks | Python FastAPI backend + Next.js frontend |
 | **OpenAI Agents SDK** | `agents.Agent` + `SQLiteSession` + `@function_tool` | Native OpenAI Responses API (`model="gpt-5.4-mini"`) — not Anthropic | `Runner.run_streamed().stream_events()` filtered on `raw_response_event` + `ResponseTextDeltaEvent` | Python FastAPI backend + Next.js frontend |
+| **OpenAI Agents SDK (TypeScript)** | `@openai/agents` `Agent` + per-request `AgentInputItem[]` history + `tool(...)` with Zod schemas | Native OpenAI Responses API (`model="gpt-5.4-mini"`) — not Anthropic | `run(agent, history, { stream: true })` over `stream.toStream()` — `raw_model_stream_event` → `output_text_delta` for tokens, `run_item_stream_event` for tool boundaries | Next.js monolith |
 | **OpenAI Voice** | OpenAI Agents SDK with the `realtime` extras — `RealtimeAgent` + `RealtimeRunner` for voice, `Agent` + `Runner` for text fallback. Same 5 `@function_tool` wrappers serve both | `openai-agents` (`gpt-realtime` voice, `gpt-4o` text) | Voice: `async for event in session` over `RealtimeAudio` / `RealtimeHistoryAdded` / `RealtimeRawModelEvent`. Text: `Runner.run_streamed().stream_events()` | Python FastAPI backend (HTTP `/chat` + WS `/voice`) + Next.js frontend |
 | **OpenInference Annotation Tracing** | Hand-rolled tool-loop using the Anthropic Java SDK, with `@Agent` / `@Chain` / `@LLM` / `@Tool` annotations applied via ByteBuddy at startup | `com.anthropic:anthropic-java` SDK | Anthropic SDK `messages.stream(...)` `MessageStreamEvent` | Spring Boot Java backend + Next.js frontend |
 | **Pydantic AI** | `pydantic_ai` Agent | `"anthropic:claude-sonnet-4"` model string | `agent.run_stream_events()` over PartStart/PartDelta events | Python FastAPI backend + Next.js frontend |

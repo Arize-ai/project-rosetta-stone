@@ -13,6 +13,7 @@ rosetta/
 │   ├── langchain-py/      — LangChain / LangGraph (Python + Next.js)
 │   ├── llamaindex-py/     — LlamaIndex (Python + Next.js)
 │   ├── microsoft-agent-py/ — Microsoft Agent Framework (Python + Next.js)
+│   ├── openai-agents-ts/  — OpenAI Agents SDK (TypeScript)
 │   └── openai-voice/      — OpenAI Realtime API + Chat Completions (Python + Next.js)
 ├── phoenix/             — Agents instrumented with Arize Phoenix Cloud
 │   ├── mastra/            — Mastra framework (TypeScript)
@@ -20,12 +21,14 @@ rosetta/
 │   ├── langchain-py/      — LangChain / LangGraph (Python + Next.js)
 │   ├── llamaindex-py/     — LlamaIndex (Python + Next.js)
 │   ├── microsoft-agent-py/ — Microsoft Agent Framework (Python + Next.js)
+│   ├── openai-agents-ts/  — OpenAI Agents SDK (TypeScript)
 │   └── openai-voice/      — OpenAI Realtime API + Chat Completions (Python + Next.js)
 └── ax/                  — Agents instrumented with Arize AX
     ├── mastra/            — Mastra framework (TypeScript)
     ├── langchain-js/      — LangChain.js / LangGraph (TypeScript)
     ├── langchain-py/      — LangChain / LangGraph (Python + Next.js)
     ├── llamaindex-py/     — LlamaIndex (Python + Next.js)
+    ├── openai-agents-ts/  — OpenAI Agents SDK (TypeScript)
     └── openai-voice/      — OpenAI Realtime API + Chat Completions (Python + Next.js)
 ```
 
@@ -77,6 +80,17 @@ The agent uses Claude (Anthropic) as the LLM for most tiers and X (Twitter) OAut
 - `backend/requirements.txt` — observability packages added
 - `env.example` — observability environment variables
 - `evals/` — **New directory** in observability tiers (synthetic requests + eval harness)
+
+**OpenAI Agents TypeScript** (Next.js monolith; all three tiers):
+- `src/ai/tracing.ts` — **New file** in observability tiers. Phoenix calls `register({ projectName, url, apiKey, spanProcessors: [...] })` from `@arizeai/phoenix-otel`, passing a local `OpenInferenceFilteredBatchSpanProcessor` (subclass of OTel's `BatchSpanProcessor`, ~15 LOC in `src/ai/oi-filter-processor.ts`) — without it Next.js's auto-OTel pumps HTTP / fetch / page-render spans into the Phoenix project bucket alongside the agent spans. AX builds a `NodeTracerProvider` by hand with the same filter processor and **does not call `provider.register()`** — making the provider global would have the same effect on AX. Both tiers then run `new OpenAIAgentsInstrumentation({ tracerProvider }).manuallyInstrument(agents)`. The instrumentor is *not* a monkey-patch — it implements the agents SDK's first-class `TracingProcessor` interface and registers via `setTraceProcessors`.
+- `src/ai/oi-filter-processor.ts` — **New file**. Drops any span whose attributes don't include `SemanticConventions.OPENINFERENCE_SPAN_KIND`. Defined locally rather than imported from `@arizeai/openinference-vercel` so the OpenAI Agents tier doesn't take a Vercel-specific dependency.
+- `instrumentation.ts` — **New file** at the project root. Next.js auto-detects it and calls `register()` once per server process at startup, before user-land modules load. Delegates to `initTracing()`.
+- `src/app/api/chat/route.ts` — AX tier calls `getTracerProvider()?.forceFlush()` after `stream.completed` so spans drain out of the OTel batch buffer before the route handler exits.
+- `next.config.ts` — adds the OI instrumentor + (for Phoenix) `@arizeai/phoenix-otel` to `serverExternalPackages` alongside `@openai/agents` so Turbopack doesn't try to bundle them.
+- `package.json` — adds `@arizeai/openinference-instrumentation-openai-agents` + `@arizeai/openinference-semantic-conventions` + `@opentelemetry/sdk-trace-base` + `@opentelemetry/exporter-trace-otlp-proto`, plus `@arizeai/phoenix-otel` (Phoenix) or the remaining OTel SDK packages — `@opentelemetry/sdk-trace-node`, `@opentelemetry/resources`, `@opentelemetry/semantic-conventions` (AX).
+- `env.example` — adds `PHOENIX_*` (phoenix) or `ARIZE_*` (ax).
+
+Both observability tiers use OpenAI's native Responses API (`model="gpt-5.4-mini"`), matching the Python `openai-agents-py` tier. The JS SDK could route through `@ai-sdk/anthropic` via `@openai/agents-extensions`, but the native path keeps the OpenInference tracing surface clean. The chat route threads conversation history through `AgentInputItem[]` rebuilt per request (`user(...)` / `assistant(...)` helpers) — no per-user `SQLiteSession` like the Python tier, since Next.js HTTP routes are stateless.
 
 **OpenAI Voice** (Python FastAPI backend + Next.js frontend; all three tiers):
 - `backend/tracing.py` — **New file** in observability tiers. AX uses `arize.otel.register(...)`, Phoenix uses `phoenix.otel.register(...)`, then both call `OpenAIAgentsInstrumentor().instrument(...)`. That instrumentor auto-traces both `agents.realtime.RealtimeSession` (voice) and `Agent` + `Runner` (text), producing the canonical OpenInference `AUDIO conversation.turn → USER user + LLM assistant → TOOL <tool_name>` span tree with no per-event glue code.
@@ -141,6 +155,17 @@ Do not let non-observability code drift between the tiers.
 - **Vector Search**: ChromaDB (local server, default embeddings)
 - **Sessions**: Per-user `AgentSession` stored in memory; `**kwargs` injects `user_id` at runtime via `additional_function_arguments`
 - **Observability** (phoenix): `arize-phoenix-otel` + `openinference-instrumentation-agent-framework` + `agent_framework.observability.enable_instrumentation`
+
+### OpenAI Agents SDK (TypeScript)
+- **Framework**: OpenAI Agents JS SDK (`@openai/agents` ≥ 0.11.6) — `Agent` + `run(agent, history, { stream: true })`, with `tool(...)` definitions driven by Zod v4 schemas
+- **LLM**: Native OpenAI Responses API (`model="gpt-5.4-mini"`) — not Anthropic. The SDK can be routed through `@ai-sdk/anthropic` via `@openai/agents-extensions`, but the native path keeps the OpenInference tracing surface clean (matches the Python `openai-agents-py` tier convention)
+- **Web**: Next.js (App Router, Tailwind CSS) — monolith, no separate Python backend
+- **Auth**: NextAuth v4 with Twitter/X OAuth 2.0. The chat route honors an `x-eval-secret` / `x-eval-user-id` bypass header for headless smoke tests
+- **Sessions**: Stateless per-request — conversation history is rebuilt as `AgentInputItem[]` from the messages the client sends (`user(...)` / `assistant(...)` helpers), then passed to `run()`. No `SQLiteSession` like the Python tier
+- **Vector Search**: ChromaDB (local server, default embeddings) — shared with the Python tiers
+- **Streaming**: `await run(agent, history, { stream: true })` → iterate `stream.toStream()` and pick up `raw_model_stream_event` → `output_text_delta` for token deltas, `run_item_stream_event` → `tool_call_item` for tool boundaries. Same `data: {...}\n\n` SSE shape every other tier emits
+- **Observability** (phoenix): `@arizeai/phoenix-otel` + `@arizeai/openinference-instrumentation-openai-agents` (the instrumentor implements the SDK's native `TracingProcessor` interface — no monkey-patch)
+- **Observability** (ax): a local `OpenInferenceFilteredBatchSpanProcessor` (subclass of OTel's `BatchSpanProcessor`) wrapping `@opentelemetry/exporter-trace-otlp-proto`'s `OTLPTraceExporter` pointed at `https://otlp.arize.com/v1/traces`, plus the same `@arizeai/openinference-instrumentation-openai-agents`. The AX tier deliberately skips `provider.register()` so Next.js's auto-OTel doesn't pump HTTP infra spans into the AX project
 
 ### OpenAI Voice (Python)
 - **Framework**: OpenAI Agents SDK with the `realtime` extras — `agents.realtime.RealtimeAgent` + `RealtimeRunner` for voice, `agents.Agent` + `Runner` for the text fallback. Same `@function_tool` set drives both
