@@ -9,6 +9,13 @@
 // implements that interface and registers via the SDK's
 // `setTraceProcessors` / `addTraceProcessor` APIs. We hand it the
 // Phoenix-aware tracer provider returned by `@arizeai/phoenix-otel`.
+//
+// We pass a custom `spanProcessors` array so we can attach the
+// `isOpenInferenceSpan` filter — Next.js's built-in OTel emits its own
+// HTTP / page-render / fetch spans through whatever global provider is
+// registered, and they'd otherwise pollute the Phoenix project alongside
+// the agent spans. Only spans with an `openinference.span.kind` attribute
+// (AGENT / LLM / TOOL / GUARDRAIL / CHAIN) reach the exporter.
 
 let _initialised = false;
 
@@ -19,6 +26,12 @@ export async function initTracing() {
   const { register } = await import("@arizeai/phoenix-otel");
   const { OpenAIAgentsInstrumentation } = await import(
     "@arizeai/openinference-instrumentation-openai-agents"
+  );
+  const { OpenInferenceBatchSpanProcessor, isOpenInferenceSpan } = await import(
+    "@arizeai/openinference-vercel"
+  );
+  const { OTLPTraceExporter } = await import(
+    "@opentelemetry/exporter-trace-otlp-proto"
   );
   // Whole-namespace import so the instrumentor can swap in its trace
   // processor before any Agent / run() calls fire.
@@ -32,11 +45,21 @@ export async function initTracing() {
   const baseUrl = rawEndpoint.replace(/\/v1\/traces\/?$/, "");
   const apiKey = process.env.PHOENIX_API_KEY ?? undefined;
 
+  const exporter = new OTLPTraceExporter({
+    url: `${baseUrl.replace(/\/$/, "")}/v1/traces`,
+    headers: apiKey ? { authorization: `Bearer ${apiKey}` } : undefined,
+  });
+
   const provider = register({
     projectName,
     url: baseUrl,
     apiKey,
-    batch: true,
+    spanProcessors: [
+      new OpenInferenceBatchSpanProcessor({
+        exporter,
+        spanFilter: isOpenInferenceSpan,
+      }),
+    ],
   });
 
   const instrumentation = new OpenAIAgentsInstrumentation({
@@ -45,6 +68,6 @@ export async function initTracing() {
   instrumentation.manuallyInstrument(agents);
 
   console.log(
-    `[tracing] Phoenix tracing initialised for OpenAI Agents → ${baseUrl} (project: ${projectName})`,
+    `[tracing] Phoenix tracing initialised for OpenAI Agents → ${baseUrl} (project: ${projectName}, OI-filtered)`,
   );
 }

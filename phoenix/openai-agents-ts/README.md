@@ -17,7 +17,7 @@ instrumentation.ts                   ─→ Next.js auto-detects; calls register
     └── @openai/agents               (the imported namespace passed to the instrumentor)
 ```
 
-`@arizeai/phoenix-otel`'s `register()` sets up a `NodeTracerProvider` with the `openinference.project.name` resource attribute and an `OpenInferenceBatchSpanProcessor` (or `OpenInferenceSimpleSpanProcessor` when `batch: false`), wrapping an `OTLPTraceExporter`. We hand the resulting provider to the instrumentor; from then on every agent span flows straight to Phoenix.
+`@arizeai/phoenix-otel`'s `register()` sets up a `NodeTracerProvider` with the `openinference.project.name` resource attribute. We pass our own `spanProcessors` array containing an `OpenInferenceBatchSpanProcessor` with `spanFilter: isOpenInferenceSpan` — Next.js's built-in OTel auto-instrumentation otherwise pumps its own HTTP / fetch / page-render spans through whatever global provider is registered, polluting the Phoenix project alongside the agent spans. The filter drops anything that doesn't carry an `openinference.span.kind` attribute, so only `AGENT` / `LLM` / `TOOL` / `GUARDRAIL` / `CHAIN` spans reach the exporter.
 
 ## Span coverage
 
@@ -45,7 +45,7 @@ npm run dev
 - New `instrumentation.ts` at root.
 - New `src/ai/tracing.ts`.
 - `next.config.ts` — `serverExternalPackages` adds `@arizeai/openinference-instrumentation-openai-agents` and `@arizeai/phoenix-otel`.
-- `package.json` — adds `@arizeai/phoenix-otel`, `@arizeai/openinference-instrumentation-openai-agents`, `@arizeai/openinference-semantic-conventions`, `@opentelemetry/sdk-trace-base`.
+- `package.json` — adds `@arizeai/phoenix-otel`, `@arizeai/openinference-instrumentation-openai-agents`, `@arizeai/openinference-semantic-conventions`, `@arizeai/openinference-vercel` (for the OI-aware processor + `isOpenInferenceSpan` filter), `@opentelemetry/exporter-trace-otlp-proto`, `@opentelemetry/sdk-trace-base`.
 - `env.example` — adds `PHOENIX_COLLECTOR_ENDPOINT`, `PHOENIX_API_KEY`, `PHOENIX_PROJECT_NAME`.
 
 Everything else is unchanged.
