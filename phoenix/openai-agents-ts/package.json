@@ -8,6 +8,8 @@
     "build": "next build",
     "start": "next start",
     "index": "npx tsx scripts/index-products.ts",
+    "synthetic-requests": "bash ../../evals/run-synthetic-requests.sh .",
+    "evals": "bash ../../evals/run-phoenix-evals.sh .",
     "lint": "eslint"
   },
   "dependencies": {
@@ -37,6 +39,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.4",
     "tailwindcss": "^4",
+    "tsx": "^4.22.2",
     "typescript": "^5"
   }
 }
