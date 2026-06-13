@@ -16,6 +16,7 @@
     "@arizeai/phoenix-otel": "^1.0.2",
     "@chroma-core/default-embed": "^0.1.9",
     "@openai/agents": "^0.11.6",
+    "@opentelemetry/exporter-trace-otlp-proto": "^0.218.0",
     "@opentelemetry/sdk-trace-base": "^2.7.1",
     "@tailwindcss/typography": "^0.5.19",
     "chromadb": "^3.3.1",
