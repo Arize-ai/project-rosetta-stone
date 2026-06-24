@@ -38,6 +38,7 @@ Read the no-obs version to see the bare agent. Diff the phoenix or ax version ag
 | [Smolagents](https://huggingface.co/docs/smolagents/) | ✅ | — | — |
 | [Spring AI](https://docs.spring.io/spring-ai/reference/) | — | — | ✅ |
 | [Vercel AI SDK](https://ai-sdk.dev/) | — | ✅ | — |
+| [Vercel Eve](https://eve.dev/) | — | ✅ | — |
 
 ## The agent — Wonder Toys
 
@@ -81,7 +82,8 @@ rosetta/
 │   ├── semantic-kernel-py/      Microsoft Semantic Kernel (Python + Next.js)
 │   ├── smolagents-py/           Smolagents (Python + Next.js)
 │   ├── spring-ai-java/          Spring AI (Java + Next.js)
-│   └── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
+│   ├── vercel-ai-sdk/           Vercel AI SDK (TypeScript)
+│   └── eve/                     Vercel Eve (Eve agent + Next.js proxy)
 ├── phoenix/                   Arize Phoenix Cloud instrumentation (same set of frameworks)
 ├── ax/                        Arize AX instrumentation (same set of frameworks)
 ├── evals/                     Shared synthetic requests + eval harness (text + voice)
@@ -191,6 +193,17 @@ If you're instrumenting your own app, find the framework you use, read what file
 - `next.config.ts` — `serverExternalPackages` for observability packages
 - `package.json` — observability dependencies
 - `env.example` — observability environment variables
+
+### Vercel Eve
+
+[Eve](https://eve.dev/) is a filesystem-first agent runtime with its own dev server and HTTP channel, so it follows the repo's separate-backend + Next.js-proxy pattern (like the Python tiers) rather than the in-process pattern of the Vercel AI SDK / Mastra tiers. The Eve agent lives in `eve-agent/` (an Eve project: `agent/agent.ts`, `agent/instructions.md`, `agent/tools/`, `agent/lib/`), and the Next.js `src/app/api/chat/route.ts` proxies to the Eve dev server, translating Eve's NDJSON session stream into the Wonder Toys SSE shape. Observability lives entirely inside the Eve project:
+
+- `eve-agent/agent/instrumentation.ts` — auto-discovered by Eve (root-only slot), runs before agent code. `registerOTel` (via `@vercel/otel`) with an OTLP exporter (new file)
+- `eve-agent/agent/root-aware-processor.ts` — `RootAwareOpenInferenceProcessor` keeps OpenInference spans plus Eve's `ai.eve.turn` workflow span and promotes `ai.eve.turn` to the trace root, so each turn lands as a single un-orphaned root (new file)
+- `eve-agent/package.json` — observability dependencies (`@arizeai/openinference-vercel`, `@vercel/otel`, OTel packages, `lru-cache`; `@arizeai/openinference-semantic-conventions` for Phoenix)
+- `env.example` — observability environment variables
+
+> Unlike the Vercel AI SDK tier, userId is threaded into tools via Eve `clientContext` (the runtime surfaces it to the model, which passes it into the `userId` tool arguments) rather than an OTel-context session ID. The model is `anthropic/claude-sonnet-4.6` via the Vercel AI Gateway.
 
 ### Agno
 
@@ -407,6 +420,7 @@ If you're picking which framework to read first, this table is a quick compariso
 | **Smolagents** | `smolagents.ToolCallingAgent` | `LiteLLMModel("anthropic/claude-sonnet-4")` | `agent.run(stream=True)` over `ChatMessageStreamDelta` (`stream_outputs=True`) | Python FastAPI backend + Next.js frontend |
 | **Spring AI** | `spring-ai-anthropic` `ChatClient` + `@Tool` methods | `spring-ai-starter-model-anthropic` | `chatClient.prompt().stream().chatResponse()` returns `Flux<ChatResponse>` | Spring Boot Java backend + Next.js frontend |
 | **Vercel AI SDK** | Vercel AI SDK `streamText` | `@ai-sdk/anthropic` | `result.fullStream` | Next.js monolith |
+| **Vercel Eve** | Eve filesystem-first agent (`defineAgent` + `defineTool`), durable sessions over the built-in HTTP channel | `anthropic/claude-sonnet-4.6` via the Vercel AI Gateway | Eve NDJSON session stream (`message.appended` deltas) → SSE in the Next.js proxy | Eve dev server + Next.js proxy frontend |
 
 ## Evaluations
 
