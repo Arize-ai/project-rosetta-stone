@@ -1,0 +1,10 @@
+Phoenix trace root/orphan analysis (Podman, project wonder-toys-eve-podman)
+Verified via: GET http://localhost:6007/v1/projects/UHJvamVjdDoy/spans
+
+Total traces: 1
+
+Trace 894c6f7a529ee611129a33921d2b64ba
+  spans: 8
+  roots (1): ai.eve.turn
+  orphans (0): none
+  span names: gen_ai, gen_ai, gen_ai.client, ai.eve.turn, gen_ai, gen_ai.client, gen_ai, gen_ai
