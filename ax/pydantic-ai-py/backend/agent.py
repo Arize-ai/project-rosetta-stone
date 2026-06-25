@@ -90,7 +90,7 @@ def get_agent() -> Agent:
     if _agent is None:
         # Anthropic API key is read from ANTHROPIC_API_KEY env var by the provider.
         _agent = Agent(
-            "anthropic:claude-sonnet-4-20250514",
+            "anthropic:claude-sonnet-4-6",
             system_prompt=SYSTEM_PROMPT,
             name="WonderToysAgent",
             tools=[

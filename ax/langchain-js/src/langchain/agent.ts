@@ -103,7 +103,7 @@ let _shoppingAgent: ReturnType<typeof createReactAgent> | null = null;
 export function getShoppingAgent() {
   if (!_shoppingAgent) {
     const llm = new ChatAnthropic({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-6",
       apiKey: process.env.ANTHROPIC_API_KEY,
     });
     _shoppingAgent = createReactAgent({ llm, tools });

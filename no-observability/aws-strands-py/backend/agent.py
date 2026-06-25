@@ -100,7 +100,7 @@ def _build_agent(user_id: str) -> Agent:
     """
     model = AnthropicModel(
         client_args={"api_key": os.environ["ANTHROPIC_API_KEY"]},
-        model_id="claude-sonnet-4-20250514",
+        model_id="claude-sonnet-4-6",
         max_tokens=4096,
         params={"temperature": 0.7},
     )

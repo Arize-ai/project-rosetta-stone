@@ -95,7 +95,7 @@ def get_agent() -> Agent:
         # thread prior turns into the next prompt when we reuse session_id.
         _agent = Agent(
             name="WonderToysAgent",
-            model=Claude(id="claude-sonnet-4-20250514"),
+            model=Claude(id="claude-sonnet-4-6"),
             system_message=SYSTEM_PROMPT,
             db=InMemoryDb(),
             add_history_to_context=True,

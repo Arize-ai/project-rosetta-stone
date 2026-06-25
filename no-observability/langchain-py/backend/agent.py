@@ -65,7 +65,7 @@ Description or marketing copy
 
 def _build_agent():
     model = ChatAnthropic(
-        model="claude-sonnet-4-20250514",
+        model="claude-sonnet-4-6",
         api_key=os.environ.get("ANTHROPIC_API_KEY"),
     )
     return create_react_agent(model, all_tools, prompt=SYSTEM_PROMPT)

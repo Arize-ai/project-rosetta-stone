@@ -16,7 +16,7 @@ The instrumentor produces one CHAIN span per `agent.run(...)`, nested LLM spans 
 - **Python FastAPI backend** (port 8001) — agent, tools, and API
 - **Next.js frontend** — UI, auth, proxies chat to the Python backend
 - **Agent**: `smolagents.ToolCallingAgent` configured with the 5 Wonder Toys tools
-- **LLM**: Claude (`claude-sonnet-4-20250514`) via `smolagents.LiteLLMModel` (LiteLLM under the hood reaches Anthropic directly with `ANTHROPIC_API_KEY`)
+- **LLM**: Claude (`claude-sonnet-4-6`) via `smolagents.LiteLLMModel` (LiteLLM under the hood reaches Anthropic directly with `ANTHROPIC_API_KEY`)
 - **Tools**: Plain Python functions decorated with `@tool` from `smolagents`; tool descriptions and JSON schemas are derived from Google-style docstrings (`Args:` blocks)
 - **Streaming**: `agent.run(message, stream=True, reset=...)` with `stream_outputs=True` on the agent yields `ChatMessageStreamDelta` token-level events; we forward `delta.content` to the SSE stream
 - **Conversation memory**: one `ToolCallingAgent` instance per `user_id` is kept in memory; subsequent turns pass `reset=False` so smolagents' internal step log carries history forward

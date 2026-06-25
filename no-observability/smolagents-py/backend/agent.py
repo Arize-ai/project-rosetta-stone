@@ -90,7 +90,7 @@ _history_turns: dict[str, int] = {}
 def _build_agent() -> ToolCallingAgent:
     # LiteLLMModel reads ANTHROPIC_API_KEY from env automatically.
     model = LiteLLMModel(
-        model_id="anthropic/claude-sonnet-4-20250514",
+        model_id="anthropic/claude-sonnet-4-6",
         max_tokens=4096,
     )
     return ToolCallingAgent(

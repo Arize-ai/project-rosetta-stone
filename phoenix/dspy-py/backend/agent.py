@@ -126,7 +126,7 @@ def _configure_lm() -> None:
     # api_key is read from ANTHROPIC_API_KEY by LiteLLM automatically.
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     lm = dspy.LM(
-        "anthropic/claude-sonnet-4-20250514",
+        "anthropic/claude-sonnet-4-6",
         api_key=api_key,
         max_tokens=8192,
         cache=False,

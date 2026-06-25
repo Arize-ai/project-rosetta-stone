@@ -23,7 +23,7 @@ async function main() {
   const { UnconstrainedMemory } = await import("beeai-framework/memory/unconstrainedMemory");
   const { searchProductsTool } = await import("@/beeai/tools/search-products");
 
-  const llm = new AnthropicChatModel("claude-sonnet-4-20250514");
+  const llm = new AnthropicChatModel("claude-sonnet-4-6");
   llm.config({ parameters: { stream: true } as any });
   const agent = new ReActAgent({ llm, memory: new UnconstrainedMemory(), tools: [searchProductsTool] });
   await agent.run({ prompt: "Show me dragon toys" });

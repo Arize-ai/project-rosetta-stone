@@ -5,7 +5,7 @@ import { purchaseProduct } from "./tools/purchase";
 import { checkOrderStatus } from "./tools/order-status";
 import { cancelOrderTool } from "./tools/cancel-order";
 
-export const model = anthropic("claude-sonnet-4-20250514");
+export const model = anthropic("claude-sonnet-4-6");
 
 export const tools = {
   searchProducts,

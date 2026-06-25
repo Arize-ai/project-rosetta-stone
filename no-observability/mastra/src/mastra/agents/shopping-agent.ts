@@ -63,6 +63,6 @@ Description or marketing copy
 6. **Tone**: Be warm, enthusiastic about toys, and helpful. Use a conversational tone appropriate for a toy store. Suggest related products when relevant.
 
 7. **Important**: You have a userId available in the conversation context. Always use it when making purchases or checking orders. The userId will be provided in the system context.`,
-  model: anthropic("claude-sonnet-4-20250514"),
+  model: anthropic("claude-sonnet-4-6"),
   tools: { searchProducts, getProduct, purchaseProduct, checkOrderStatus, cancelOrderTool },
 });

@@ -134,7 +134,7 @@ def _get_llm() -> Anthropic:
     global _llm
     if _llm is None:
         _llm = Anthropic(
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-6",
             api_key=os.environ.get("ANTHROPIC_API_KEY"),
             max_tokens=4096,
         )

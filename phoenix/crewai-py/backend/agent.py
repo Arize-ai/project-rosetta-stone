@@ -111,7 +111,7 @@ def _build_crew(message: str, history: list[tuple[str, str]]) -> Crew:
         # CrewAI hardcodes strict=True on tool schemas, which Sonnet 4
         # (2025-05-14) doesn't support. Sonnet 4.5 is the oldest Claude
         # model that accepts strict tool definitions.
-        llm=LLM(model="anthropic/claude-sonnet-4-5-20250929", stream=True),
+        llm=LLM(model="anthropic/claude-sonnet-4-6", stream=True),
         tools=_TOOLS,
         verbose=False,
         allow_delegation=False,

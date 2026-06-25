@@ -49,7 +49,7 @@ The home page shows the top 5 products by best seller rank and category browse c
 
 The chat UI renders product results as custom `ProductCard` components (image + "Add to Cart" button on the left, product details on the right) by pre-parsing the agent's markdown into typed segments before rendering.
 
-The agent uses Claude (Anthropic) as the LLM for most tiers and X (Twitter) OAuth for authentication. The `openai-voice` tier is the exception — it uses OpenAI's `gpt-realtime` (voice mode) and `gpt-4o` (text-mode fallback) since the OpenAI Realtime API is what makes the voice flow possible.
+The agent uses Claude (Anthropic) as the LLM for most tiers and X (Twitter) OAuth for authentication. The `openai-voice` tier is the exception — it uses OpenAI's `gpt-realtime` (voice mode) and `gpt-5.4-mini` (text-mode fallback) since the OpenAI Realtime API is what makes the voice flow possible.
 
 ## Editing Rules
 
@@ -148,7 +148,7 @@ Do not let non-observability code drift between the tiers.
 
 ### Microsoft Agent Framework Python
 - **Framework**: Microsoft Agent Framework (`agent-framework-anthropic`, pre-release)
-- **LLM**: Claude (`claude-sonnet-4-20250514`) via `agent_framework.anthropic.AnthropicClient`
+- **LLM**: Claude (`claude-sonnet-4-6`) via `agent_framework.anthropic.AnthropicClient`
 - **Backend**: FastAPI + uvicorn (port 8001)
 - **Frontend**: Next.js (App Router, Tailwind CSS)
 - **Auth**: NextAuth v4 with Twitter/X OAuth 2.0
@@ -169,7 +169,7 @@ Do not let non-observability code drift between the tiers.
 
 ### OpenAI Voice (Python)
 - **Framework**: OpenAI Agents SDK with the `realtime` extras — `agents.realtime.RealtimeAgent` + `RealtimeRunner` for voice, `agents.Agent` + `Runner` for the text fallback. Same `@function_tool` set drives both
-- **LLM**: `gpt-realtime` for voice and `gpt-4o` for text
+- **LLM**: `gpt-realtime` for voice and `gpt-5.4-mini` for text
 - **Backend**: FastAPI + uvicorn (port 8001) with a `/voice` WebSocket endpoint that bridges the browser to a `RealtimeSession`. The SDK owns the OpenAI Realtime WebSocket, VAD wiring, and tool dispatch — our handler only translates browser frames to/from SDK events
 - **Frontend**: Next.js (App Router, Tailwind CSS) with a text/voice toggle in the chat header. Voice mode opens a browser WebSocket to the FastAPI backend, captures mic audio via an `AudioWorklet` (24 kHz mono PCM16), and plays back assistant audio via `AudioContext`-scheduled buffers
 - **Auth**: NextAuth v4 with Twitter/X OAuth 2.0. WS auth uses a token + user_id in the query string (browsers can't set headers on WS upgrade), validated against the same `BACKEND_SECRET` the HTTP `/chat` route uses
