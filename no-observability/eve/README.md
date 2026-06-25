@@ -78,7 +78,7 @@ See `env.example`. Required variables:
 ## Differences in observability tiers
 
 `phoenix/eve` and `ax/eve` differ from this baseline only in observability, all
-inside the `eve-agent/` project: a new `agent/instrumentation.ts` +
-`agent/root-aware-processor.ts` (which promotes Eve's `ai.eve.turn` workflow span
-to the trace root), observability dependencies in `eve-agent/package.json`, and
-observability env vars. Everything else is identical.
+inside the `eve-agent/` project: a new `agent/instrumentation.ts` (which wires the
+stock `OpenInferenceSimpleSpanProcessor` with `reparentOrphanedSpans: true` to
+keep `ai.eve.turn` as the per-turn trace root), observability dependencies in
+`eve-agent/package.json`, and observability env vars. Everything else is identical.

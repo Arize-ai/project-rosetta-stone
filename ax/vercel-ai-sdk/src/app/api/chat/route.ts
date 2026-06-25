@@ -3,8 +3,6 @@ import { model, tools, SYSTEM_PROMPT } from "@/ai/agent";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
-import { context } from "@opentelemetry/api";
-import { setSession } from "@arizeai/openinference-core";
 
 export async function POST(req: Request) {
   let userId: string;
@@ -22,22 +20,18 @@ export async function POST(req: Request) {
     userId = (session.user as { id?: string }).id || session.user.email || "anonymous";
   }
   const { messages } = await req.json();
-  const sessionId = req.headers.get("x-session-id") ?? crypto.randomUUID();
 
   // Append user context to the system prompt
   const system = `${SYSTEM_PROMPT}\n\nThe current authenticated user's ID is: ${userId}. Use this userId when making purchases or checking order status.`;
 
-  const result = context.with(
-    setSession(context.active(), { sessionId }),
-    () => streamText({
-      model,
-      system,
-      messages,
-      tools,
-      stopWhen: stepCountIs(10),
-      experimental_telemetry: { isEnabled: true },
-    }),
-  );
+  const result = streamText({
+    model,
+    system,
+    messages,
+    tools,
+    stopWhen: stepCountIs(10),
+    experimental_telemetry: { isEnabled: true },
+  });
 
   // Convert the Vercel AI SDK stream to a ReadableStream for the client.
   // We iterate fullStream to detect tool-call boundaries and inject a paragraph

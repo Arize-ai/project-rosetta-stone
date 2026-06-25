@@ -9,10 +9,9 @@ const nextConfig: NextConfig = {
     '@opentelemetry/exporter-trace-otlp-proto',
     '@opentelemetry/resources',
     '@opentelemetry/semantic-conventions',
-    '@arizeai/openinference-core',
     '@arizeai/openinference-vercel',
-    '@arizeai/openinference-semantic-conventions',
     '@vercel/otel',
+    '@ai-sdk/otel',
   ],
 };
 

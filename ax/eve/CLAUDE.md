@@ -1,10 +1,10 @@
 # Wonder Toys — Vercel Eve + Arize AX
 
-This is the Arize AX-instrumented version of the Wonder Toys shopping agent built with Vercel Eve. It is identical to `no-observability/eve` except for the observability files inside the Eve project (`eve-agent/agent/instrumentation.ts` + `eve-agent/agent/root-aware-processor.ts`), the observability dependencies in `eve-agent/package.json`, and the `ARIZE_*` env vars.
+This is the Arize AX-instrumented version of the Wonder Toys shopping agent built with Vercel Eve. It is identical to `no-observability/eve` except for the observability file inside the Eve project (`eve-agent/agent/instrumentation.ts`), the observability dependencies in `eve-agent/package.json`, and the `ARIZE_*` env vars.
 
 ## Observability
 
-`eve-agent/agent/instrumentation.ts` is auto-discovered by Eve (root-only slot) and runs before agent code. It calls `registerOTel` with an OTLP exporter pointed at `https://otlp.arize.com/v1/traces` (auth via `space_id` / `api_key` headers). The exporter is wrapped in `RootAwareOpenInferenceProcessor` (`eve-agent/agent/root-aware-processor.ts`), which keeps only OpenInference spans plus Eve's `ai.eve.turn` workflow span and promotes `ai.eve.turn` to the trace root — so each turn lands as a single un-orphaned root in Arize.
+`eve-agent/agent/instrumentation.ts` is auto-discovered by Eve (root-only slot) and runs before agent code. It calls `registerOTel` with an OTLP exporter pointed at `https://otlp.arize.com/v1/traces` (auth via `space_id` / `api_key` headers), wrapped in the stock `OpenInferenceSimpleSpanProcessor` (`@arizeai/openinference-vercel` ≥ 2.8.0) with `spanFilter: isOpenInferenceSpan` and `reparentOrphanedSpans: true`. `reparentOrphanedSpans` drops non-AI spans and re-roots orphaned AI spans, and tags Eve's `ai.eve.turn` wrapper as an agent span so it survives the filter as the single un-orphaned per-turn root in Arize — replacing the old custom `RootAwareOpenInferenceProcessor`. Eve manages its own AI SDK telemetry, so no `@ai-sdk/otel` / `registerTelemetry` is needed (unlike the `vercel-ai-sdk` tier).
 
 Eve is a **filesystem-first agent runtime** with its own dev server and HTTP channel — it is not an in-process library like the Vercel AI SDK or Mastra tiers. So this tier follows the repo's **separate-backend + Next.js-proxy pattern** (the same shape the Python/FastAPI tiers use): the Eve agent runs as its own dev server, and the Next.js frontend proxies the chat endpoint to it.
 
@@ -87,9 +87,9 @@ When creating `phoenix/eve` or `ax/eve`, the ONLY differences are observability,
 all inside the `agent/` project:
 
 - **`agent/instrumentation.ts`** — new file. `defineInstrumentation` +
-  `registerOTel` wiring the OTLP exporter.
-- **`agent/root-aware-processor.ts`** — new file. `RootAwareOpenInferenceProcessor`
-  promotes Eve's `ai.eve.turn` workflow span to the trace root.
+  `registerOTel` wiring the OTLP exporter through the stock
+  `OpenInferenceSimpleSpanProcessor` with `spanFilter: isOpenInferenceSpan` and
+  `reparentOrphanedSpans: true`.
 - **`agent/package.json`** — observability dependencies.
 - **`env.example`** — observability environment variables.
 

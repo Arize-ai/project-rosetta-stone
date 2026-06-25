@@ -83,9 +83,11 @@ When creating `phoenix/eve` or `ax/eve`, the ONLY differences are observability,
 all inside the `agent/` project:
 
 - **`agent/instrumentation.ts`** — new file. `defineInstrumentation` +
-  `registerOTel` wiring the OTLP exporter.
-- **`agent/root-aware-processor.ts`** — new file. `RootAwareOpenInferenceProcessor`
-  promotes Eve's `ai.eve.turn` workflow span to the trace root.
+  `registerOTel` wiring the OTLP exporter through the stock
+  `OpenInferenceSimpleSpanProcessor` (`@arizeai/openinference-vercel` ≥ 2.8.0)
+  with `spanFilter: isOpenInferenceSpan` and `reparentOrphanedSpans: true`.
+  `reparentOrphanedSpans` tags Eve's `ai.eve.turn` wrapper as the per-turn agent
+  root, so no custom span processor is needed.
 - **`agent/package.json`** — observability dependencies.
 - **`env.example`** — observability environment variables.
 

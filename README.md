@@ -186,21 +186,20 @@ If you're instrumenting your own app, find the framework you use, read what file
 
 ### Vercel AI SDK
 
-- `src/instrumentation.ts` — `registerOTel` with OTLP exporter (new file)
-- `src/root-aware-processor.ts` — custom span processor that promotes the first AI SDK span to trace root and drops HTTP spans (new file)
-- `src/app/api/chat/route.ts` — session ID injected into OTel context via `context.with(setSession(...))`
-- `src/components/Chat.tsx` — session ID generated/rotated and sent as `x-session-id` request header
-- `next.config.ts` — `serverExternalPackages` for observability packages
-- `package.json` — observability dependencies
+Uses **AI SDK v7**, which removed built-in OpenTelemetry tracing in favor of a pluggable telemetry integration (`@ai-sdk/otel`).
+
+- `src/instrumentation.ts` — `registerOTel` with OTLP exporter, the stock `OpenInferenceSimpleSpanProcessor` (`spanFilter: isOpenInferenceSpan` + `reparentOrphanedSpans: true`), and `registerTelemetry(new OpenTelemetry())` from `@ai-sdk/otel` to bridge v7 telemetry events into OTel spans (new file)
+- `src/app/api/chat/route.ts` — adds `experimental_telemetry: { isEnabled: true }` to the `streamText` call
+- `next.config.ts` — `serverExternalPackages` for observability packages (incl. `@ai-sdk/otel`)
+- `package.json` — observability dependencies (`@ai-sdk/otel`, `@vercel/otel`, `@opentelemetry/*`, `@arizeai/openinference-vercel`)
 - `env.example` — observability environment variables
 
 ### Vercel Eve
 
 [Eve](https://eve.dev/) is a filesystem-first agent runtime with its own dev server and HTTP channel, so it follows the repo's separate-backend + Next.js-proxy pattern (like the Python tiers) rather than the in-process pattern of the Vercel AI SDK / Mastra tiers. The Eve agent lives in `eve-agent/` (an Eve project: `agent/agent.ts`, `agent/instructions.md`, `agent/tools/`, `agent/lib/`), and the Next.js `src/app/api/chat/route.ts` proxies to the Eve dev server, translating Eve's NDJSON session stream into the Wonder Toys SSE shape. Observability lives entirely inside the Eve project:
 
-- `eve-agent/agent/instrumentation.ts` — auto-discovered by Eve (root-only slot), runs before agent code. `registerOTel` (via `@vercel/otel`) with an OTLP exporter (new file)
-- `eve-agent/agent/root-aware-processor.ts` — `RootAwareOpenInferenceProcessor` keeps OpenInference spans plus Eve's `ai.eve.turn` workflow span and promotes `ai.eve.turn` to the trace root, so each turn lands as a single un-orphaned root (new file)
-- `eve-agent/package.json` — observability dependencies (`@arizeai/openinference-vercel`, `@vercel/otel`, OTel packages, `lru-cache`; `@arizeai/openinference-semantic-conventions` for Phoenix)
+- `eve-agent/agent/instrumentation.ts` — auto-discovered by Eve (root-only slot), runs before agent code. `registerOTel` (via `@vercel/otel`) with an OTLP exporter through the stock `OpenInferenceSimpleSpanProcessor` (`spanFilter: isOpenInferenceSpan` + `reparentOrphanedSpans: true`, which keeps Eve's `ai.eve.turn` wrapper as the single un-orphaned per-turn root). Eve manages its own AI SDK telemetry, so no `@ai-sdk/otel` is needed (new file)
+- `eve-agent/package.json` — observability dependencies (`@arizeai/openinference-vercel` ≥ 2.8.0, `@vercel/otel`, OTel packages; `@arizeai/openinference-semantic-conventions` for Phoenix)
 - `env.example` — observability environment variables
 
 > Unlike the Vercel AI SDK tier, userId is threaded into tools via Eve `clientContext` (the runtime surfaces it to the model, which passes it into the `userId` tool arguments) rather than an OTel-context session ID. The model is `anthropic/claude-sonnet-4.6` via the Vercel AI Gateway.

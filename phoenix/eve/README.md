@@ -11,11 +11,14 @@ Tracing is configured inside the Eve project (`eve-agent/`):
 - **`eve-agent/agent/instrumentation.ts`** — auto-discovered by Eve (root-only
   slot), runs before agent code. Calls `registerOTel` with an
   `OTLPTraceExporter` pointed at `PHOENIX_COLLECTOR_ENDPOINT` (Bearer auth via
-  `PHOENIX_API_KEY`) and sets the `SEMRESATTRS_PROJECT_NAME` resource attribute.
-- **`eve-agent/agent/root-aware-processor.ts`** — `RootAwareOpenInferenceProcessor`
-  keeps only OpenInference spans plus Eve's `ai.eve.turn` workflow span, and
-  promotes `ai.eve.turn` to the trace root. Each turn lands in Phoenix as a
-  single un-orphaned root span (`ai.eve.turn`) with the gen_ai spans beneath it.
+  `PHOENIX_API_KEY`) and the `SEMRESATTRS_PROJECT_NAME` resource attribute,
+  wrapped in the stock `OpenInferenceSimpleSpanProcessor`
+  (`@arizeai/openinference-vercel` ≥ 2.8.0) with `spanFilter: isOpenInferenceSpan`
+  and `reparentOrphanedSpans: true`. `reparentOrphanedSpans` drops non-AI spans,
+  re-roots orphaned AI spans, and tags Eve's `ai.eve.turn` wrapper as an agent
+  span so each turn lands in Phoenix as a single un-orphaned root (`ai.eve.turn`)
+  with the gen_ai spans beneath it. Eve manages its own AI SDK telemetry, so no
+  `@ai-sdk/otel` / `registerTelemetry` is needed.
 
 Set `PHOENIX_COLLECTOR_ENDPOINT`, `PHOENIX_API_KEY`, and `PHOENIX_PROJECT_NAME`
 in `.env.local`.
@@ -94,7 +97,7 @@ See `env.example`. Required variables:
 ## Differences in observability tiers
 
 `phoenix/eve` and `ax/eve` differ from this baseline only in observability, all
-inside the `eve-agent/` project: a new `agent/instrumentation.ts` +
-`agent/root-aware-processor.ts` (which promotes Eve's `ai.eve.turn` workflow span
-to the trace root), observability dependencies in `eve-agent/package.json`, and
-observability env vars. Everything else is identical.
+inside the `eve-agent/` project: a new `agent/instrumentation.ts` (which wires the
+stock `OpenInferenceSimpleSpanProcessor` with `reparentOrphanedSpans: true` to
+keep `ai.eve.turn` as the per-turn trace root), observability dependencies in
+`eve-agent/package.json`, and observability env vars. Everything else is identical.
