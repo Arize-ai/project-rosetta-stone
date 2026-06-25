@@ -59,8 +59,8 @@ export async function initTracing() {
         new OTLPTraceExporter({
           url: "https://otlp.arize.com/v1/traces",
           headers: {
-            space_id: spaceId,
-            api_key: apiKey,
+            "arize-space-id": spaceId,
+            "arize-api-key": apiKey,
           },
         }),
       ),

@@ -21,8 +21,8 @@ export function register() {
         exporter: new OTLPTraceExporter({
           url: 'https://otlp.arize.com/v1/traces',
           headers: {
-            space_id: process.env.ARIZE_SPACE_ID ?? '',
-            api_key: process.env.ARIZE_API_KEY ?? '',
+            'arize-space-id': process.env.ARIZE_SPACE_ID ?? '',
+            'arize-api-key': process.env.ARIZE_API_KEY ?? '',
           },
         }),
       }),

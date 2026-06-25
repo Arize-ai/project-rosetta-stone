@@ -61,8 +61,8 @@ public class Tracing {
     OtlpGrpcSpanExporterBuilder exporterBuilder =
         OtlpGrpcSpanExporter.builder()
             .setEndpoint(endpoint)
-            .addHeader("space_id", spaceId)
-            .addHeader("api_key", apiKey)
+            .addHeader("arize-space-id", spaceId)
+            .addHeader("arize-api-key", apiKey)
             .setTimeout(Duration.ofSeconds(10));
 
     Resource resource =
