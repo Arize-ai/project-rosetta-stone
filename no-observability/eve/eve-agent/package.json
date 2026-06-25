@@ -14,9 +14,9 @@
   },
   "dependencies": {
     "@chroma-core/default-embed": "^0.1.9",
-    "ai": "7.0.0-beta.178",
+    "ai": "^7.0.0",
     "chromadb": "^3.3.1",
-    "eve": "^0.13.3",
+    "eve": "^0.14.0",
     "uuid": "^13.0.0",
     "zod": "^4.1.8"
   },
