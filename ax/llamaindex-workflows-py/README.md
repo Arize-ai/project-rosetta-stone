@@ -7,7 +7,7 @@ This is the LlamaIndex **Workflows** variant of the Wonder Toys shopping agent w
 - **Python FastAPI backend** (port 8001) — workflow, tools, and API
 - **Next.js frontend** — UI, auth, proxies chat to the Python backend
 - **Workflow**: `WonderToysWorkflow(Workflow)` with three `@step` methods (`prepare_chat_history`, `handle_llm_input`, `handle_tool_calls`) wired together by typed `Event` subclasses
-- **LLM**: Claude (`claude-sonnet-4-20250514`) via `llama_index.llms.anthropic.Anthropic`
+- **LLM**: Claude (`claude-sonnet-4-6`) via `llama_index.llms.anthropic.Anthropic`
 - **Tools**: Plain Python functions wrapped with `FunctionTool.from_defaults(fn=...)`
 - **Streaming**: `llm.astream_chat_with_tools(...)` inside `handle_llm_input`, deltas pushed to the workflow stream via `ctx.write_event_to_stream(StreamEvent(delta=...))`
 - **Vector search**: ChromaDB (default embeddings)

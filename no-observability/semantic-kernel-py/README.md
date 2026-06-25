@@ -7,7 +7,7 @@ This is the Microsoft Semantic Kernel variant of the Wonder Toys shopping agent 
 - **Python FastAPI backend** (port 8001) — agent, tools, and API
 - **Next.js frontend** — UI, auth, proxies chat to the Python backend
 - **Agent**: `ChatCompletionAgent` from `semantic_kernel.agents` with a single Anthropic chat-completion service
-- **LLM**: Claude (`claude-sonnet-4-20250514`) via `semantic_kernel.connectors.ai.anthropic.AnthropicChatCompletion`
+- **LLM**: Claude (`claude-sonnet-4-6`) via `semantic_kernel.connectors.ai.anthropic.AnthropicChatCompletion`
 - **Tools**: A `WonderToysPlugin` class whose methods are decorated with `@kernel_function`, passed to the agent via `plugins=[...]`
 - **Streaming**: `agent.invoke_stream(messages=..., thread=...)` yields `StreamingChatMessageContent` chunks with `content` text
 - **Conversation memory**: Per-user `ChatHistoryAgentThread` stored in memory

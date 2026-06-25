@@ -23,7 +23,7 @@ logging:
 wondertoys:
   anthropic:
     api-key: ${ANTHROPIC_API_KEY:}
-    model: claude-sonnet-4-20250514
+    model: claude-sonnet-4-6
   chroma:
     url: ${CHROMA_URL:http://localhost:8000}
   backend:

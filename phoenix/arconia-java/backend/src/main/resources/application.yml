@@ -18,7 +18,7 @@ spring:
       api-key: ${ANTHROPIC_API_KEY:}
       chat:
         options:
-          model: claude-sonnet-4-20250514
+          model: claude-sonnet-4-6
           max-tokens: 4096
 
 # Arconia OTel auto-configuration. Endpoint + bearer auth go to Phoenix; metrics + logs are

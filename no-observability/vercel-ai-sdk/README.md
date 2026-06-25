@@ -8,7 +8,7 @@ A Next.js monolith: the agent, tools, and UI all live in one app.
 
 | Layer | Implementation |
 |---|---|
-| LLM | `@ai-sdk/anthropic` — Claude `claude-sonnet-4-20250514` |
+| LLM | `@ai-sdk/anthropic` — Claude `claude-sonnet-4-6` |
 | Agent loop | `streamText()` from `ai` with `maxSteps: 10` |
 | Tools | `tool()` from `ai` with Zod parameter schemas |
 | Streaming | `result.fullStream` → custom SSE (`data: {"text":"..."}\n\n`) |

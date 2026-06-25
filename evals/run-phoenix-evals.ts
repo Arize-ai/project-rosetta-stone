@@ -28,7 +28,7 @@ import { logSpanAnnotations } from "@arizeai/phoenix-client/spans";
 const projectName = process.env.PHOENIX_PROJECT_NAME;
 if (!projectName) throw new Error("PHOENIX_PROJECT_NAME is not set");
 
-const judgeModel = anthropic("claude-sonnet-4-20250514");
+const judgeModel = anthropic("claude-sonnet-4-6");
 
 // Derive the Phoenix API base URL from the OTLP endpoint.
 // PHOENIX_COLLECTOR_ENDPOINT is like "https://app.phoenix.arize.com/s/<space>/v1/traces"

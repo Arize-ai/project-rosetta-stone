@@ -38,7 +38,7 @@ After generating traces, configure the same 6 evaluators in the [Arize AX consol
 1. Click **New Eval Task** (or **Eval Tasks** → **Add Eval Task**) → **LLM-as-a-Judge** → **Create From Blank**
 1. Name: `correctness`
 1. Configure the task: scope to **Trace**
-1. Select your judge model (e.g. Claude Sonnet via Anthropic, or GPT-4o via OpenAI)
+1. Select your judge model (e.g. Claude Sonnet via Anthropic, or GPT-4.1 via OpenAI)
 1. Paste this prompt template:
 
    ```text
@@ -93,7 +93,7 @@ After generating traces, configure the same 6 evaluators in the [Arize AX consol
 1. Click **New Eval Task** (or **Eval Tasks** → **Add Eval Task**) → **LLM-as-a-Judge** → **Create From Blank**
 1. Name: `tool_selection`
 1. Configure the task: scope to **Trace**
-1. Select your judge model (e.g. Claude Sonnet via Anthropic, or GPT-4o via OpenAI)
+1. Select your judge model (e.g. Claude Sonnet via Anthropic, or GPT-4.1 via OpenAI)
 1. Paste this prompt template:
 
    ```text
@@ -141,7 +141,7 @@ After generating traces, configure the same 6 evaluators in the [Arize AX consol
 1. Click **New Eval Task** (or **Eval Tasks** → **Add Eval Task**) → **LLM-as-a-Judge** → **Create From Blank**
 1. Name: `tool_response_handling`
 1. Configure the task: scope to **Trace**
-1. Select your judge model (e.g. Claude Sonnet via Anthropic, or GPT-4o via OpenAI)
+1. Select your judge model (e.g. Claude Sonnet via Anthropic, or GPT-4.1 via OpenAI)
 1. Paste this prompt template:
 
    ```text
@@ -187,7 +187,7 @@ After generating traces, configure the same 6 evaluators in the [Arize AX consol
 1. Click **New Eval Task** (or **Eval Tasks** → **Add Eval Task**) → **LLM-as-a-Judge** → **Create From Blank**
 1. Name: `format_compliance`
 1. Configure the task: scope to **Trace**
-1. Select your judge model (e.g. Claude Sonnet via Anthropic, or GPT-4o via OpenAI)
+1. Select your judge model (e.g. Claude Sonnet via Anthropic, or GPT-4.1 via OpenAI)
 1. Paste this prompt template:
 
    ```text

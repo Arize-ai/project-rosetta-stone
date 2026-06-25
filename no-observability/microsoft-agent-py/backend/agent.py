@@ -76,7 +76,7 @@ def get_agent() -> Agent:
     global _agent
     if _agent is None:
         client = AnthropicClient(
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-6",
             api_key=os.environ.get("ANTHROPIC_API_KEY"),
         )
         _agent = Agent(

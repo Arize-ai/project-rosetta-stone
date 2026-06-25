@@ -7,7 +7,7 @@ This is the Microsoft Agent Framework Python variant of the Wonder Toys shopping
 - **Python FastAPI backend** (port 8001) — agent, tools, and API
 - **Next.js frontend** — UI, auth, proxies chat to the Python backend
 - **Agent**: `AnthropicClient().as_agent()` from `agent_framework.anthropic` — uses Claude via the Microsoft Agent Framework
-- **LLM**: Claude (`claude-sonnet-4-20250514`) via `agent_framework.anthropic.AnthropicClient`
+- **LLM**: Claude (`claude-sonnet-4-6`) via `agent_framework.anthropic.AnthropicClient`
 - **Tools**: Plain Python functions decorated with `@tool(approval_mode="never_require")` from `agent_framework`
 - **Streaming**: `agent.run(message, stream=True, session=session)` yields chunks with `chunk.text`
 - **Sessions**: Per-user `AgentSession` objects stored in memory for multi-turn conversation

@@ -110,7 +110,7 @@ def _build_agent(streaming_cb) -> Agent:
     per-request asyncio.Queue.
     """
     generator = AnthropicChatGenerator(
-        model="claude-sonnet-4-20250514",
+        model="claude-sonnet-4-6",
         streaming_callback=streaming_cb,
     )
     agent = Agent(

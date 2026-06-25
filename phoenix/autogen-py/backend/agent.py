@@ -124,7 +124,7 @@ _last_assistant_turns: dict[str, int] = {}
 def _build_agent() -> AssistantAgent:
     """Construct a fresh AssistantAgent wired up with Claude + the 5 tools."""
     # ANTHROPIC_API_KEY is read from the environment by the client.
-    model_client = AnthropicChatCompletionClient(model="claude-sonnet-4-20250514")
+    model_client = AnthropicChatCompletionClient(model="claude-sonnet-4-6")
     return AssistantAgent(
         name="WonderToysAgent",
         model_client=model_client,

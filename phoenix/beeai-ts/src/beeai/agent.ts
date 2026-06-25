@@ -72,7 +72,7 @@ Description or marketing copy
 //      token-level streaming via the `partialUpdate` event with
 //      `update.key === "final_answer"` — necessary for the chat SSE UX.
 function buildAgent() {
-  const llm = new AnthropicChatModel("claude-sonnet-4-20250514");
+  const llm = new AnthropicChatModel("claude-sonnet-4-6");
   llm.config({ parameters: { stream: true } as never });
   return new ReActAgent({
     llm,

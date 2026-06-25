@@ -106,7 +106,7 @@ Description or marketing copy
 7. **Important**: The user is authenticated. When making purchases or checking orders, the system automatically provides your user identification — you do not need to ask for or manage user IDs."""
 
 
-_MODEL_ID = "claude-sonnet-4-20250514"
+_MODEL_ID = "claude-sonnet-4-6"
 
 # Per-user conversation threads, plus a turn counter so we can detect resets
 # (e.g. browser refresh) and start a fresh thread.

@@ -92,7 +92,7 @@ def get_runner() -> Runner:
         # is read from the environment by litellm's anthropic provider.
         _agent = Agent(
             name="WonderToysAgent",
-            model=LiteLlm(model="anthropic/claude-sonnet-4-20250514"),
+            model=LiteLlm(model="anthropic/claude-sonnet-4-6"),
             instruction=SYSTEM_PROMPT,
             tools=[
                 search_products,

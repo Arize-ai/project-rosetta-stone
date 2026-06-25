@@ -7,7 +7,7 @@ This is the AWS Strands Python variant of the Wonder Toys shopping agent with no
 - **Python FastAPI backend** (port 8031) — agent, tools, and API
 - **Next.js frontend** (port 3030) — UI, auth, proxies chat to the Python backend
 - **Agent**: `strands.Agent` wired to `strands.models.anthropic.AnthropicModel` — uses Claude via the direct Anthropic API (not Bedrock)
-- **LLM**: Claude (`claude-sonnet-4-20250514`) via `strands.models.anthropic.AnthropicModel`
+- **LLM**: Claude (`claude-sonnet-4-6`) via `strands.models.anthropic.AnthropicModel`
 - **Tools**: Plain Python functions decorated with `@tool` from `strands`; descriptions taken from Google-style "Args:" docstring sections
 - **Streaming**: `async for event in agent.stream_async(prompt)` yielding events with `event["data"]` (text deltas) and `event["current_tool_use"]` (tool calls)
 - **Sessions**: Per-user `Agent` instances cached by `user_id`; their internal `messages` list accumulates history automatically and is reset when the browser-side history shrinks
@@ -45,7 +45,7 @@ This repo is standardised on the direct Anthropic API for fair cross-framework c
 ```python
 model = AnthropicModel(
     client_args={"api_key": os.environ["ANTHROPIC_API_KEY"]},
-    model_id="claude-sonnet-4-20250514",
+    model_id="claude-sonnet-4-6",
     max_tokens=4096,
     params={"temperature": 0.7},
 )

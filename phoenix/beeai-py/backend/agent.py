@@ -120,7 +120,7 @@ def _build_agent(memory: UnconstrainedMemory) -> RequirementAgent:
     # Anthropic API key is read from ANTHROPIC_API_KEY env var by the LiteLLM
     # provider underneath AnthropicChatModel. Enable token streaming so the
     # FinalAnswer event fires with text deltas instead of one final aggregate.
-    llm = ChatModel.from_name("anthropic:claude-sonnet-4-20250514")
+    llm = ChatModel.from_name("anthropic:claude-sonnet-4-6")
     llm.parameters.stream = True
 
     return RequirementAgent(

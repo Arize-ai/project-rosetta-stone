@@ -19,7 +19,7 @@ from backend.context import current_user_id
 from backend.prompt import text_system_prompt
 from backend.tools import all_tools
 
-MODEL = os.environ.get("OPENAI_TEXT_MODEL", "gpt-4o")
+MODEL = os.environ.get("OPENAI_TEXT_MODEL", "gpt-5.4-mini")
 
 _agent: Agent | None = None
 _sessions: dict[str, SQLiteSession] = {}
