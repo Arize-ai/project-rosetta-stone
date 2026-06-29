@@ -119,20 +119,8 @@ To skip ChromaDB (search falls back to keyword matching): `npm run dev:next`.
 - [uv](https://docs.astral.sh/uv/) (for ChromaDB's Python venv)
 - An [Anthropic API key](https://console.anthropic.com/) (all tiers except `openai-voice`)
 - An [OpenAI API key](https://platform.openai.com/api-keys) (`openai-voice` only)
-- [X/Twitter OAuth credentials](https://console.x.com/) for sign-in (see "Setting up X credentials" below)
+- [X/Twitter OAuth credentials](https://console.x.com/) for sign-in (see "X credentials" below)
 - Observability credentials for the phoenix or ax tier you want to run (see further instructions below)
-
-### Setting up X credentials
-
-1. Sign into [console.x.com](https://console.x.com/) and navigate to "Apps" in the sidebar.
-2. Create a new App.
-3. On the App's page, navigate to "Settings".
-4. Under the "Type of App" section, select "Web App, Automated App or Bot".
-5. Under the "App Info" section, set the Callback URI to "http://localhost:3000/api/auth/callback/twitter".
-6. Set the Website URL to a real URL you own with "https" like "https://nearestnabors.com/".
-7. Save changes, and the credentials will be shown to you.
-
-If you are not immediately presented with them, you can find the Client ID and Client Secret under the App's page's "OAuth 2.0 Keys" section.
 
 ### Environment variables
 
@@ -148,7 +136,19 @@ Every agent needs these in `.env.local`:
 | `BACKEND_SECRET` | Python frameworks | Shared secret for Next.js ↔ Python auth (any string) |
 | `BACKEND_URL` | Python frameworks | Python backend URL (default: `http://localhost:8001`) |
 
-**Phoenix tier** adds:
+### X credentials
+
+1. Sign into [console.x.com](https://console.x.com/) and navigate to "Apps" in the sidebar.
+2. Create a new App.
+3. On the App's page, navigate to "Settings".
+4. Under the "Type of App" section, select "Web App, Automated App or Bot".
+5. Under the "App Info" section, set the Callback URI to "http://localhost:3000/api/auth/callback/twitter".
+6. Set the Website URL to a real URL you own with "https" like "https://nearestnabors.com/".
+7. Save changes, and the credentials will be shown to you.
+
+If you are not immediately presented with them, you can find the Client ID and Client Secret under the App's page's "OAuth 2.0 Keys" section.
+
+### Phoenix credentials
 
 | Variable | Description |
 |----------|-------------|
@@ -158,7 +158,7 @@ Every agent needs these in `.env.local`:
 
 > TypeScript frameworks require the full OTLP URL including `/v1/traces`. Python frameworks expect just the base URL, as `arize-phoenix-otel` appends the path automatically.
 
-**AX tier** adds:
+### AX credentials
 
 | Variable | Description |
 |----------|-------------|
