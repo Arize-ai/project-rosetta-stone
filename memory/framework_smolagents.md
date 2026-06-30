@@ -32,9 +32,9 @@ Smolagents (`smolagents==1.25.0`) added to `no-observability/smolagents-py/`, `p
 
 ## Anthropic via LiteLLMModel — no direct Anthropic class
 
-**Why:** smolagents has no Anthropic-native model class. The supported route is `LiteLLMModel(model_id="anthropic/claude-sonnet-4-20250514")`. LiteLLM reads `ANTHROPIC_API_KEY` from the environment automatically. Requires `smolagents[litellm]` extra.
+**Why:** smolagents has no Anthropic-native model class. The supported route is `LiteLLMModel(model_id="anthropic/claude-sonnet-4-6")`. LiteLLM reads `ANTHROPIC_API_KEY` from the environment automatically. Requires `smolagents[litellm]` extra.
 
-**How to apply:** `pip install 'smolagents[litellm]==1.25.0'`. Then `model = LiteLLMModel(model_id="anthropic/claude-sonnet-4-20250514", max_tokens=4096)`. No `api_key=` argument needed — the env var path is the default.
+**How to apply:** `pip install 'smolagents[litellm]==1.25.0'`. Then `model = LiteLLMModel(model_id="anthropic/claude-sonnet-4-6", max_tokens=4096)`. No `api_key=` argument needed — the env var path is the default.
 
 ## OpenInference instrumentor does NOT emit `session.id`
 
