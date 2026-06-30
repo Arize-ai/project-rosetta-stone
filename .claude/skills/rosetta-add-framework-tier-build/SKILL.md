@@ -17,7 +17,7 @@ Materialise one observability tier for a new framework, copied from a known-good
   - `no-observability` tier: copy from `no-observability/pydantic-ai-py` (simplest agent.py)
   - `phoenix` tier: copy from the framework's just-built `no-observability/<FRAMEWORK_DIR>`
   - `ax` tier: copy from the framework's just-built `no-observability/<FRAMEWORK_DIR>`
-- `MODEL_OVERRIDE` (optional) — if the framework requires a Claude model other than `claude-sonnet-4-20250514`
+- `MODEL_OVERRIDE` (optional) — if the framework requires a Claude model other than `claude-sonnet-4-6`
 
 ## Steps
 
@@ -86,7 +86,7 @@ Rewrite to use the new framework's Agent class, tools list, and streaming API. K
 - **Streaming** — preserve the SSE wire format. Each text delta becomes `data: {"text":"<chunk>"}\n\n`; sentinel is `data: [DONE]\n\n`. Inject `\n\n` between pre-tool and post-tool text (the paragraph-break trick — search existing tiers for the pattern).
 - **History** — per-user dict at module scope; reset when message-history length shrinks (browser refresh). Same pattern across tiers.
 - **User-id propagation** — set the `current_user_id` contextvar from the `user_id` parameter so tools can read it. Same pattern as existing tiers.
-- **Anthropic model** — use `claude-sonnet-4-20250514` unless `MODEL_OVERRIDE` is set (e.g. CrewAI needed Sonnet 4.5). If overriding, add an inline comment explaining why.
+- **Anthropic model** — use `claude-sonnet-4-6` unless `MODEL_OVERRIDE` is set (e.g. CrewAI needed Sonnet 4.5). If overriding, add an inline comment explaining why.
 
 #### `backend/tools.py` (Python)
 

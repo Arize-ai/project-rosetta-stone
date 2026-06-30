@@ -18,7 +18,7 @@ Microsoft AutoGen v0.4+ split into `autogen-core`, `autogen-agentchat`, and `aut
 - `max_tool_iterations=10` — default is **1**, which kills any search → detail → purchase chain after one step.
 
 ### `AnthropicChatCompletionClient` lives in `autogen-ext`
-`pip install "autogen-ext[anthropic]"` — the model client is at `autogen_ext.models.anthropic.AnthropicChatCompletionClient`. `claude-sonnet-4-20250514` works (docs show older Claude 3 strings but newer ones also work).
+`pip install "autogen-ext[anthropic]"` — the model client is at `autogen_ext.models.anthropic.AnthropicChatCompletionClient`. `claude-sonnet-4-6` works (docs show older Claude 3 strings but newer ones also work).
 
 ### Per-user agent instances for memory isolation
 AutoGen keeps conversation history on the agent's `model_context` and only persists it via `save_state()`/`load_state()`. Simplest isolation: a `dict[str, AssistantAgent]` keyed by `user_id`. Reset by `pop()`-ing the user's agent when the client-side message history shrinks (browser refresh).

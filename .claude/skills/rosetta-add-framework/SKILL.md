@@ -231,7 +231,7 @@ The orchestrator should maintain these throughout:
 - `FRAMEWORK_DIR` — derived (`google-adk-py` for Python, `google-adk` for TS — match existing naming)
 - `LANGUAGE` — `py` or `ts`
 - `CLONE_SOURCE` — closest existing tier to copy from. For Python: prefer `pydantic-ai-py` (simplest agent.py); for TS: prefer `vercel-ai-sdk`. The build skill takes this as input.
-- `MODEL_OVERRIDE` — optional. If the framework can't use the project default `claude-sonnet-4-20250514` (e.g. CrewAI needed Sonnet 4.5), set this here and propagate.
+- `MODEL_OVERRIDE` — optional. If the framework can't use the project default `claude-sonnet-4-6` (e.g. CrewAI needed Sonnet 4.5), set this here and propagate.
 
 Print these at the start of the run so a human can resume.
 
