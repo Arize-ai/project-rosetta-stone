@@ -55,7 +55,7 @@ When creating `phoenix/vercel-ai-sdk` or `ax/vercel-ai-sdk`:
 ## Key Implementation Details
 
 - **`maxSteps: 10`** — required for multi-turn tool use; Mastra handles this internally but the raw Vercel AI SDK requires it explicitly
-- **`part.text`** — the Vercel AI SDK v6 `fullStream` text-delta event uses `part.text`; Mastra re-wraps it as `part.payload.text`
+- **`part.text`** — the Vercel AI SDK v7 `fullStream` text-delta event uses `part.text`; Mastra re-wraps it as `part.payload.text`
 - **`system` parameter** — user context is appended to the system string passed to `streamText()`; in Mastra it was injected as a `role: "system"` message in the messages array
 - **Streaming**: same custom SSE format as Mastra (`data: {"text":"..."}\n\n` / `data: [DONE]\n\n`) so Chat.tsx is unchanged
 

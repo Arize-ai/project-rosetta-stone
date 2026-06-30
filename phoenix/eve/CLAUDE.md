@@ -4,7 +4,9 @@ This is the Arize Phoenix Cloud-instrumented version of the Wonder Toys shopping
 
 ## Observability
 
-`eve-agent/agent/instrumentation.ts` is auto-discovered by Eve (root-only slot) and runs before agent code. It calls `registerOTel` with an OTLP exporter pointed at `PHOENIX_COLLECTOR_ENDPOINT` (Bearer auth via `PHOENIX_API_KEY`) and sets the `SEMRESATTRS_PROJECT_NAME` resource attribute. The exporter is wrapped in `RootAwareOpenInferenceProcessor` (`eve-agent/agent/root-aware-processor.ts`), which keeps only OpenInference spans plus Eve's `ai.eve.turn` workflow span and promotes `ai.eve.turn` to the trace root — so each turn lands as a single un-orphaned root in Phoenix.
+`eve-agent/agent/instrumentation.ts` is auto-discovered by Eve (root-only slot) and runs before agent code. It calls `registerOTel` with an OTLP exporter pointed at `PHOENIX_COLLECTOR_ENDPOINT` (Bearer auth via `PHOENIX_API_KEY`) and sets the `SEMRESATTRS_PROJECT_NAME` resource attribute. The exporter is wrapped in a stock `OpenInferenceSimpleSpanProcessor` (`@arizeai/openinference-vercel` v3) configured with `spanFilter: isOpenInferenceSpan` + `reparentOrphanedSpans: true`. The `reparentOrphanedSpans` flag detects Eve's per-turn `ai.eve.turn` wrapper (an `ai.*` framework span on top of the AI SDK) by shape, tags it `openinference.span.kind = AGENT`, and keeps it as the trace root — so each turn lands as a single un-orphaned root in Phoenix. This replaces the old custom `RootAwareOpenInferenceProcessor`.
+
+Eve owns the model loop and registers AI SDK v7 telemetry itself (`registerTelemetry(new OpenTelemetry({ runtimeContext: true }))` via its `otel-integration` harness), so — unlike the `vercel-ai-sdk` tier — this `instrumentation.ts` does **not** call `registerTelemetry`.
 
 Eve is a **filesystem-first agent runtime** with its own dev server and HTTP channel — it is not an in-process library like the Vercel AI SDK or Mastra tiers. So this tier follows the repo's **separate-backend + Next.js-proxy pattern** (the same shape the Python/FastAPI tiers use): the Eve agent runs as its own dev server, and the Next.js frontend proxies the chat endpoint to it.
 
@@ -87,9 +89,9 @@ When creating `phoenix/eve` or `ax/eve`, the ONLY differences are observability,
 all inside the `agent/` project:
 
 - **`agent/instrumentation.ts`** — new file. `defineInstrumentation` +
-  `registerOTel` wiring the OTLP exporter.
-- **`agent/root-aware-processor.ts`** — new file. `RootAwareOpenInferenceProcessor`
-  promotes Eve's `ai.eve.turn` workflow span to the trace root.
+  `registerOTel` wiring the OTLP exporter, with a stock
+  `OpenInferenceSimpleSpanProcessor` using `reparentOrphanedSpans: true` to keep
+  Eve's `ai.eve.turn` wrapper as the trace root.
 - **`agent/package.json`** — observability dependencies.
 - **`env.example`** — observability environment variables.
 

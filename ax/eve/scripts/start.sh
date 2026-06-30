@@ -99,15 +99,29 @@ else
   echo "✓ Products already indexed (200 items)"
 fi
 
-# --- Load .env / .env.local so the Eve agent inherits credentials ---
+# --- Load .env files so the Eve agent + Next.js inherit credentials ---
 # (AI_GATEWAY_API_KEY for the model, plus any observability vars.)
-for envfile in "$APP_DIR/.env" "$APP_DIR/.env.local"; do
-  if [ -f "$envfile" ]; then
-    set -a
-    # shellcheck disable=SC1090
-    source "$envfile"
-    set +a
-  fi
+#
+# Variables already present in the environment WIN over the files, mirroring
+# Next.js's process.env precedence. This is what lets the eval harness export
+# EVAL_SECRET / PHOENIX_PROJECT_NAME (or an .env.test-local overlay) and have
+# those reach the Next.js chat route and the Eve agent without start.sh
+# clobbering them. Precedence: existing env > .env.test-local > .env.local > .env.
+load_env_if_unset() {
+  [ -f "$1" ] || return 0
+  while IFS= read -r line || [ -n "$line" ]; do
+    case "$line" in ''|'#'*) continue ;; esac
+    key=${line%%=*}
+    case "$key" in *[!A-Za-z0-9_]*|'') continue ;; esac
+    if [ -z "${!key+x}" ]; then
+      val=${line#*=}
+      val=${val%\"}; val=${val#\"}   # strip optional surrounding double quotes
+      export "$key=$val"
+    fi
+  done < "$1"
+}
+for envfile in "$APP_DIR/.env.test-local" "$APP_DIR/.env.local" "$APP_DIR/.env"; do
+  load_env_if_unset "$envfile"
 done
 
 # --- Install Eve agent dependencies if needed ---
