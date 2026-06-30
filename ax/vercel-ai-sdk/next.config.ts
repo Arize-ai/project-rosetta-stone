@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
     '@arizeai/openinference-vercel',
     '@arizeai/openinference-semantic-conventions',
     '@vercel/otel',
+    '@ai-sdk/otel',
   ],
 };
 

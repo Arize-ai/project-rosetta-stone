@@ -35,7 +35,7 @@ export async function POST(req: Request) {
       messages,
       tools,
       stopWhen: stepCountIs(10),
-      experimental_telemetry: { isEnabled: true },
+      telemetry: { functionId: "wonder-toys-chat" },
     }),
   );
 
