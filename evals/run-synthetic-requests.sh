@@ -60,5 +60,5 @@ cd "$APP_DIR"
 node --env-file-if-exists=.env --env-file-if-exists=.env.local ./node_modules/.bin/tsx "$EVALS_DIR/synthetic-requests.ts"
 
 echo ""
-echo "Waiting 20s for traces to sync to Arize AX..."
+echo "Waiting 20s for traces to sync..."
 sleep 20

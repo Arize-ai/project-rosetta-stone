@@ -3,8 +3,8 @@
  *
  * Sends 25 requests of varying complexity to the running Next.js app's
  * /api/chat endpoint, collecting the full text response for each.
- * Arize AX observability is active in the app, so every request produces
- * traces — no OTel setup is needed here.
+ * Whatever observability the app is configured with is active, so every
+ * request produces traces — no OTel setup is needed here.
  *
  * Prerequisites:
  *   1. Start the app: npm run dev
@@ -276,15 +276,6 @@ async function main() {
   console.log("Wonder Toys — Synthetic Eval Harness");
   console.log(`Target: ${BASE_URL}`);
   console.log(`Sending ${requests.length} request(s) sequentially`);
-  if (process.env.ARIZE_SPACE_ID) {
-    console.log("Observability: Arize AX ACTIVE");
-    console.log(`  Project: ${process.env.ARIZE_PROJECT_NAME}`);
-  } else if (process.env.PHOENIX_COLLECTOR_ENDPOINT) {
-    console.log("Observability: Phoenix ACTIVE");
-    console.log(`  Project: ${process.env.PHOENIX_PROJECT_NAME}`);
-  } else {
-    console.log("Observability: NOT CONFIGURED (check app env for ARIZE_SPACE_ID or PHOENIX_COLLECTOR_ENDPOINT)");
-  }
   console.log();
 
   for (let i = 0; i < requests.length; i++) {
