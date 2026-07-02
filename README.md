@@ -19,6 +19,7 @@ Read the no-obs version to see the bare agent. Diff the phoenix or ax version ag
 | [AutoGen AgentChat](https://microsoft.github.io/autogen/stable/) | ✅ | — | — |
 | [AWS Strands](https://strandsagents.com/) | ✅ | — | — |
 | [BeeAI](https://framework.beeai.dev/) | ✅ | ✅ | — |
+| [Claude Agent SDK](https://platform.claude.com/docs/en/agent-sdk/overview) | ✅ | — | — |
 | [CrewAI](https://www.crewai.com/) | ✅ | — | — |
 | [DSPy](https://dspy.ai/) | ✅ | — | — |
 | [Google ADK](https://google.github.io/adk-docs/) | ✅ | — | — |
@@ -64,6 +65,7 @@ rosetta/
 │   ├── aws-strands-py/          AWS Strands (Python + Next.js)
 │   ├── beeai-py/                BeeAI (Python + Next.js)
 │   ├── beeai-ts/                BeeAI framework (TypeScript)
+│   ├── claude-agent-sdk-py/     Claude Agent SDK (Python + Next.js)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── dspy-py/                 DSPy (Python + Next.js)
 │   ├── google-adk-py/           Google ADK (Python + Next.js)
@@ -250,6 +252,15 @@ If you're instrumenting your own app, find the framework you use, read what file
 - `backend/requirements.txt` — adds `arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-beeai`
 - `env.example` — observability environment variables
 
+### Claude Agent SDK
+
+- `backend/tracing.py` — tracing initialization (new file, imported before `claude_agent_sdk`). Uses `register()` + `ClaudeAgentSDKInstrumentor().instrument(tracer_provider=...)`. `session.id` is auto-tagged via `using_session(user_id)` around the `ClaudeSDKClient` call in `agent.py`.
+- `backend/main.py` — imports `backend.tracing` before other backend modules
+- `backend/requirements.txt` — adds `arize-phoenix-otel` or `arize-otel` + `openinference-instrumentation-claude-agent-sdk`
+- `env.example` — observability environment variables
+
+> `backend/agent.py` and `backend/tools.py` are shared across all three tiers. The five Wonder Toys tools are served in-process via `create_sdk_mcp_server` (namespaced `mcp__wonder_toys__*`); `allowed_tools` restricts the agent to just those and `permission_mode="bypassPermissions"` auto-approves them for headless serving. The Claude Agent SDK runs the Claude Code CLI as a subprocess, so the `claude` binary must be on PATH (`npm install -g @anthropic-ai/claude-code`) and `ANTHROPIC_API_KEY` set. Since SDK MCP tools run in-process, tools read the user id from a `current_user_id` context var rather than through the model.
+
 ### CrewAI
 
 - `backend/tracing.py` — tracing initialization (new file, imported before `crewai`)
@@ -412,6 +423,7 @@ If you're picking which framework to read first, this table is a quick compariso
 | **AWS Strands** | `strands.Agent` with per-user instance + `@tool`-decorated functions | `strands.models.anthropic.AnthropicModel` (direct Anthropic API, not Bedrock) | `agent.stream_async(prompt)` over `{"data": ...}` text-delta events + `{"current_tool_use": ...}` tool events | Python FastAPI backend + Next.js frontend |
 | **BeeAI** | `beeai_framework` `RequirementAgent` + `UnconstrainedMemory` | `ChatModel.from_name("anthropic:claude-sonnet-4-6")` (litellm) | `agent.run(...).observe(...)` over `RequirementAgentFinalAnswerEvent.delta` | Python FastAPI backend + Next.js frontend |
 | **BeeAI (TypeScript)** | `beeai-framework` ReActAgent + UnconstrainedMemory | `AnthropicChatModel` (wraps `@ai-sdk/anthropic`) | `agent.run().observe(emitter)` — `partialUpdate` with `update.key === "final_answer"` | Next.js monolith |
+| **Claude Agent SDK** | `claude_agent_sdk.ClaudeSDKClient` + per-user session + `@tool` served via `create_sdk_mcp_server` | Claude via the Claude Code CLI subprocess (`model="claude-sonnet-4-6"`) | `client.receive_response()` over `AssistantMessage` content blocks (`TextBlock` / `ToolUseBlock`) | Python FastAPI backend + Next.js frontend |
 | **CrewAI** | `crewai` Agent + Task + Crew | `crewai.LLM("anthropic/claude-sonnet-4-6")` (litellm) | `crewai_event_bus` `LLMStreamChunkEvent` | Python FastAPI backend + Next.js frontend |
 | **DSPy** | `dspy.ReAct` over a `dspy.Signature` + `dspy.History` | `dspy.LM("anthropic/claude-sonnet-4-6")` (litellm) | `dspy.streamify` + `StreamListener(signature_field_name="answer")` | Python FastAPI backend + Next.js frontend |
 | **Google ADK** | `google.adk` Agent + Runner + `InMemorySessionService` | `LiteLlm("anthropic/claude-sonnet-4-6")` | `Runner.run_async(streaming_mode=SSE)` over `Event` (`event.partial`) | Python FastAPI backend + Next.js frontend |
