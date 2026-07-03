@@ -4,7 +4,9 @@ set -e
 REPO_ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
 APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 CHROMA_URL="${CHROMA_URL:-http://localhost:8000}"
-CHROMA_DATA="$REPO_ROOT/chroma-data"
+CHROMA_DATA="${CHROMA_DATA:-$REPO_ROOT/chroma-data}"
+TMP_ROOT="${TMPDIR:-/tmp}"
+CHROMA_FALLBACK_DATA="${CHROMA_FALLBACK_DATA:-${TMP_ROOT%/}/project-rosetta-stone-phoenix-crewai-chroma}"
 VENV_DIR="$REPO_ROOT/.venv"
 
 # PIDs to clean up on exit
@@ -22,6 +24,34 @@ trap cleanup EXIT
 
 # --- ChromaDB Setup ---
 
+start_chroma() {
+  local data_path="$1"
+
+  mkdir -p "$data_path"
+  echo "  Using ChromaDB data path: $data_path"
+
+  chroma run --path "$data_path" &
+  CHROMA_PID=$!
+  PIDS_TO_KILL+=("$CHROMA_PID")
+
+  echo "  Waiting for ChromaDB to start..."
+  for i in $(seq 1 30); do
+    if curl -sf "$CHROMA_URL/api/v2/heartbeat" > /dev/null 2>&1; then
+      echo "✓ ChromaDB started (PID $CHROMA_PID)"
+      return 0
+    fi
+    if ! kill -0 "$CHROMA_PID" 2>/dev/null; then
+      wait "$CHROMA_PID" 2>/dev/null || true
+      return 1
+    fi
+    sleep 1
+  done
+
+  kill "$CHROMA_PID" 2>/dev/null || true
+  wait "$CHROMA_PID" 2>/dev/null || true
+  return 1
+}
+
 if curl -sf "$CHROMA_URL/api/v2/heartbeat" > /dev/null 2>&1; then
   echo "✓ ChromaDB already running at $CHROMA_URL"
 else
@@ -37,24 +67,18 @@ else
     source "$VENV_DIR/bin/activate"
   fi
 
-  # Start ChromaDB in the background
-  chroma run --path "$CHROMA_DATA" &
-  CHROMA_PID=$!
-  PIDS_TO_KILL+=("$CHROMA_PID")
-
-  # Wait for it to be ready
-  echo "  Waiting for ChromaDB to start..."
-  for i in $(seq 1 30); do
-    if curl -sf "$CHROMA_URL/api/v2/heartbeat" > /dev/null 2>&1; then
-      echo "✓ ChromaDB started (PID $CHROMA_PID)"
-      break
-    fi
-    if [ $i -eq 30 ]; then
-      echo "✗ ChromaDB failed to start after 30s"
+  if ! start_chroma "$CHROMA_DATA"; then
+    echo "✗ ChromaDB failed to start with $CHROMA_DATA"
+    if [ -n "${CHROMA_DATA:-}" ] && [ "$CHROMA_DATA" != "$CHROMA_FALLBACK_DATA" ]; then
+      echo "Retrying ChromaDB with temporary data path..."
+      if ! start_chroma "$CHROMA_FALLBACK_DATA"; then
+        echo "✗ ChromaDB failed to start after retry"
+        exit 1
+      fi
+    else
       exit 1
     fi
-    sleep 1
-  done
+  fi
 fi
 
 # --- Activate venv and install Python backend deps ---
