@@ -1,5 +1,6 @@
 import { Tool, StringToolOutput, ToolEmitter } from "beeai-framework/tools/base";
 import { Emitter } from "beeai-framework/emitter/emitter";
+import type { Where } from "chromadb";
 import { z } from "zod";
 import { products } from "@/lib/inventory";
 import { vectorSearch } from "@/lib/chroma";
@@ -26,6 +27,20 @@ const inputSchema = z.object({
 
 type Input = z.infer<typeof inputSchema>;
 
+function applyKeywordFilter<T extends { keywords: string[] }>(items: T[], keywords?: string[]) {
+  if (!keywords || keywords.length === 0) return items;
+
+  const kws = keywords.map((k: string) => k.toLowerCase());
+  const filtered = items.filter((p) =>
+    kws.some((kw: string) => p.keywords.some((pk) => pk.toLowerCase().includes(kw))),
+  );
+
+  // LLMs often send broad words like "gift", "toddler", or "toys" as
+  // keywords. Those are not catalog tags, so treating them as mandatory would
+  // erase good vector-search results.
+  return filtered.length > 0 ? filtered : items;
+}
+
 class SearchProductsTool extends Tool<StringToolOutput> {
   name = "search_products";
   description =
@@ -44,8 +59,8 @@ class SearchProductsTool extends Tool<StringToolOutput> {
     let filtered = [...products];
 
     if (input.query) {
-      const where: Record<string, unknown> = {};
-      const conditions: Record<string, unknown>[] = [];
+      const where: Where = {};
+      const conditions: Where[] = [];
       if (input.category) conditions.push({ category: { $eq: input.category.toLowerCase() } });
       if (input.minAge !== undefined) conditions.push({ ageMax: { $gte: input.minAge } });
       if (input.maxAge !== undefined) conditions.push({ ageMin: { $lte: input.maxAge } });
@@ -65,12 +80,7 @@ class SearchProductsTool extends Tool<StringToolOutput> {
           .filter((p) => idSet.has(p.id))
           .sort((a, b) => (idOrder.get(a.id) ?? 0) - (idOrder.get(b.id) ?? 0));
 
-        if (input.keywords && input.keywords.length > 0) {
-          const kws = input.keywords.map((k: string) => k.toLowerCase());
-          filtered = filtered.filter((p) =>
-            kws.some((kw: string) => p.keywords.some((pk) => pk.toLowerCase().includes(kw))),
-          );
-        }
+        filtered = applyKeywordFilter(filtered, input.keywords);
 
         const results = filtered.slice(0, 10).map((p) => ({
           id: p.id,
@@ -96,12 +106,7 @@ class SearchProductsTool extends Tool<StringToolOutput> {
       );
     }
 
-    if (input.keywords && input.keywords.length > 0) {
-      const kws = input.keywords.map((k: string) => k.toLowerCase());
-      filtered = filtered.filter((p) =>
-        kws.some((kw: string) => p.keywords.some((pk) => pk.toLowerCase().includes(kw))),
-      );
-    }
+    filtered = applyKeywordFilter(filtered, input.keywords);
     if (input.minAge !== undefined) filtered = filtered.filter((p) => p.ageRange.max >= input.minAge!);
     if (input.maxAge !== undefined) filtered = filtered.filter((p) => p.ageRange.min <= input.maxAge!);
     if (input.category) {

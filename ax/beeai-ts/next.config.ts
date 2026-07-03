@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   serverExternalPackages: [
     "beeai-framework",
     "chromadb",
+    "zod",
     "@arizeai/openinference-instrumentation-beeai",
     "@opentelemetry/sdk-node",
     "@opentelemetry/sdk-trace-node",
