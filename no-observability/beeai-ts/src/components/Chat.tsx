@@ -123,34 +123,7 @@ export function Chat() {
     }
   }, [messageCount, lastMessageDone]);
 
-  const sendMessage = useCallback(async (text: string) => {
-    if (!text.trim() || isLoading) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: text.trim(),
-    };
-    const assistantMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      role: "assistant",
-      content: "",
-    };
-
-    // Build the conversation history for the API call BEFORE updating state
-    // IMPORTANT: Do NOT call fetchResponse inside setMessages — React Strict Mode
-    // calls updater functions twice, which would launch two parallel streams.
-    setMessages((prev) => [...prev, userMessage, assistantMessage]);
-    setInput("");
-    setIsLoading(true);
-
-    // Use a snapshot of messages for the API call (current messages + user message)
-    const currentMessages = [...messages, userMessage];
-    fetchResponse(currentMessages);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, messages]);
-
-  async function fetchResponse(updatedMessages: Message[]) {
+  const fetchResponse = useCallback(async (updatedMessages: Message[]) => {
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
@@ -240,7 +213,33 @@ export function Chat() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, []);
+
+  const sendMessage = useCallback((text: string) => {
+    if (!text.trim() || isLoading) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: text.trim(),
+    };
+    const assistantMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: "assistant",
+      content: "",
+    };
+
+    // Build the conversation history for the API call BEFORE updating state
+    // IMPORTANT: Do NOT call fetchResponse inside setMessages — React Strict Mode
+    // calls updater functions twice, which would launch two parallel streams.
+    setMessages((prev) => [...prev, userMessage, assistantMessage]);
+    setInput("");
+    setIsLoading(true);
+
+    // Use a snapshot of messages for the API call (current messages + user message)
+    const currentMessages = [...messages, userMessage];
+    void fetchResponse(currentMessages);
+  }, [fetchResponse, isLoading, messages]);
 
   useEffect(() => {
     const ask = searchParams.get("ask");
@@ -249,8 +248,7 @@ export function Chat() {
       sendMessage(ask);
       router.replace("/", { scroll: false });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, [router, searchParams, sendMessage]);
 
   useEffect(() => {
     fetch("/api/products/featured")

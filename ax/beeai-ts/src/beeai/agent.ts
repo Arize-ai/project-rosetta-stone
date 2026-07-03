@@ -1,5 +1,6 @@
 import { AnthropicChatModel } from "beeai-framework/adapters/anthropic/backend/chat";
 import { ReActAgent } from "beeai-framework/agents/react/agent";
+import type { ChatModelInput } from "beeai-framework/backend/chat";
 import { UnconstrainedMemory } from "beeai-framework/memory/unconstrainedMemory";
 import { SystemMessage, UserMessage, AssistantMessage } from "beeai-framework/backend/message";
 
@@ -64,6 +65,29 @@ Description or marketing copy
 
 7. **Important**: You have a userId available in the conversation context. Always use it when making purchases or checking orders. The userId will be provided in the system context.`;
 
+const CONTINUE_AFTER_TOOL_PROMPT =
+  "Continue from the function output above. Follow the required communication structure and produce the next Thought followed by either Function Name or Final Answer.";
+
+class AnthropicReActChatModel extends AnthropicChatModel {
+  protected override async transformInput(input: ChatModelInput) {
+    const transformed = await super.transformInput(input);
+    const messages = transformed.messages;
+
+    // BeeAI's ReAct runner stores the tool result in an assistant scratchpad
+    // message, then asks the model to continue. Newer Anthropic models reject
+    // conversations that end with an assistant prefill, so convert that
+    // continuation request into a normal user turn.
+    if (Array.isArray(messages) && messages.at(-1)?.role === "assistant") {
+      messages.push({
+        role: "user",
+        content: CONTINUE_AFTER_TOOL_PROMPT,
+      });
+    }
+
+    return transformed;
+  }
+}
+
 // We use `ReActAgent` (BeeAI's ReAct-pattern agent) because:
 //   1. It's compatible with `@arizeai/openinference-instrumentation-beeai`, which
 //      pins beeai-framework to `>=0.1.9 <0.1.14`. RequirementAgent only exists
@@ -72,7 +96,7 @@ Description or marketing copy
 //      token-level streaming via the `partialUpdate` event with
 //      `update.key === "final_answer"` — necessary for the chat SSE UX.
 function buildAgent() {
-  const llm = new AnthropicChatModel("claude-sonnet-4-6");
+  const llm = new AnthropicReActChatModel("claude-sonnet-4-6");
   llm.config({ parameters: { stream: true } as never });
   return new ReActAgent({
     llm,
@@ -144,7 +168,7 @@ export async function* streamAgentResponse(
       // post-tool text so the response doesn't run together.
       emitter.match(
         /tool\.[^.]+\.start$/,
-        (_d: unknown, _evt: { path: string }) => {
+        () => {
           queue.push({ type: "tool-call" });
           wake();
         },
