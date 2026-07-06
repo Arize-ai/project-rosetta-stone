@@ -79,10 +79,13 @@ Description or marketing copy
 
 
 def _build_agent():
-    model = ChatAnthropic(
-        model="claude-sonnet-4-6",
-        api_key=os.environ.get("ANTHROPIC_API_KEY"),
-    )
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        raise EnvironmentError(
+            "ANTHROPIC_API_KEY environment variable is not set. "
+            "Set it before starting the server (see env.example)."
+        )
+    model = ChatAnthropic(model="claude-sonnet-4-6", api_key=api_key)
     return create_react_agent(model, all_tools, prompt=SYSTEM_PROMPT)
 
 
