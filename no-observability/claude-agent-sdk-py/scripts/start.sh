@@ -116,6 +116,15 @@ if [ -f "$APP_DIR/.env.local" ]; then
   set +a
 fi
 
+# --- Install Node dependencies (provides the `claude` CLI that claude-agent-sdk spawns) ---
+
+echo "Installing Node dependencies..."
+cd "$APP_DIR"
+npm install --no-audit --no-fund
+
+# Put the locally-installed `claude` CLI on PATH so the backend subprocess resolves it
+export PATH="$APP_DIR/node_modules/.bin:$PATH"
+
 # --- Start Python Backend ---
 
 echo ""
