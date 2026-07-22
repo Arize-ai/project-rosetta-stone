@@ -1,7 +1,13 @@
-crewai[anthropic]>=1.14.0
+# crewai's native Anthropic provider needs the anthropic SDK, but the
+# crewai[anthropic] extra pins anthropic~=0.73.0 — below the >=0.84 floor the
+# openinference Anthropic instrumentor needs to emit (streaming) LLM spans.
+# Depend on anthropic directly instead of through the extra.
+crewai>=1.14.0
+anthropic>=0.84.0
 fastapi>=0.115.0
 uvicorn[standard]>=0.34.0
 chromadb>=0.6.0
 pydantic>=2.0.0
 arize-phoenix-otel>=0.16.1
 openinference-instrumentation-crewai>=0.1.0
+openinference-instrumentation-anthropic>=1.0.6

@@ -66,7 +66,7 @@ fi
 source "$VENV_DIR/bin/activate"
 
 echo "Installing Python backend dependencies..."
-uv pip install -q --pre -r "$APP_DIR/backend/requirements.txt"
+uv pip install -q --pre -r "$APP_DIR/backend/requirements.txt" --overrides "$APP_DIR/backend/overrides.txt"
 
 # --- Product Indexing ---
 

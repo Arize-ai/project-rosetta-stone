@@ -13,6 +13,7 @@ import os
 
 from arize.otel import register
 from openinference.instrumentation.crewai import CrewAIInstrumentor
+from openinference.instrumentation.anthropic import AnthropicInstrumentor
 
 _tracer_provider = register(
     space_id=os.environ["ARIZE_SPACE_ID"],
@@ -21,4 +22,6 @@ _tracer_provider = register(
 )
 
 CrewAIInstrumentor().instrument(tracer_provider=_tracer_provider)
+AnthropicInstrumentor().instrument(tracer_provider=_tracer_provider)
+
 print("Arize AX tracing initialized for CrewAI.")
