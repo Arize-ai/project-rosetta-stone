@@ -1,6 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import { products } from "@/lib/inventory";
+import type { Where } from "chromadb";
 import { vectorSearch } from "@/lib/chroma";
 
 const inputSchema = z.object({
@@ -36,8 +37,8 @@ export const searchProducts = tool({
     // If there's a text query, try vector search first
     if (input.query) {
       // Build ChromaDB where filter for metadata
-      const where: Record<string, unknown> = {};
-      const conditions: Record<string, unknown>[] = [];
+      const where: Where = {};
+      const conditions: Where[] = [];
 
       if (input.category) {
         conditions.push({ category: { $eq: input.category.toLowerCase() } });

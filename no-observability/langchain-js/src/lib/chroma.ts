@@ -30,7 +30,7 @@ export async function getProductsCollection() {
 export async function vectorSearch(
   query: string,
   nResults: number = 20,
-  where?: Record<string, unknown>
+  where?: Where
 ) {
   const collection = await getProductsCollection();
   if (!collection) return null;

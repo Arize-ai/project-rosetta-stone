@@ -1,6 +1,7 @@
 import { tool } from "@openai/agents";
 import { z } from "zod";
 import { products } from "@/lib/inventory";
+import type { Where } from "chromadb";
 import { vectorSearch } from "@/lib/chroma";
 
 const inputSchema = z.object({
@@ -35,8 +36,8 @@ export const searchProducts = tool({
     let filtered = [...products];
 
     if (input.query) {
-      const where: Record<string, unknown> = {};
-      const conditions: Record<string, unknown>[] = [];
+      const where: Where = {};
+      const conditions: Where[] = [];
 
       if (input.category) {
         conditions.push({ category: { $eq: input.category.toLowerCase() } });

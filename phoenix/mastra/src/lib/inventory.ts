@@ -1173,6 +1173,7 @@ Insects represent over 80% of all known animal species, making entomology one of
   {
     id: "toy-058",
     name: "Adventure Action Figures (6 pack)",
+    image: "/product-images/toy-058.png",
     description: "Six poseable adventure action figures with swappable accessories. Each 6 inches tall with 12 points of articulation.",
     marketingCopy: `Assemble your ultimate squad with our Adventure Action Figures — six original, diverse characters that bring excitement to tabletop, bedroom-floor, and backyard adventures. The roster includes Volt (electric-powered speedster), Titan (super-strong powerhouse), Shadow Wing (stealth flyer), Blaze (fire controller), Frost Nova (ice specialist), and Terra (earth manipulator). Each 6-inch figure features 12 points of articulation — neck, shoulders, elbows, wrists, hips, and knees — enabling dynamic action poses and combat stances.
 
