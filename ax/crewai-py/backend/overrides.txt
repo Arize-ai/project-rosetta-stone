@@ -1,0 +1,11 @@
+# Dependency version overrides for `uv pip install --overrides`.
+#
+# crewai declares `chromadb>=1.1.0,<1.2`, but this repo shares a single
+# ChromaDB server + data dir across every framework tier, and the other
+# tiers run chromadb 1.5.x. A 1.1.x `chroma run` panics reading a
+# 1.5.x-format store (rust/sqlite db.rs). crewai only needs chromadb for
+# optional memory/knowledge features, which this agent does not use
+# (memory=False, no knowledge sources) — our only ChromaDB access is the
+# HTTP client in chroma_client.py. So we override crewai's cap and keep the
+# shared 1.5.x chromadb, matching every other tier.
+chromadb>=1.5.9
