@@ -1,4 +1,5 @@
 import json
+import os
 from collections.abc import AsyncIterator
 from contextlib import nullcontext
 
@@ -91,6 +92,12 @@ def _build_options() -> ClaudeAgentOptions:
         allowed_tools=allowed_tools,
         permission_mode="bypassPermissions",
         setting_sources=[],
+        # Pass the API key explicitly into the CLI subprocess env so the
+        # spawned `claude` binary authenticates headlessly regardless of how
+        # the backend was launched (e.g. the uvicorn --reload worker). Without
+        # this the CLI falls back to interactive login and exits 1
+        # ("Not logged in · Please run /login").
+        env={**os.environ, "ANTHROPIC_API_KEY": os.environ.get("ANTHROPIC_API_KEY", "")},
     )
 
 
