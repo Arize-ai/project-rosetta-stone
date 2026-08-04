@@ -20,6 +20,7 @@ Read the no-obs version to see the bare agent. Diff the phoenix or ax version ag
 | [AWS Strands](https://strandsagents.com/) | ✅ | — | — |
 | [BeeAI](https://framework.beeai.dev/) | ✅ | ✅ | — |
 | [Claude Agent SDK](https://platform.claude.com/docs/en/agent-sdk/overview) | ✅ | — | — |
+| [Claude Agent SDK (TypeScript)](https://platform.claude.com/docs/en/agent-sdk/typescript) | — | ✅ | — |
 | [CrewAI](https://www.crewai.com/) | ✅ | — | — |
 | [DSPy](https://dspy.ai/) | ✅ | — | — |
 | [Google ADK](https://google.github.io/adk-docs/) | ✅ | — | — |
@@ -66,6 +67,7 @@ rosetta/
 │   ├── beeai-py/                BeeAI (Python + Next.js)
 │   ├── beeai-ts/                BeeAI framework (TypeScript)
 │   ├── claude-agent-sdk-py/     Claude Agent SDK (Python + Next.js)
+│   ├── claude-agent-sdk-ts/     Claude Agent SDK (TypeScript)
 │   ├── crewai-py/               CrewAI (Python + Next.js)
 │   ├── dspy-py/                 DSPy (Python + Next.js)
 │   ├── google-adk-py/           Google ADK (Python + Next.js)
@@ -261,6 +263,16 @@ If you're instrumenting your own app, find the framework you use, read what file
 
 > `backend/agent.py` and `backend/tools.py` are shared across all three tiers. The five Wonder Toys tools are served in-process via `create_sdk_mcp_server` (namespaced `mcp__wonder_toys__*`); `allowed_tools` restricts the agent to just those and `permission_mode="bypassPermissions"` auto-approves them for headless serving. The Claude Agent SDK runs the Claude Code CLI as a subprocess, so the `claude` binary must be on PATH (`npm install -g @anthropic-ai/claude-code`) and `ANTHROPIC_API_KEY` set. Since SDK MCP tools run in-process, tools read the user id from a `current_user_id` context var rather than through the model.
 
+### Claude Agent SDK (TypeScript)
+
+- `src/ai/tracing.ts` — **new file** in observability tiers. Phoenix calls `register({ projectName, url, apiKey, spanProcessors: [...] })` from `@arizeai/phoenix-otel`; AX builds a `NodeTracerProvider` by hand — both wrapping the local `OpenInferenceFilteredBatchSpanProcessor` (`src/ai/oi-filter-processor.ts`, drops any span without an `openinference.span.kind`) around an `OTLPTraceExporter`, and neither calls `provider.register()`. It then runs `new ClaudeAgentSDKInstrumentation({ tracerProvider }).manuallyInstrument(sdk)` and **keeps the returned patched module** — the SDK is native ESM whose exports are read-only, so `manuallyInstrument()` returns a *patched copy* rather than mutating in place, and the chat route must call that patched `query()` (exposed via `getInstrumentedQuery()`). It also registers an `AsyncLocalStorageContextManager` so implicit OTel context (`context.with` / `context.active`) works without a global provider. Tracing state is stashed on `globalThis` so a single init survives Next.js dev HMR (a second `manuallyInstrument` would otherwise hit the instrumentor's process-global patch guard and hand back the *un-patched* module).
+- `src/ai/agent.ts` — the instrumentor emits **AGENT + TOOL spans only** (the SDK makes its model calls inside the spawned Claude Code subprocess, invisible to an in-process instrumentor), so `streamAgent` **synthesizes per-generation `LLM` spans** from the assistant messages the SDK streams, with token counts read from each message's `usage` (and the final `result` message). It opens a `CHAIN` parent span, takes the query iterator *inside* that span's context (so the instrumentor's AGENT span nests under it rather than becoming a separate root trace), and parents the LLM spans on the same context — yielding one coherent trace: `CHAIN → { AGENT → TOOL…, LLM… }` with `session.id` set to the user id on the root. This whole block is guarded so it is inert if tracing isn't initialised.
+- `next.config.ts` — adds `@anthropic-ai/claude-agent-sdk` + `@arizeai/openinference-instrumentation-claude-agent-sdk` + the whole `@opentelemetry/*` stack (+ `@arizeai/phoenix-otel` for Phoenix) to `serverExternalPackages`, so the app code and the instrumentor share a **single** `@opentelemetry/api` instance and its one global `ContextManager` (a second bundled copy would make the CHAIN → AGENT nesting silently break).
+- `package.json` — adds the OpenInference instrumentor + OTel SDK packages.
+- `env.example` — observability environment variables.
+
+> `src/ai/agent.ts`, `src/ai/context.ts`, `src/ai/tools/*`, and `src/app/api/chat/route.ts` are otherwise identical across all three tiers. The five Wonder Toys tools are served in-process via `createSdkMcpServer` (namespaced `mcp__wonder_toys__*`); `allowedTools` restricts the agent to just those and `permissionMode: "bypassPermissions"` + `settingSources: []` isolate the run. The TypeScript SDK has no persistent `ClaudeSDKClient` — conversation memory is kept by retaining the SDK `session_id` per user and passing `options.resume` on the next turn (reset when the history shrinks on a browser refresh). Tools read the user id from an `AsyncLocalStorage` (the contextvar equivalent) rather than through the model. Tracing initialises lazily on the first chat request (no root `instrumentation.ts`) so the patched `query()` and the tracer live in the same module instance that `streamAgent` runs in.
+
 ### CrewAI
 
 - `backend/tracing.py` — tracing initialization (new file, imported before `crewai`)
@@ -424,6 +436,7 @@ If you're picking which framework to read first, this table is a quick compariso
 | **BeeAI** | `beeai_framework` `RequirementAgent` + `UnconstrainedMemory` | `ChatModel.from_name("anthropic:claude-sonnet-4-6")` (litellm) | `agent.run(...).observe(...)` over `RequirementAgentFinalAnswerEvent.delta` | Python FastAPI backend + Next.js frontend |
 | **BeeAI (TypeScript)** | `beeai-framework` ReActAgent + UnconstrainedMemory | `AnthropicChatModel` (wraps `@ai-sdk/anthropic`) | `agent.run().observe(emitter)` — `partialUpdate` with `update.key === "final_answer"` | Next.js monolith |
 | **Claude Agent SDK** | `claude_agent_sdk.ClaudeSDKClient` + per-user session + `@tool` served via `create_sdk_mcp_server` | Claude via the Claude Code CLI subprocess (`model="claude-sonnet-4-6"`) | `client.receive_response()` over `AssistantMessage` content blocks (`TextBlock` / `ToolUseBlock`) | Python FastAPI backend + Next.js frontend |
+| **Claude Agent SDK (TypeScript)** | `@anthropic-ai/claude-agent-sdk` `query()` + per-user `options.resume` session + `tool(...)` served via `createSdkMcpServer` | Claude via the bundled Claude Code binary (`model="claude-sonnet-4-6"`) | `for await (const message of query(...))` over `SDKAssistantMessage.message.content` blocks (`text` / `tool_use`) | Next.js monolith |
 | **CrewAI** | `crewai` Agent + Task + Crew | `crewai.LLM("anthropic/claude-sonnet-4-6")` (litellm) | `crewai_event_bus` `LLMStreamChunkEvent` | Python FastAPI backend + Next.js frontend |
 | **DSPy** | `dspy.ReAct` over a `dspy.Signature` + `dspy.History` | `dspy.LM("anthropic/claude-sonnet-4-6")` (litellm) | `dspy.streamify` + `StreamListener(signature_field_name="answer")` | Python FastAPI backend + Next.js frontend |
 | **Google ADK** | `google.adk` Agent + Runner + `InMemorySessionService` | `LiteLlm("anthropic/claude-sonnet-4-6")` | `Runner.run_async(streaming_mode=SSE)` over `Event` (`event.partial`) | Python FastAPI backend + Next.js frontend |

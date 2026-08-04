@@ -7,6 +7,7 @@ from claude_agent_sdk import (
     ClaudeAgentOptions,
     ClaudeSDKClient,
     AssistantMessage,
+    ResultMessage,
     TextBlock,
     ToolUseBlock,
 )
@@ -22,6 +23,25 @@ try:
 except ImportError:
     def using_session(session_id: str):  # type: ignore[no-redef]
         return nullcontext()
+
+# Emit per-generation LLM spans. The Claude Agent SDK instrumentor produces
+# AGENT and TOOL spans but not LLM spans — the SDK runs the Claude Code binary
+# as a subprocess and makes its model calls there, so an in-process LLM
+# instrumentor never sees them. We synthesize LLM spans from the assistant
+# messages the SDK streams back, taking accurate token counts from the final
+# result message. Guarded so the no-observability tier (no opentelemetry /
+# openinference installed) is a no-op and agent.py stays identical across tiers.
+try:
+    from opentelemetry import trace as _otel_trace
+    from openinference.semconv.trace import (
+        SpanAttributes as _SpanAttr,
+        OpenInferenceSpanKindValues as _SpanKind,
+    )
+
+    _llm_tracer = _otel_trace.get_tracer("claude-agent-sdk-llm-spans")
+    _EMIT_LLM_SPANS = True
+except ImportError:
+    _EMIT_LLM_SPANS = False
 
 SYSTEM_PROMPT = """You are a friendly and helpful shopping assistant for "Wonder Toys", a children's toy store. Your job is to help customers find the perfect toys, answer questions about products, and help them complete purchases.
 
@@ -148,11 +168,56 @@ async def stream_agent(messages: list[dict], user_id: str) -> AsyncIterator[str]
 
     # Set the current user ID in the context var so tools can access it
     token = current_user_id.set(user_id)
+    # Open LLM spans for the current turn, closed when the result message
+    # arrives (or in the finally, defensively). Empty in the no-observability
+    # tier since _EMIT_LLM_SPANS is False.
+    llm_spans: list = []
     try:
         with using_session(user_id):
             client = await _get_client(user_id)
             await client.query(last_message)
             async for message in client.receive_response():
+                # Start an LLM span for each assistant turn that produces text
+                # or a tool call. Created while the SDK's AGENT span is the
+                # active context, so it nests under that span. Thinking-only
+                # messages (extended thinking) are skipped so they don't create
+                # empty spans.
+                if (
+                    _EMIT_LLM_SPANS
+                    and isinstance(message, AssistantMessage)
+                    and any(
+                        isinstance(b, (TextBlock, ToolUseBlock)) for b in message.content
+                    )
+                ):
+                    output_text = "".join(
+                        b.text for b in message.content if isinstance(b, TextBlock)
+                    )
+                    span = _llm_tracer.start_span(f"{message.model} generation")
+                    span.set_attribute(
+                        _SpanAttr.OPENINFERENCE_SPAN_KIND, _SpanKind.LLM.value
+                    )
+                    span.set_attribute(_SpanAttr.LLM_MODEL_NAME, message.model)
+                    span.set_attribute(_SpanAttr.LLM_PROVIDER, "anthropic")
+                    if output_text:
+                        span.set_attribute(_SpanAttr.OUTPUT_VALUE, output_text)
+                    llm_spans.append(span)
+                # Accurate token counts arrive only on the final result message.
+                if _EMIT_LLM_SPANS and isinstance(message, ResultMessage):
+                    usage = getattr(message, "usage", None) or {}
+                    if llm_spans and usage:
+                        last = llm_spans[-1]
+                        last.set_attribute(
+                            _SpanAttr.LLM_TOKEN_COUNT_PROMPT,
+                            usage.get("input_tokens", 0),
+                        )
+                        last.set_attribute(
+                            _SpanAttr.LLM_TOKEN_COUNT_COMPLETION,
+                            usage.get("output_tokens", 0),
+                        )
+                    for span in llm_spans:
+                        span.end()
+                    llm_spans = []
+
                 if not isinstance(message, AssistantMessage):
                     continue
                 for block in message.content:
@@ -169,6 +234,8 @@ async def stream_agent(messages: list[dict], user_id: str) -> AsyncIterator[str]
                         had_text_before = True
                         yield f"data: {json.dumps({'text': text_delta})}\n\n"
     finally:
+        for span in llm_spans:
+            span.end()
         current_user_id.reset(token)
 
     # Update session turn count after successful response

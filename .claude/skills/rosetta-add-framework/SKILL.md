@@ -36,6 +36,7 @@ Snapshot (last refreshed 2026-06-12 from `https://arize.com/docs/llms.txt`). Eac
 
 ### TypeScript (Tier A)
 - [x] BeeAI
+- [x] Claude Agent SDK — synthesizes LLM spans in the chat route (instrumentor emits AGENT+TOOL only); a CHAIN parent wraps the run so AGENT+LLM share one trace
 - [x] OpenAI Agents SDK
 
 ### Java (Tier A)
