@@ -39,6 +39,10 @@ const MCP_SERVER_NAME = "wonder_toys";
 const wonderToysServer = createSdkMcpServer({
   name: MCP_SERVER_NAME,
   version: "1.0.0",
+  // alwaysLoad keeps all five tools in the prompt so the SDK never defers them
+  // behind its built-in tool-search step — that keeps traces clean (no
+  // `ToolSearch` spans), and with only five tools there's nothing to defer.
+  alwaysLoad: true,
   tools: [
     searchProducts,
     getProduct,
