@@ -54,7 +54,7 @@ The orchestrator:
 1. Researches the framework using web docs + the existing Arize OpenInference instrumentation catalog (via `rosetta-add-framework-discover` for the up-to-date list)
 2. Builds all three tiers (`rosetta-add-framework-tier-build` × 3), each cloned from the closest existing tier and modified for the new framework's agent/tool/streaming conventions
 3. Smoke-tests each tier (`rosetta-add-framework-tier-test`) — boots the backend, hits the chat endpoint with a synthetic request, verifies traces land in the right project
-4. Runs the public-flow Playwright smoke (`rosetta-add-framework-playwright`) — home page rendering + product browsing (no X/Twitter OAuth required)
+4. Runs the public-flow Playwright smoke (`rosetta-add-framework-playwright`) — home page rendering + product browsing
 5. Finalises the docs (`rosetta-add-framework-docs`) — updates the README's supported-frameworks table and "What changes between tiers" section, marks the framework off in `TODO.md`, commits per tier, and raises a PR
 6. Captures PR screenshots (`rosetta-pr-screenshots`) and embeds them in the PR body
 

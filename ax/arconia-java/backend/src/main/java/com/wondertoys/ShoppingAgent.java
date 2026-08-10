@@ -98,14 +98,14 @@ public class ShoppingAgent {
    * @param history previous turns (user + assistant, ordered oldest → newest). Should NOT include
    *     the user's current question — that's passed via {@code latestUserMessage}.
    * @param latestUserMessage the user's current question, attached via {@code .user(...)}.
-   * @param userId the authenticated user's ID, threaded into the system message and into every
+   * @param userId the current user's ID, threaded into the system message and into every
    *     tool call the model makes.
    */
   public ChatClient.ChatClientRequestSpec build(
       List<Map<String, String>> history, String latestUserMessage, String userId) {
     String systemPrompt =
         SYSTEM_PROMPT
-            + "\n\nThe current authenticated user's ID is: "
+            + "\n\nThe current user's ID is: "
             + userId
             + ". Use this userId when making purchases or checking order status.";
 

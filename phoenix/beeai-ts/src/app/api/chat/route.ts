@@ -1,6 +1,4 @@
 import { streamAgentResponse, type ChatMessage } from "@/beeai/agent";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -12,16 +10,11 @@ export async function POST(req: Request) {
   if (configuredSecret && evalSecret === configuredSecret) {
     userId = req.headers.get("x-eval-user-id") ?? "eval-user-001";
   } else {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    userId =
-      (session.user as { id?: string }).id || session.user.email || "anonymous";
+    userId = "anonymous";
   }
   const { messages } = (await req.json()) as { messages: ChatMessage[] };
 
-  const userContext = `The current authenticated user's ID is: ${userId}. Use this userId when making purchases or checking order status.`;
+  const userContext = `The current user's ID is: ${userId}. Use this userId when making purchases or checking order status.`;
 
   const encoder = new TextEncoder();
   const readable = new ReadableStream({

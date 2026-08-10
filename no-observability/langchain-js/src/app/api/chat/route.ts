@@ -1,17 +1,9 @@
 import { getShoppingAgent, SYSTEM_PROMPT } from "@/langchain/agent";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { HumanMessage, AIMessage, SystemMessage } from "@langchain/core/messages";
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const userId = (session.user as { id?: string }).id || session.user.email || "anonymous";
+  const userId = "anonymous";
   const { messages } = await req.json();
   const sessionId = req.headers.get("x-session-id") ?? crypto.randomUUID();
 
@@ -19,7 +11,7 @@ export async function POST(req: Request) {
   const langchainMessages = [
     new SystemMessage(
       SYSTEM_PROMPT +
-        `\n\nThe current authenticated user's ID is: ${userId}. Use this userId when making purchases or checking order status.`
+        `\n\nThe current user's ID is: ${userId}. Use this userId when making purchases or checking order status.`
     ),
     ...messages.map((m: { role: string; content: string }) => {
       if (m.role === "user") return new HumanMessage(m.content);

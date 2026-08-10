@@ -4,7 +4,7 @@ import { z } from "zod";
 import { cancelOrder } from "@/lib/orders";
 
 const inputSchema = z.object({
-  userId: z.string().describe("The authenticated user's ID"),
+  userId: z.string().describe("The current user's ID"),
   orderId: z.string().describe("The order ID to cancel (e.g. 'A1B2C3D4')"),
 });
 

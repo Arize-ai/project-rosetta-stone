@@ -32,7 +32,6 @@ The Eve agent lives in its own project (`eve-agent/`), and a Next.js frontend (c
 | Channel | Eve's built-in HTTP channel (`POST /eve/v1/session`, `GET .../stream` NDJSON) |
 | Chat proxy | `src/app/api/chat/route.ts` — translates Eve NDJSON → Wonder Toys SSE |
 | Vector search | ChromaDB + `@chroma-core/default-embed` (all-MiniLM-L6-v2) |
-| Auth | NextAuth v4 + Twitter/X OAuth 2.0 |
 | UI | Next.js App Router + Tailwind CSS v4 |
 
 ## Key Files
@@ -52,7 +51,7 @@ The Eve agent lives in its own project (`eve-agent/`), and a Next.js frontend (c
 1. `scripts/start.sh` boots the Eve dev server on port `2000`
    (`eve dev --port 2000 --no-ui`), waits for it to listen, then starts Next.js
    on `3000`.
-1. The Next.js chat route resolves the `userId` (NextAuth session, or the
+1. The Next.js chat route resolves the `userId` (authentication session, or the
    `x-eval-secret` / `x-eval-user-id` bypass header for headless smoke tests),
    `POST`s the user message to the Eve HTTP channel with the `userId` as
    `clientContext`, then attaches to the NDJSON stream.
@@ -84,10 +83,6 @@ See `env.example`. Required variables:
 |---|---|
 | `AI_GATEWAY_API_KEY` | Vercel AI Gateway key (routes the Claude model) |
 | `EVE_PORT` / `EVE_URL` | Eve dev server port / base URL the chat route proxies to |
-| `NEXTAUTH_URL` | Callback URL (e.g. `http://localhost:3000`) |
-| `NEXTAUTH_SECRET` | Session encryption key (`openssl rand -base64 32`) |
-| `TWITTER_CLIENT_ID` | X OAuth app client ID |
-| `TWITTER_CLIENT_SECRET` | X OAuth app client secret |
 | `EVAL_SECRET` | Optional shared secret for the `/api/chat` eval-bypass header |
 
 ## Differences in observability tiers

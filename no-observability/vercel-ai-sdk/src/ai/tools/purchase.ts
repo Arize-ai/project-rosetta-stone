@@ -4,7 +4,7 @@ import { products } from "@/lib/inventory";
 import { createOrder } from "@/lib/orders";
 
 const inputSchema = z.object({
-  userId: z.string().describe("The authenticated user's ID"),
+  userId: z.string().describe("The current user's ID"),
   items: z
     .array(
       z.object({

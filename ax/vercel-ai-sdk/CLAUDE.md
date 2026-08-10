@@ -18,11 +18,10 @@ src/
 │   ├── inventory.ts          — 200 products (in-memory array, typed as Product[])
 │   ├── orders.ts             — In-memory order store (Map, resets on restart)
 │   ├── chroma.ts             — ChromaDB client wrapper with graceful fallback
-│   └── auth.ts               — NextAuth config (Twitter/X OAuth 2.0)
 ├── app/
 │   ├── api/chat/route.ts     — Streaming chat endpoint (SSE via fullStream)
 │   ├── api/products/         — REST endpoints for featured products and product detail
-│   ├── api/auth/             — NextAuth route handler
+│   ├── api/auth/             — authentication route handler
 │   ├── page.tsx              — Home page (top 5 products, category chips, chat)
 │   ├── product/[id]/         — Product detail page with add-to-cart
 │   ├── cart/                 — Shopping cart page (sessionStorage-backed)

@@ -51,7 +51,7 @@ Audio is embedded inline as `data:audio/wav;base64,...` URIs so the Phoenix trac
 ## Running
 
 ```bash
-cp env.example .env.local   # fill in OPENAI_API_KEY + PHOENIX_* + TWITTER_*
+cp env.example .env.local   # fill in OPENAI_API_KEY + PHOENIX_*
 npm install
 npm run dev                 # ChromaDB + Python deps + backend + Next.js
 ```

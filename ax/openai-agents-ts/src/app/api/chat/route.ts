@@ -2,8 +2,6 @@ import { run, user, assistant } from "@openai/agents";
 import type { AgentInputItem } from "@openai/agents";
 import { getAgent, SYSTEM_PROMPT } from "@/ai/agent";
 import { getTracerProvider } from "@/ai/tracing";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 type ChatMessage = { role: "user" | "assistant" | "system"; content: string };
@@ -17,11 +15,7 @@ export async function POST(req: Request) {
   if (configuredSecret && evalSecret === configuredSecret) {
     userId = req.headers.get("x-eval-user-id") ?? "eval-user-001";
   } else {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    userId = (session.user as { id?: string }).id || session.user.email || "anonymous";
+    userId = "anonymous";
   }
   const { messages } = (await req.json()) as { messages: ChatMessage[] };
 
@@ -38,7 +32,7 @@ export async function POST(req: Request) {
   }
 
   const agent = getAgent().clone({
-    instructions: `${SYSTEM_PROMPT}\n\nThe current authenticated user's ID is: ${userId}. Use this userId when making purchases or checking order status.`,
+    instructions: `${SYSTEM_PROMPT}\n\nThe current user's ID is: ${userId}. Use this userId when making purchases or checking order status.`,
   });
 
   const stream = await run(agent, history, { stream: true, maxTurns: 10 });

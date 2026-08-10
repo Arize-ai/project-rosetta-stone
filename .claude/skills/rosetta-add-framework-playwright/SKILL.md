@@ -1,11 +1,11 @@
 ---
 name: rosetta-add-framework-playwright
-description: Run a public-flow Playwright smoke test against a freshly-built framework tier's Next.js frontend. Covers home page rendering + product browsing — the parts that don't require X/Twitter OAuth. The Playwright project (package.json, config, tests) lives inside this skill directory and is checked into the repo. Part of the rosetta-add-framework flow.
+description: Run a public-flow Playwright smoke test against a freshly-built framework tier's Next.js frontend. Covers home page rendering and product browsing. The Playwright project (package.json, config, tests) lives inside this skill directory and is checked into the repo. Part of the rosetta-add-framework flow.
 ---
 
 # Playwright UI smoke
 
-Lightweight UI test covering the public, unauthenticated paths of the Wonder Toys frontend. Authenticated chat flow needs a NextAuth bypass and is out of scope for this skill.
+Lightweight UI test covering the public Wonder Toys frontend.
 
 ## Inputs
 

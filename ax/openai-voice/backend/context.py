@@ -1,7 +1,7 @@
 """Per-request context variables shared between the agent and tools.
 
 `current_user_id` is set by both voice and text-mode entry points so tool
-functions can look up which authenticated user is making the call without
+functions can look up which current user is making the call without
 having to thread it through every signature.
 
 `current_voice_callback` is set ONLY in voice mode. When tools that produce

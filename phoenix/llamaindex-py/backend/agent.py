@@ -101,7 +101,7 @@ async def stream_agent(messages: list[dict], user_id: str) -> AsyncIterator[str]
     chat_history = [
         ChatMessage(
             role="system",
-            content=f"The current authenticated user's ID is: {user_id}. "
+            content=f"The current user's ID is: {user_id}. "
             "Use this userId when making purchases or checking order status.",
         ),
     ]

@@ -193,7 +193,7 @@ class ShippingAddress(BaseModel):
 
 
 class PurchaseInput(BaseModel):
-    user_id: str = Field(alias="userId", description="The authenticated user's ID")
+    user_id: str = Field(alias="userId", description="The current user's ID")
     items: list[PurchaseItem] = Field(
         description="List of products and quantities to purchase"
     )
@@ -272,7 +272,7 @@ def purchase_product(
 
 
 class CheckOrderInput(BaseModel):
-    user_id: str = Field(alias="userId", description="The authenticated user's ID")
+    user_id: str = Field(alias="userId", description="The current user's ID")
     order_id: Optional[str] = Field(
         None,
         alias="orderId",
@@ -338,7 +338,7 @@ def check_order_status(
 
 
 class CancelOrderInput(BaseModel):
-    user_id: str = Field(alias="userId", description="The authenticated user's ID")
+    user_id: str = Field(alias="userId", description="The current user's ID")
     order_id: str = Field(
         alias="orderId", description="The order ID to cancel (e.g. 'A1B2C3D4')"
     )

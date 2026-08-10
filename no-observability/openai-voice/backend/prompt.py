@@ -73,7 +73,7 @@ Therefore:
 def text_system_prompt(user_id: str) -> str:
     return (
         f"{BASE_PROMPT}\n\n{TEXT_FORMATTING}\n\n"
-        f"The current authenticated user's ID is: {user_id}. "
+        f"The current user's ID is: {user_id}. "
         f"Use this userId when making purchases or checking order status."
     )
 
@@ -81,6 +81,6 @@ def text_system_prompt(user_id: str) -> str:
 def voice_system_prompt(user_id: str) -> str:
     return (
         f"{BASE_PROMPT}\n\n{VOICE_GUIDANCE}\n\n"
-        f"The current authenticated user's ID is: {user_id}. "
+        f"The current user's ID is: {user_id}. "
         f"Use this userId when making purchases or checking order status."
     )

@@ -2,7 +2,7 @@
  * Browser smoke test for the openai-voice tier.
  *
  * Exercises three things from a real Chromium context:
- *   1. The Next.js home page serves and redirects unauthenticated users
+ *   1. The Next.js home page serves and redirects uncurrent users
  *      to /login (proves the frontend stack — App Router, auth middleware,
  *      and all the bits that the synthetic-voice harness skips — is alive).
  *   2. The login page renders with the X sign-in button.
@@ -62,8 +62,8 @@ async function main() {
   });
   const page = await context.newPage();
 
-  // --- (1) Home page redirect ----------------------------------------
-  console.log("\n[1/3] Unauth home page should redirect to /login");
+  // --- (1) Home page renders without authentication ------------------
+  console.log("\n[1/3] Home page renders without authentication");
   const homeRes = await page.goto(BASE_URL, { waitUntil: "networkidle" });
   check(
     "200 status",
@@ -71,17 +71,13 @@ async function main() {
     `${homeRes?.status()}`
   );
   check(
-    "URL contains /login",
-    page.url().includes("/login"),
+    "URL remains on home page",
+    new URL(page.url()).pathname === "/",
     page.url()
   );
 
-  // --- (2) Login page renders ----------------------------------------
-  console.log("\n[2/3] /login renders");
-  await page.goto(`${BASE_URL}/login`, { waitUntil: "networkidle" });
-  const xButton = await page.getByRole("button", { name: /Sign in with X/i }).count();
-  check("Sign-in-with-X button visible", xButton >= 1);
-
+  // --- (2) Home page content renders ---------------------------------
+  console.log("\n[2/3] Wonder Toys UI renders");
   const title = await page.locator("h1").first().textContent();
   check(
     "Wonder Toys title rendered",

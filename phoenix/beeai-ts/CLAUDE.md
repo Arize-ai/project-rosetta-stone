@@ -25,7 +25,7 @@ npm run dev:next   # Next.js only (search falls back to keyword matching)
 
 After a chat, traces land in the Phoenix project named in `PHOENIX_PROJECT_NAME`.
 
-## Smoke test (bypasses NextAuth)
+## Smoke test (bypasses authentication)
 
 ```bash
 npx tsx scripts/smoke-agent.ts

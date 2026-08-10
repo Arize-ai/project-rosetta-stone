@@ -6,7 +6,7 @@ The OpenAI Agents JS SDK variant of the Wonder Toys shopping agent. Baseline tie
 
 - **`src/ai/`** — `Agent` from `@openai/agents` + a per-request `AgentInputItem[]` history (built with the `user(...)` / `assistant(...)` helpers). Tools defined via `tool({ name, description, parameters: zod-v4, execute })` from `@openai/agents`.
 - **`src/app/api/chat/route.ts`** — `await run(agent, history, { stream: true, maxTurns: 10 })`, then iterate `stream.toStream()`. `raw_model_stream_event` → `output_text_delta` gives token deltas; `run_item_stream_event` → `tool_call_item` marks tool boundaries (used to inject a `\n\n` between pre- and post-tool text).
-- **Eval-bypass header** — the chat route checks `x-eval-secret` against `EVAL_SECRET` (env). When matched, NextAuth is skipped and the user ID is taken from `x-eval-user-id`. Lets the rosetta-test harness drive chat without going through Twitter OAuth.
+- **Eval-bypass header** — the chat route checks `x-eval-secret` against `EVAL_SECRET` (env). When matched, authentication is skipped and the user ID is taken from `x-eval-user-id`. Lets the rosetta-test harness drive chat without going through sign-in.
 - **`next.config.ts`** — `serverExternalPackages` lists `@openai/agents`, `@openai/agents-core`, `chromadb`, `@chroma-core/default-embed`. `turbopack.root` is set to `__dirname` per the Next.js 16 + Turbopack convention.
 - **`package.json`** — depends on `@openai/agents` + `zod@4` (peer-dep requirement of `@openai/agents`).
 - **LLM** — `gpt-5.4-mini` via the native OpenAI Responses API (not Anthropic), matching the Python `openai-agents-py` tier. The SDK can be routed through `@ai-sdk/anthropic` via `@openai/agents-extensions`, but the native path keeps the OpenInference tracing surface clean.

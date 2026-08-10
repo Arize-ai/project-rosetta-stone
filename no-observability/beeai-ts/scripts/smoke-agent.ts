@@ -1,4 +1,4 @@
-// Direct smoke test of the BeeAI agent layer — bypasses NextAuth so we can
+// Direct smoke test of the BeeAI agent layer — bypasses authentication so we can
 // validate the agent + tools + streaming without driving the UI.
 //
 // Run: ANTHROPIC_API_KEY=... npx tsx scripts/smoke-agent.ts
@@ -7,7 +7,7 @@ import "dotenv/config";
 import { streamAgentResponse, type ChatMessage } from "@/beeai/agent";
 
 const USER_CONTEXT =
-  "The current authenticated user's ID is: smoke-test. Use this userId when making purchases or checking order status.";
+  "The current user's ID is: smoke-test. Use this userId when making purchases or checking order status.";
 
 async function runTurn(history: ChatMessage[], userText: string): Promise<string> {
   const messages: ChatMessage[] = [...history, { role: "user", content: userText }];

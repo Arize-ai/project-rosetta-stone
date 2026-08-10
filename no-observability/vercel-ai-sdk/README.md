@@ -13,7 +13,6 @@ A Next.js monolith: the agent, tools, and UI all live in one app.
 | Tools | `tool()` from `ai` with Zod parameter schemas |
 | Streaming | `result.fullStream` → custom SSE (`data: {"text":"..."}\n\n`) |
 | Vector search | ChromaDB + `@chroma-core/default-embed` (all-MiniLM-L6-v2) |
-| Auth | NextAuth v4 + Twitter/X OAuth 2.0 |
 | UI | Next.js App Router + Tailwind CSS v4 |
 
 ## Key Files
@@ -50,10 +49,6 @@ See `env.example`. Required variables:
 | Variable | Description |
 |---|---|
 | `ANTHROPIC_API_KEY` | Claude API key |
-| `NEXTAUTH_URL` | Callback URL (e.g. `http://localhost:3000`) |
-| `NEXTAUTH_SECRET` | Session encryption key (`openssl rand -base64 32`) |
-| `TWITTER_CLIENT_ID` | X OAuth app client ID |
-| `TWITTER_CLIENT_SECRET` | X OAuth app client secret |
 
 ## Differences from the Mastra variant
 

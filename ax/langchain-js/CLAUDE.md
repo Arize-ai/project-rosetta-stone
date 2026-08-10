@@ -18,16 +18,15 @@ src/
 │   ├── inventory.ts           — 200 products (in-memory array, typed as Product[])
 │   ├── orders.ts              — In-memory order store (Map, resets on restart)
 │   ├── chroma.ts              — ChromaDB client wrapper with graceful fallback
-│   └── auth.ts                — NextAuth config (Twitter/X OAuth 2.0)
 ├── components/
 │   ├── Chat.tsx               — Main chat component
 │   ├── CartContext.tsx         — Cart state management
 │   ├── CartIcon.tsx            — Cart icon with badge
-│   └── SessionProvider.tsx     — NextAuth provider wrapper
+│   └── SessionProvider.tsx     — authentication provider wrapper
 ├── app/
 │   ├── api/chat/route.ts      — Streaming chat endpoint (SSE via streamEvents)
 │   ├── api/products/          — REST endpoints for featured products and product detail
-│   ├── api/auth/              — NextAuth route handler
+│   ├── api/auth/              — authentication route handler
 │   ├── page.tsx               — Home page (top 5 products, category chips, chat)
 │   ├── product/[id]/          — Product detail page with add-to-cart
 │   ├── cart/                  — Shopping cart page (sessionStorage-backed)
@@ -74,7 +73,6 @@ Both use `LangChainInstrumentation.manuallyInstrument()` to patch LangChain's ca
 - **Vector search**: ChromaDB with `@chroma-core/default-embed` (all-MiniLM-L6-v2). Supports metadata filters for age range and category. Falls back to substring matching if ChromaDB is unavailable.
 - **Orders**: In-memory `Map<string, Order>` — resets on process restart. Order status is randomly assigned on each check (simulates progression).
 - **Inventory**: Mutable — purchases deduct stock, cancellations restore it. Resets on restart.
-- **Auth**: Twitter/X OAuth 2.0 via NextAuth v4. The chat route prepends a system message with the authenticated user's ID.
 - **Product images**: AI-generated, stored in repo root `product-images/`, symlinked to `public/product-images/`. Agent uses markdown image syntax with local paths.
 
 ## Running

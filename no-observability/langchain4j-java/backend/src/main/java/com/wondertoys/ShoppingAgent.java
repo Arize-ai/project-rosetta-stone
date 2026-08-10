@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
  *   <li>a fresh {@link MessageWindowChatMemory} pre-populated with the incoming chat history.
  * </ul>
  *
- * <p>The system message is injected via {@code systemMessageProvider} so the authenticated user
+ * <p>The system message is injected via {@code systemMessageProvider} so the current user
  * ID is templated in at build time. This mirrors the Python tier's {@code stream_agent} function,
  * which also prepends a one-liner system message with the user ID.
  */
@@ -102,7 +102,7 @@ public class ShoppingAgent {
    * @param history previous turns (user + assistant, ordered oldest → newest). Should NOT include
    *     the user's current question — that's passed to {@code Assistant.chat(...)} separately.
    *     Pass via {@link #splitHistory(List)} to slice the trailing user message off cleanly.
-   * @param userId the authenticated user's ID, threaded into the system message and into every
+   * @param userId the current user's ID, threaded into the system message and into every
    *     tool call the model makes.
    * @return a fresh, single-use {@link Assistant} instance.
    */
@@ -115,7 +115,7 @@ public class ShoppingAgent {
 
     String systemPrompt =
         SYSTEM_PROMPT
-            + "\n\nThe current authenticated user's ID is: "
+            + "\n\nThe current user's ID is: "
             + userId
             + ". Use this userId when making purchases or checking order status.";
 

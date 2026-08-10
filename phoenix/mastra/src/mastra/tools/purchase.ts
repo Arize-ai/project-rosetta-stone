@@ -8,7 +8,7 @@ export const purchaseProduct = createTool({
   description:
     "Purchase one or more products. The user's credit card is on file, so only shipping details are needed. Use this after the user has confirmed they want to buy and has provided shipping information.",
   inputSchema: z.object({
-    userId: z.string().describe("The authenticated user's ID"),
+    userId: z.string().describe("The current user's ID"),
     items: z
       .array(
         z.object({

@@ -183,7 +183,7 @@ public class WonderToysTools {
         "provided shipping information."
       })
   public Map<String, Object> purchaseProduct(
-      @P("The authenticated user's ID") String userId,
+      @P("The current user's ID") String userId,
       @P("List of products and quantities to purchase") List<PurchaseItem> items,
       @P("Shipping address details") ShippingAddress shippingAddress) {
 
@@ -248,7 +248,7 @@ public class WonderToysTools {
         "Use this when users ask about their order status, shipping, or delivery."
       })
   public Map<String, Object> checkOrderStatus(
-      @P("The authenticated user's ID") String userId,
+      @P("The current user's ID") String userId,
       @P(value = "Specific order ID to look up (e.g. 'A1B2C3D4')", required = false) String orderId,
       @P(
               value =
@@ -312,7 +312,7 @@ public class WonderToysTools {
         "can be cancelled. Delivered orders cannot be cancelled."
       })
   public Map<String, Object> cancelOrder(
-      @P("The authenticated user's ID") String userId,
+      @P("The current user's ID") String userId,
       @P("The order ID to cancel (e.g. 'A1B2C3D4')") String orderId) {
     return orders.cancel(orderId, userId);
   }

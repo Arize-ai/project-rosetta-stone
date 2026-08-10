@@ -1,5 +1,3 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 // The Eve agent runs as a separate dev server (filesystem-first runtime) that
@@ -9,7 +7,7 @@ import { NextResponse } from "next/server";
 const EVE_URL = process.env.EVE_URL || "http://127.0.0.1:2000";
 
 // Honor the same eval-bypass header the other tiers use for headless smoke
-// tests, so curl can hit /api/chat without an X/Twitter OAuth session.
+// tests, so curl can hit /api/chat without an sign-in session.
 const EVAL_SECRET = process.env.EVAL_SECRET || "";
 
 interface ChatMessage {
@@ -25,12 +23,7 @@ export async function POST(req: Request) {
   if (EVAL_SECRET && evalSecret && evalSecret === EVAL_SECRET) {
     userId = evalUserId || "eval-user";
   } else {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    userId =
-      (session.user as { id?: string }).id || session.user.email || "anonymous";
+    userId = "anonymous";
   }
 
   const { messages } = (await req.json()) as { messages: ChatMessage[] };
