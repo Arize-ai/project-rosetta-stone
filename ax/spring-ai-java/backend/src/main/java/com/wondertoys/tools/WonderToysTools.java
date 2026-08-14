@@ -187,7 +187,7 @@ public class WonderToysTools {
               + " details are needed. Use this after the user has confirmed they want to buy and"
               + " has provided shipping information.")
   public Map<String, Object> purchaseProduct(
-      @ToolParam(description = "The authenticated user's ID") String userId,
+      @ToolParam(description = "The current user's ID") String userId,
       @ToolParam(description = "List of products and quantities to purchase") List<PurchaseItem> items,
       @ToolParam(description = "Shipping address details") ShippingAddress shippingAddress) {
 
@@ -251,7 +251,7 @@ public class WonderToysTools {
           "Check the status of an order by order ID, or search for orders by product name."
               + " Use this when users ask about their order status, shipping, or delivery.")
   public Map<String, Object> checkOrderStatus(
-      @ToolParam(description = "The authenticated user's ID") String userId,
+      @ToolParam(description = "The current user's ID") String userId,
       @ToolParam(description = "Specific order ID to look up (e.g. 'A1B2C3D4')", required = false)
           String orderId,
       @ToolParam(
@@ -314,7 +314,7 @@ public class WonderToysTools {
           "Cancel an order by its order ID. Only orders that are still processing or shipping"
               + " can be cancelled. Delivered orders cannot be cancelled.")
   public Map<String, Object> cancelOrder(
-      @ToolParam(description = "The authenticated user's ID") String userId,
+      @ToolParam(description = "The current user's ID") String userId,
       @ToolParam(description = "The order ID to cancel (e.g. 'A1B2C3D4')") String orderId) {
     return orders.cancel(orderId, userId);
   }

@@ -7,7 +7,7 @@ import {
 } from "../lib/orders.js";
 
 const inputSchema = z.object({
-  userId: z.string().describe("The authenticated user's ID"),
+  userId: z.string().describe("The current user's ID"),
   orderId: z
     .string()
     .optional()

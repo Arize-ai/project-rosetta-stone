@@ -32,7 +32,7 @@ src/                            — Next.js frontend (copied from no-observabili
 ├── app/
 │   ├── api/chat/route.ts       — Proxies to the Eve HTTP channel + NDJSON→SSE translation
 │   ├── api/products/           — REST endpoints for featured products and product detail
-│   ├── api/auth/               — NextAuth route handler
+│   ├── api/auth/               — authentication route handler
 │   ├── page.tsx                — Home page (top 5 products, category chips, chat)
 │   ├── product/[id]/           — Product detail page with add-to-cart
 │   ├── cart/                   — Shopping cart page (sessionStorage-backed)
@@ -40,7 +40,6 @@ src/                            — Next.js frontend (copied from no-observabili
 ├── lib/
 │   ├── inventory.ts            — 200 products (used by the products REST routes)
 │   ├── orders.ts               — In-memory order store
-│   └── auth.ts                 — NextAuth config (Twitter/X OAuth 2.0)
 scripts/
 ├── start.sh                    — Dev startup (ChromaDB + indexing + Eve dev server + Next.js)
 └── index-products.ts           — Index 200 products into ChromaDB
@@ -66,7 +65,7 @@ waits for it to listen before starting Next.js on `3000`.
 
 The Next.js chat route:
 
-1. Resolves `userId` from the NextAuth session (or the `x-eval-secret` /
+1. Resolves `userId` from the authentication session (or the `x-eval-secret` /
    `x-eval-user-id` bypass header for headless smoke tests).
 1. POSTs the latest user message to the Eve HTTP channel, passing the `userId`
    as `clientContext` (Eve surfaces it to the model as `Client context: ...`).
@@ -79,7 +78,7 @@ The Next.js chat route:
 ## userId threading
 
 Eve tools receive a `userId` argument the same way the vercel-ai-sdk tier does:
-the system prompt tells the model the authenticated user's ID (delivered via
+the system prompt tells the model the current user's ID (delivered via
 `clientContext`), and the model passes it into the `userId` argument of the
 `purchase`, `order_status`, and `cancel_order` tools.
 

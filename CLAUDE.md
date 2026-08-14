@@ -49,7 +49,6 @@ The home page shows the top 5 products by best seller rank and category browse c
 
 The chat UI renders product results as custom `ProductCard` components (image + "Add to Cart" button on the left, product details on the right) by pre-parsing the agent's markdown into typed segments before rendering.
 
-The agent uses Claude (Anthropic) as the LLM for most tiers and X (Twitter) OAuth for authentication. The `openai-voice` tier is the exception — it uses OpenAI's `gpt-realtime` (voice mode) and `gpt-5.4-mini` (text-mode fallback) since the OpenAI Realtime API is what makes the voice flow possible.
 
 ## Editing Rules
 
@@ -112,7 +111,6 @@ Do not let non-observability code drift between the tiers.
 - **Framework**: Mastra (`@mastra/core`) with Vercel AI SDK
 - **LLM**: Anthropic Claude via `@ai-sdk/anthropic`
 - **Web**: Next.js (App Router, Tailwind CSS)
-- **Auth**: NextAuth v4 with Twitter/X OAuth 2.0
 - **Vector Search**: ChromaDB (local server) with `@chroma-core/default-embed` (all-MiniLM-L6-v2)
 - **Observability** (phoenix): `@mastra/observability` + `@mastra/arize` → Phoenix Cloud
 - **Observability** (ax): `@mastra/observability` + `@mastra/arize` → Arize AX
@@ -121,7 +119,6 @@ Do not let non-observability code drift between the tiers.
 - **Framework**: LangChain.js + LangGraph (`@langchain/langgraph` ReAct agent)
 - **LLM**: `@langchain/anthropic`
 - **Web**: Next.js (App Router, Tailwind CSS)
-- **Auth**: NextAuth v4 with Twitter/X OAuth 2.0
 - **Vector Search**: ChromaDB (local server) with `@chroma-core/default-embed`
 - **Observability** (phoenix): `@arizeai/phoenix-otel` + `@arizeai/openinference-langchain`
 - **Observability** (ax): raw OpenTelemetry
@@ -131,7 +128,6 @@ Do not let non-observability code drift between the tiers.
 - **LLM**: `langchain-anthropic`
 - **Backend**: FastAPI + uvicorn (port 8001)
 - **Frontend**: Next.js (App Router, Tailwind CSS)
-- **Auth**: NextAuth v4 with Twitter/X OAuth 2.0
 - **Vector Search**: ChromaDB (local server, default embeddings)
 - **Observability** (phoenix): `arize-phoenix-otel` + `openinference-instrumentation-langchain`
 - **Observability** (ax): `arize-otel` + `openinference-instrumentation-langchain`
@@ -141,7 +137,6 @@ Do not let non-observability code drift between the tiers.
 - **LLM**: `llama_index.llms.anthropic.Anthropic`
 - **Backend**: FastAPI + uvicorn (port 8001)
 - **Frontend**: Next.js (App Router, Tailwind CSS)
-- **Auth**: NextAuth v4 with Twitter/X OAuth 2.0
 - **Vector Search**: ChromaDB (local server, default embeddings)
 - **Observability** (phoenix): `arize-phoenix-otel` + `openinference-instrumentation-llama-index`
 - **Observability** (ax): `arize-otel` + `openinference-instrumentation-llama-index`
@@ -151,7 +146,6 @@ Do not let non-observability code drift between the tiers.
 - **LLM**: Claude (`claude-sonnet-4-6`) via `agent_framework.anthropic.AnthropicClient`
 - **Backend**: FastAPI + uvicorn (port 8001)
 - **Frontend**: Next.js (App Router, Tailwind CSS)
-- **Auth**: NextAuth v4 with Twitter/X OAuth 2.0
 - **Vector Search**: ChromaDB (local server, default embeddings)
 - **Sessions**: Per-user `AgentSession` stored in memory; `**kwargs` injects `user_id` at runtime via `additional_function_arguments`
 - **Observability** (phoenix): `arize-phoenix-otel` + `openinference-instrumentation-agent-framework` + `agent_framework.observability.enable_instrumentation`
@@ -160,7 +154,6 @@ Do not let non-observability code drift between the tiers.
 - **Framework**: OpenAI Agents JS SDK (`@openai/agents` ≥ 0.11.6) — `Agent` + `run(agent, history, { stream: true })`, with `tool(...)` definitions driven by Zod v4 schemas
 - **LLM**: Native OpenAI Responses API (`model="gpt-5.4-mini"`) — not Anthropic. The SDK can be routed through `@ai-sdk/anthropic` via `@openai/agents-extensions`, but the native path keeps the OpenInference tracing surface clean (matches the Python `openai-agents-py` tier convention)
 - **Web**: Next.js (App Router, Tailwind CSS) — monolith, no separate Python backend
-- **Auth**: NextAuth v4 with Twitter/X OAuth 2.0. The chat route honors an `x-eval-secret` / `x-eval-user-id` bypass header for headless smoke tests
 - **Sessions**: Stateless per-request — conversation history is rebuilt as `AgentInputItem[]` from the messages the client sends (`user(...)` / `assistant(...)` helpers), then passed to `run()`. No `SQLiteSession` like the Python tier
 - **Vector Search**: ChromaDB (local server, default embeddings) — shared with the Python tiers
 - **Streaming**: `await run(agent, history, { stream: true })` → iterate `stream.toStream()` and pick up `raw_model_stream_event` → `output_text_delta` for token deltas, `run_item_stream_event` → `tool_call_item` for tool boundaries. Same `data: {...}\n\n` SSE shape every other tier emits
@@ -172,7 +165,6 @@ Do not let non-observability code drift between the tiers.
 - **LLM**: `gpt-realtime` for voice and `gpt-5.4-mini` for text
 - **Backend**: FastAPI + uvicorn (port 8001) with a `/voice` WebSocket endpoint that bridges the browser to a `RealtimeSession`. The SDK owns the OpenAI Realtime WebSocket, VAD wiring, and tool dispatch — our handler only translates browser frames to/from SDK events
 - **Frontend**: Next.js (App Router, Tailwind CSS) with a text/voice toggle in the chat header. Voice mode opens a browser WebSocket to the FastAPI backend, captures mic audio via an `AudioWorklet` (24 kHz mono PCM16), and plays back assistant audio via `AudioContext`-scheduled buffers
-- **Auth**: NextAuth v4 with Twitter/X OAuth 2.0. WS auth uses a token + user_id in the query string (browsers can't set headers on WS upgrade), validated against the same `BACKEND_SECRET` the HTTP `/chat` route uses
 - **Vector Search**: ChromaDB (local server, default embeddings) — shared with all other Python tiers
 - **Tools**: 5 `@function_tool`-decorated functions in `backend/tools.py`, shared between voice and text mode. The Agents SDK derives JSON schemas from the type hints and handles dispatch
 - **Observability** (phoenix): `arize-phoenix-otel` + `openinference-instrumentation-openai-agents`. The instrumentor patches both `RealtimeSession` and `Runner`, emitting the canonical OpenInference voice span tree (`AUDIO conversation.turn → USER + LLM + TOOL`) with audio captured as inline WAV data URIs on `input.audio.url` / `output.audio.url`
@@ -196,8 +188,6 @@ To run Next.js without ChromaDB: `npm run dev:next` (search falls back to keywor
 
 See `env.example` in each directory. Key variables:
 - `ANTHROPIC_API_KEY` — Claude API key
-- `NEXTAUTH_SECRET` — session encryption (`openssl rand -base64 32`)
-- `TWITTER_CLIENT_ID` / `TWITTER_CLIENT_SECRET` — X OAuth app credentials
 - `CHROMA_URL` — ChromaDB server URL (default: `http://localhost:8000`)
 - `BACKEND_SECRET` / `BACKEND_URL` — Python backend auth (langchain-py, llamaindex-py, microsoft-agent-py, openai-voice only)
 - `OPENAI_API_KEY` — OpenAI API key (openai-voice only)

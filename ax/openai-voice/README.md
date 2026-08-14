@@ -42,7 +42,7 @@ Audio is embedded inline as `data:audio/wav;base64,...` URIs so the AX trace car
 ## Running
 
 ```bash
-cp env.example .env.local   # fill in OPENAI_API_KEY + ARIZE_* + TWITTER_*
+cp env.example .env.local   # fill in OPENAI_API_KEY + ARIZE_*
 npm install
 npm run dev                 # ChromaDB + Python deps + backend + Next.js
 ```

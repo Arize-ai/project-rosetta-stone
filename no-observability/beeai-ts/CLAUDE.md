@@ -20,12 +20,11 @@ src/
 │   ├── inventory.ts             — 200 products (in-memory array, typed as Product[])
 │   ├── orders.ts                — In-memory order store (Map, resets on restart)
 │   ├── chroma.ts                — ChromaDB client wrapper with graceful fallback
-│   └── auth.ts                  — NextAuth config (Twitter/X OAuth 2.0)
 ├── components/                  — Chat, CartContext, CartIcon, SessionProvider
 └── app/
     ├── api/chat/route.ts        — Streaming chat endpoint (SSE, drives BeeAI agent)
     ├── api/products/            — REST endpoints for featured products and product detail
-    ├── api/auth/                — NextAuth route handler
+    ├── api/auth/                — authentication route handler
     ├── page.tsx                 — Home page (top 5 products, category chips, chat)
     ├── product/[id]/            — Product detail page with add-to-cart
     ├── cart/                    — Shopping cart page (sessionStorage-backed)
@@ -43,7 +42,7 @@ scripts/
 - **Streaming**: `agent.run({ prompt }).observe(emitter => …)` exposes events:
   - `partialUpdate` event with `update.key === "final_answer"` and `update.value` carrying each delta — only the final-answer key is forwarded to the SSE client; `thought`/`tool_name`/`tool_input` keys are internal reasoning.
   - `tool.<name>.start` (via a `/tool\.[^.]+\.start$/` regex matcher with `matchNested: true`) — tool-call boundary, used for the `\n\n` paragraph break between pre- and post-tool text.
-- **Memory**: The chat front-end resends full history each turn. The agent factory replays the history into `UnconstrainedMemory` then runs with the most recent user message as `prompt`. A user-context system message is prepended so the agent knows the authenticated user's ID.
+- **Memory**: The chat front-end resends full history each turn. The agent factory replays the history into `UnconstrainedMemory` then runs with the most recent user message as `prompt`. A user-context system message is prepended so the agent knows the current user's ID.
 
 ## What differs in observability tiers
 

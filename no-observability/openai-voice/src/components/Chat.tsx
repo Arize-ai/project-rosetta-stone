@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useSession, signOut } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
@@ -78,7 +77,6 @@ interface FeaturedProduct {
 type Mode = "text" | "voice";
 
 export function Chat() {
-  const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { addToCart } = useCart();
@@ -102,11 +100,6 @@ export function Chat() {
   const rafRef = useRef<number | null>(null);
   const askHandledRef = useRef<string | null>(null);
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
-    }
-  }, [status, router]);
 
   useEffect(() => {
     sessionStorage.setItem("chat-messages", JSON.stringify(messages));
@@ -348,15 +341,6 @@ export function Chat() {
     ]);
   }, []);
 
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-purple-600">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!session) return null;
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -463,15 +447,6 @@ export function Chat() {
             </button>
           </div>
           <CartIcon />
-          <span className="text-sm text-gray-600">
-            {session.user?.name || session.user?.email}
-          </span>
-          <button
-            onClick={() => signOut()}
-            className="text-sm text-gray-500 hover:text-gray-700 underline"
-          >
-            Sign out
-          </button>
         </div>
       </header>
 

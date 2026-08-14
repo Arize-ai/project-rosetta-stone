@@ -1,18 +1,10 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:18002";
 const BACKEND_SECRET = process.env.BACKEND_SECRET || "";
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const userId = (session.user as { id?: string }).id || session.user.email || "anonymous";
+  const userId = "anonymous";
   const { messages } = await req.json();
 
   const backendResponse = await fetch(`${BACKEND_URL}/chat`, {

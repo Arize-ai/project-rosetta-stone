@@ -196,7 +196,7 @@ class ShippingAddressSchema(BaseModel):
 class PurchaseInput(BaseModel):
     """Purchase one or more products with a shipping address."""
 
-    user_id: str = Field(description="The authenticated user's ID")
+    user_id: str = Field(description="The current user's ID")
     items: list[PurchaseItemSchema] = Field(
         description="List of products and quantities to purchase"
     )
@@ -276,7 +276,7 @@ def purchase_product(
 class CheckOrderInput(BaseModel):
     """Check order status by order ID or product search."""
 
-    user_id: str = Field(description="The authenticated user's ID")
+    user_id: str = Field(description="The current user's ID")
     order_id: Optional[str] = Field(
         None,
         description="Specific order ID to look up (e.g. 'A1B2C3D4')",
@@ -339,7 +339,7 @@ def check_order_status(
 class CancelOrderInput(BaseModel):
     """Cancel an order by its ID."""
 
-    user_id: str = Field(description="The authenticated user's ID")
+    user_id: str = Field(description="The current user's ID")
     order_id: str = Field(
         description="The order ID to cancel (e.g. 'A1B2C3D4')"
     )

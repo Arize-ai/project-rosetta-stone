@@ -4,7 +4,7 @@ import { z } from "zod";
 import { getOrderById, getOrdersByUser, searchOrdersByProduct } from "@/lib/orders";
 
 const inputSchema = z.object({
-  userId: z.string().describe("The authenticated user's ID"),
+  userId: z.string().describe("The current user's ID"),
   orderId: z.string().optional().describe("Specific order ID to look up (e.g. 'A1B2C3D4')"),
   productSearch: z
     .string()

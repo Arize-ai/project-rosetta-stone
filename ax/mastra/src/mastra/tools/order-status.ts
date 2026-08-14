@@ -11,7 +11,7 @@ export const checkOrderStatus = createTool({
   description:
     "Check the status of an order by order ID, or search for orders by product name. Use this when users ask about their order status, shipping, or delivery.",
   inputSchema: z.object({
-    userId: z.string().describe("The authenticated user's ID"),
+    userId: z.string().describe("The current user's ID"),
     orderId: z
       .string()
       .optional()

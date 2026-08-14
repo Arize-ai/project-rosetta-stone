@@ -145,7 +145,7 @@ public class ShoppingAgent {
    *
    * @param history previous turns (oldest → newest); should NOT include the latest user message.
    * @param latestUserMessage the new question to answer.
-   * @param userId the authenticated user, threaded into the system prompt and tool calls.
+   * @param userId the current user, threaded into the system prompt and tool calls.
    * @param onText called with each text delta as it arrives from Claude.
    * @param onToolUse called once per tool dispatch — the caller uses this to insert paragraph
    *     breaks in the SSE stream.
@@ -170,7 +170,7 @@ public class ShoppingAgent {
 
     String systemPrompt =
         SYSTEM_PROMPT
-            + "\n\nThe current authenticated user's ID is: "
+            + "\n\nThe current user's ID is: "
             + userId
             + ". Use this userId when making purchases or checking order status.";
 

@@ -1,4 +1,4 @@
-// Direct smoke test of the BeeAI agent layer — bypasses NextAuth so we can
+// Direct smoke test of the BeeAI agent layer — bypasses authentication so we can
 // validate the agent + tools + streaming + Phoenix tracing without driving
 // the UI.
 //
@@ -12,7 +12,7 @@ import { initTracing } from "@/beeai/tracing";
 import type { ChatMessage } from "@/beeai/agent";
 
 const USER_CONTEXT =
-  "The current authenticated user's ID is: smoke-test. Use this userId when making purchases or checking order status.";
+  "The current user's ID is: smoke-test. Use this userId when making purchases or checking order status.";
 
 async function main() {
   if (!process.env.ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY not set");

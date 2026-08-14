@@ -1,21 +1,13 @@
 import { streamText, stepCountIs } from "ai";
 import { model, tools, SYSTEM_PROMPT } from "@/ai/agent";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const userId = (session.user as { id?: string }).id || session.user.email || "anonymous";
+  const userId = "anonymous";
   const { messages } = await req.json();
 
   // Append user context to the system prompt
-  const system = `${SYSTEM_PROMPT}\n\nThe current authenticated user's ID is: ${userId}. Use this userId when making purchases or checking order status.`;
+  const system = `${SYSTEM_PROMPT}\n\nThe current user's ID is: ${userId}. Use this userId when making purchases or checking order status.`;
 
   const result = streamText({
     model,

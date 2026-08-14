@@ -18,7 +18,7 @@ Voice mode also pushes rendered markdown product cards to the browser via a `cur
 ## Running
 
 ```bash
-cp env.example .env.local   # set OPENAI_API_KEY, TWITTER_*, etc.
+cp env.example .env.local   # set OPENAI_API_KEY and backend settings
 npm install
 npm run dev                 # ChromaDB + Python deps + backend + Next.js
 ```

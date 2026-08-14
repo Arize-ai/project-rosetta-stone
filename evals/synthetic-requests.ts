@@ -14,7 +14,7 @@
  *   npm run synthetic-requests
  *
  * Configuration (env vars):
- *   EVAL_SECRET   — shared secret that bypasses NextAuth in the chat route
+ *   EVAL_SECRET   — shared secret that bypasses authentication in the chat route
  *   EVAL_BASE_URL — base URL of the running app (default: http://localhost:3000)
  */
 

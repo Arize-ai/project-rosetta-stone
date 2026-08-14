@@ -3,7 +3,7 @@ import path from "node:path";
 import fs from "node:fs";
 
 // Captures Wonder Toys app UI screenshots: landing page + a product detail
-// page. Both are public (no NextAuth gate), so no storageState needed.
+// page. Both are public, so no storageState is needed.
 //
 // Driven by env vars from the rosetta-pr-screenshots skill orchestrator:
 //   OUT_DIR              absolute path to write PNGs into

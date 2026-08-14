@@ -11,7 +11,7 @@ export const cancelOrderTool = tool(
     description:
       "Cancel an order by its order ID. Only orders that are still processing or shipping can be cancelled. Delivered orders cannot be cancelled.",
     schema: z.object({
-      userId: z.string().describe("The authenticated user's ID"),
+      userId: z.string().describe("The current user's ID"),
       orderId: z.string().describe("The order ID to cancel (e.g. 'A1B2C3D4')"),
     }),
   }

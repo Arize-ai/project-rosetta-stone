@@ -14,7 +14,6 @@ A Next.js monolith: the agent, tools, and UI all live in one app.
 | Memory | Stateless per request — `AgentInputItem[]` rebuilt from the client's message history each call (`user(...)` / `assistant(...)` helpers) |
 | Streaming | `await run(agent, history, { stream: true, maxTurns: 10 })` → iterate `stream.toStream()` → custom SSE (`data: {"text":"..."}\n\n`) |
 | Vector search | ChromaDB + `@chroma-core/default-embed` (all-MiniLM-L6-v2) |
-| Auth | NextAuth v4 + Twitter/X OAuth 2.0, with an `x-eval-secret` header bypass for headless smoke tests |
 | UI | Next.js App Router + Tailwind CSS v4 |
 
 ## Key Files
@@ -51,11 +50,7 @@ See `env.example`. Required variables:
 | Variable | Description |
 |---|---|
 | `OPENAI_API_KEY` | OpenAI API key — used by the Responses API |
-| `NEXTAUTH_URL` | Callback URL (e.g. `http://localhost:3000`) |
-| `NEXTAUTH_SECRET` | Session encryption key (`openssl rand -base64 32`) |
-| `TWITTER_CLIENT_ID` | X OAuth app client ID |
-| `TWITTER_CLIENT_SECRET` | X OAuth app client secret |
-| `EVAL_SECRET` | Optional — when set, `x-eval-secret: <value>` skips NextAuth (used by smoke / eval harnesses) |
+| `EVAL_SECRET` | Optional — when set, `x-eval-secret: <value>` skips authentication (used by smoke / eval harnesses) |
 
 ## What the observability tiers add
 
