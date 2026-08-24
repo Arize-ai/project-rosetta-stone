@@ -466,6 +466,8 @@ npm run synthetic-requests      # generate 25 traces
 
 Then configure the same 6 evaluators in the [Arize AX console](https://app.arize.com) using LLM-as-a-Judge and Code Evaluator task types. See [`evals/README.md`](./evals/README.md) for step-by-step setup with prompt templates and code — evaluators apply to all projects.
 
+On AX you can also attach **Agent-as-a-Judge** evaluators: a Claude Code sandbox reads the full trace (including TOOL spans) instead of a mapped `{input}`/`{output}` template. Scoring instructions live in [`evals/aaaj/`](./evals/aaaj/README.md). After traces exist, invoke the `rosetta-aaaj` skill to create them via GraphQL (REST/`ax` cannot). The intended first project is [`ax/langchain-py`](./ax/langchain-py/README.md) (`wonder-toys-langchain-py`).
+
 ### Voice harness (openai-voice tier only)
 
 The `openai-voice` tier ships a synthetic *voice* runner too. Instead of text prompts hitting `/api/chat`, pre-generated MP3 prompts are streamed through the voice WebSocket — same path a real microphone uses, so every prompt produces a full `AUDIO conversation.turn` → `USER` + `LLM` → `TOOL` trace tree.
@@ -486,6 +488,8 @@ The MP3 prompts live in [`evals/voice-prompts/`](./evals/voice-prompts/) — gen
 - **Format Compliance** — Does the response follow markdown formatting rules? (LLM judge)
 - **Image URL Correctness** — Do all image URLs match `/product-images/toy-XXX.png`? (code)
 - **Tool Call Count** — Appropriate number of tool calls? (code)
+
+AX only — [Agent-as-a-Judge examples](./evals/aaaj/README.md) (trajectory completion, tool-result grounding, purchase/cancel protocol). Attach with the `rosetta-aaaj` skill.
 
 ## What you can learn
 

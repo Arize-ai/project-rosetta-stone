@@ -78,7 +78,7 @@ The chat UI renders product results as custom `ProductCard` components (image + 
 - `backend/main.py` — `import backend.tracing` added before framework imports
 - `backend/requirements.txt` — observability packages added
 - `env.example` — observability environment variables
-- `evals/` — **New directory** in observability tiers (synthetic requests + eval harness)
+- `evals/` — **New directory** in observability tiers (synthetic requests + eval harness). AX Agent-as-a-Judge scoring examples live in repo-root `evals/aaaj/`. To attach them to traces, use the `rosetta-aaaj` skill (default project `ax/langchain-py`); do not use `ax evaluators create` for harness evals.
 
 **OpenAI Agents TypeScript** (Next.js monolith; all three tiers):
 - `src/ai/tracing.ts` — **New file** in observability tiers. Phoenix calls `register({ projectName, url, apiKey, spanProcessors: [...] })` from `@arizeai/phoenix-otel`, passing a local `OpenInferenceFilteredBatchSpanProcessor` (subclass of OTel's `BatchSpanProcessor`, ~15 LOC in `src/ai/oi-filter-processor.ts`) — without it Next.js's auto-OTel pumps HTTP / fetch / page-render spans into the Phoenix project bucket alongside the agent spans. AX builds a `NodeTracerProvider` by hand with the same filter processor and **does not call `provider.register()`** — making the provider global would have the same effect on AX. Both tiers then run `new OpenAIAgentsInstrumentation({ tracerProvider }).manuallyInstrument(agents)`. The instrumentor is *not* a monkey-patch — it implements the agents SDK's first-class `TracingProcessor` interface and registers via `setTraceProcessors`.

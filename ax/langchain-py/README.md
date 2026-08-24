@@ -43,3 +43,16 @@ npm run dev
 ```
 
 See the [root README](../../README.md) for full details.
+
+## Evals on these traces
+
+After the app is up and AX credentials are set:
+
+```bash
+npm run synthetic-requests   # 25 Wonder Toys chats → project wonder-toys-langchain-py
+```
+
+Then:
+
+1. **LLM-as-a-Judge / code evaluators** — the six shared templates in [`evals/README.md`](../../evals/README.md) (AX console or `rosetta-test-evals`)
+2. **Agent-as-a-Judge** — invoke the `rosetta-aaaj` skill. It creates harness evaluators from [`evals/aaaj/`](../../evals/aaaj/README.md) via GraphQL (REST/`ax` cannot). These need the LangChain OpenInference tree this tier already emits (`CHAIN`/`AGENT` → `LLM` → `TOOL`). UI paste steps are the fallback in that README.

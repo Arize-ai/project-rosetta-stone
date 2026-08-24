@@ -7,8 +7,11 @@
  * request produces traces — no OTel setup is needed here.
  *
  * Prerequisites:
- *   1. Start the app: npm run dev
- *   2. Set EVAL_SECRET in .env or .env.local (any non-empty string)
+ *   1. Prefer `npm run synthetic-requests` (it starts the app if needed).
+ *   2. If the app is *already* running, EVAL_SECRET in its environment must
+ *      match this process — typically via .env.local. A mismatch (or an unset
+ *      secret in Next.js) makes the chat route tag every trace as
+ *      userId=anonymous and ignore x-eval-user-id.
  *
  * Usage:
  *   npm run synthetic-requests

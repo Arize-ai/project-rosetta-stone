@@ -12,7 +12,7 @@ See the [README's Repo layout section](./README.md#repo-layout) for the full dir
 
 - `CLAUDE.md` — agent-facing project instructions (Claude Code reads this)
 - `TODO.md` — frameworks left to add (gitignored, local to your checkout)
-- `evals/` — shared synthetic-requests harness (text + voice), eval scripts, and the 6 evaluator templates
+- `evals/` — shared synthetic-requests harness (text + voice), eval scripts, the 6 evaluator templates, and AX Agent-as-a-Judge scoring instructions (`evals/aaaj/`)
 - `skills-lock.json` — version pin for the externally-synced `arize-*` skills
 
 ## Editing rules
@@ -187,6 +187,8 @@ npm run synthetic-requests
 
 Then either run the AX evaluators manually in the [Arize AX console](https://app.arize.com) using LLM-as-a-Judge + Code Evaluator task types (templates in `evals/README.md`), or let `rosetta-test-evals` ensure the stable space-level `rosetta-e2e-*` evaluators exist and trigger them via the `ax` CLI.
 
+For Agent-as-a-Judge (harness) evals, invoke `rosetta-aaaj` after traces exist — REST/`ax` cannot create those. Rubrics live in `evals/aaaj/`.
+
 The stable space-level evaluators (one per evaluator name, shared across all framework projects) avoid the duplication of re-creating evaluators per-project, and they're idempotent — `rosetta-test-evals` only creates ones that don't already exist.
 
 ### Voice harness (openai-voice tier only)
@@ -232,6 +234,7 @@ All skills installed under `.claude/skills/`. Repo-specific skills are committed
 | `rosetta-test-setup` | Provision a fresh isolated project; write `.env.test-local` |
 | `rosetta-test-traces` | Run the 25 synthetic Wonder Toys requests |
 | `rosetta-test-evals` | Phoenix: `npm run evals`. AX: ensure `rosetta-e2e-*` evaluators exist, trigger per-run task |
+| `rosetta-aaaj` | AX only: create/reuse three Agent-as-a-Judge (harness) evaluators from `evals/aaaj/` via GraphQL and trigger a backfill. Not part of `rosetta-test` e2e. |
 | `rosetta-test-verify` | Confirm 25 traces + every expected eval annotation; per-trace coverage matrix + pass/fail |
 | `rosetta-test-cleanup` | Delete project, remove env overlay, kill leftover processes |
 

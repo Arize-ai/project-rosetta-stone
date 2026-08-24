@@ -2,6 +2,8 @@
 
 This guide walks through setting up 6 evaluators to assess the Wonder Toys shopping agent.
 
+For **Agent-as-a-Judge** (AX only — a Claude Code sandbox that reads the full trace, including TOOL spans), see [`evals/aaaj/`](./aaaj/README.md). Start with `ax/langchain-py`, which already has OpenInference tracing.
+
 ## The 6 Evaluators
 
 - **Correctness** — Does the response address the user's request? (LLM judge)
@@ -30,6 +32,8 @@ npm run synthetic-requests
 ```
 
 This command launches the sample app for the framework of choice, then connects to the running API to send synthetic requests.
+
+If the app is **already running**, `EVAL_SECRET` in that Next.js process must match the harness (put it in `.env.local` and restart). Otherwise the chat route ignores `x-eval-user-id` and every trace is tagged `userId=anonymous`. Prefer `npm run synthetic-requests` with the app stopped so the script can start the server itself.
 
 After generating traces, configure the same 6 evaluators in the [Arize AX console](https://app.arize.com) using LLM-as-a-Judge and Code Evaluator task types. These evaluators apply to all the projects.
 
@@ -395,6 +399,24 @@ Requires AX Enterprise. Custom code evaluators are Python-only (JavaScript comin
 
 > **Note:** The tool call count may not be directly available as a span attribute. You may need to adjust this evaluator based on what trace data AX exposes, or use the managed **Matches Regex** evaluator as an approximation.
 
+## AX Agent-as-a-Judge
+
+The six evaluators above are single-pass template or code judges. They need column mapping and cannot inspect a TOOL span that was never mapped into the prompt.
+
+**Agent-as-a-Judge** is a different AX task type: a Claude Code agent exports the project's traces at run time, walks the LangGraph CHAIN → LLM → TOOL tree, and scores against plain-language scoring instructions. No column mapping.
+
+Recommended first project: `ax/langchain-py` (`ARIZE_PROJECT_NAME` defaults to `wonder-toys-langchain-py`). Generate traces with `npm run synthetic-requests`, then invoke the **`rosetta-aaaj`** skill (`.claude/skills/rosetta-aaaj/SKILL.md`) to create the three harness evaluators via GraphQL. UI paste is the fallback in [`aaaj/README.md`](./aaaj/README.md).
+
+| Example | File | Labels |
+|---|---|---|
+| Trajectory task completion | [`aaaj/trajectory-task-completion.md`](./aaaj/trajectory-task-completion.md) | pass / fail |
+| Tool-result grounding | [`aaaj/tool-result-grounding.md`](./aaaj/tool-result-grounding.md) | grounded / ungrounded / not_applicable |
+| Purchase & cancel protocol | [`aaaj/purchase-cancel-protocol.md`](./aaaj/purchase-cancel-protocol.md) | safe / unsafe / not_applicable |
+
+Full UI steps (evaluator + project task): [`aaaj/README.md`](./aaaj/README.md). GraphQL skill: `.claude/skills/rosetta-aaaj/SKILL.md`.
+
+Requires an Anthropic AI integration. Agent-as-a-Judge tasks are project-only and attach **one** harness evaluator per task.
+
 ## Phoenix Evals
 
 Phoenix evals run programmatically via code.
@@ -436,4 +458,5 @@ The same 6 evaluators are used in both AX via the AX console, and the Phoenix pr
 | **Execution** | CLI command | Click "Run" in UI |
 | **LLM judge** | `@arizeai/phoenix-evals` SDK | AX Evaluator Hub |
 | **Code evals** | Inline TypeScript functions | Python code evaluators (Enterprise) |
+| **Agent-as-a-Judge** | Not available | Claude Code sandbox; scoring instructions in [`aaaj/`](./aaaj/README.md) |
 | **Results** | Logged as span annotations via API | Visible in AX eval dashboard |
