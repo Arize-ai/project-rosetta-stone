@@ -4,6 +4,7 @@ from collections.abc import AsyncIterator
 from contextlib import nullcontext
 
 from langchain_anthropic import ChatAnthropic
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langgraph.prebuilt import create_react_agent
 
 from backend.tools import all_tools
@@ -99,24 +100,14 @@ def get_agent():
     return _agent
 
 
-async def stream_agent(messages: list[dict], user_id: str) -> AsyncIterator[str]:
-    """Stream agent response as SSE events.
+def _lc_messages(messages: list[dict], user_id: str) -> list:
+    """Convert chat turns to LangChain messages.
 
-    Yields strings in the format: 'data: {"text":"..."}\n\n'
-    Ends with 'data: [DONE]\n\n'
+    The user-id instruction is appended to the last human turn so OpenInference
+    ``input.value`` (and the AX/Phoenix trace preview) starts with the unique
+    user query instead of an identical system preamble on every trace.
     """
-    agent = get_agent()
-
-    # Build LangChain message list
-    from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
-
-    lc_messages = [
-        SystemMessage(
-            content=f"The current user's ID is: {user_id}. "
-            "Use this userId when making purchases or checking order status."
-        ),
-    ]
-
+    lc_messages: list = []
     for msg in messages:
         role = msg.get("role", "user")
         content = msg.get("content", "")
@@ -126,6 +117,28 @@ async def stream_agent(messages: list[dict], user_id: str) -> AsyncIterator[str]
             lc_messages.append(AIMessage(content=content))
         elif role == "system":
             lc_messages.append(SystemMessage(content=content))
+
+    user_id_note = (
+        f"The current user's ID is: {user_id}. "
+        "Use this userId when making purchases or checking order status."
+    )
+    if lc_messages and isinstance(lc_messages[-1], HumanMessage):
+        last = lc_messages[-1]
+        text = last.content if isinstance(last.content, str) else str(last.content)
+        lc_messages[-1] = HumanMessage(content=f"{text}\n\n{user_id_note}")
+    else:
+        lc_messages.append(HumanMessage(content=user_id_note))
+    return lc_messages
+
+
+async def stream_agent(messages: list[dict], user_id: str) -> AsyncIterator[str]:
+    """Stream agent response as SSE events.
+
+    Yields strings in the format: 'data: {"text":"..."}\n\n'
+    Ends with 'data: [DONE]\n\n'
+    """
+    agent = get_agent()
+    lc_messages = _lc_messages(messages, user_id)
 
     had_text_before = False
     in_tool_call = False
