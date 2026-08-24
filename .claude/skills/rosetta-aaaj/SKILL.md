@@ -1,27 +1,29 @@
 ---
 name: rosetta-aaaj
-description: Attach Agent-as-a-Judge (AaaJ / harness) evaluators to an Arize AX Wonder Toys project and trigger a one-time backfill. Reads scoring instructions from evals/aaaj/*.md and creates evaluators + tasks via GraphQL (REST and the ax CLI cannot create harness evals). Use when the user asks to add AaaJ, agent-as-a-judge, harness evals, or to score AX traces without the UI. AX-only; not part of rosetta-test e2e. Default project is ax/langchain-py.
+description: Attach Agent-as-a-Judge (AaaJ / harness) evaluators to any Arize AX Wonder Toys project and trigger a one-time backfill. Reads scoring instructions from evals/aaaj/*.md and creates evaluators + tasks via GraphQL (REST and the ax CLI cannot create harness evals). Use when the user asks to add AaaJ, agent-as-a-judge, harness evals, or to score AX traces without the UI. AX-only; not part of rosetta-test e2e. Default PROJECT_DIR is ax/langchain-py; any ax/<framework> with .env.local works.
 ---
 
 # Rosetta — Agent-as-a-Judge
 
-Create (or reuse) three space-level harness evaluators, attach one project task per evaluator, and trigger a backfill. Do **not** use `ax evaluators create` or `ax tasks create` — those only support TEMPLATE / CODE. Do **not** POST to `/api/graphql/v1` (cookie / session UI schema).
+Create (or reuse) three space-level harness evaluators, attach one project task per evaluator on **this** AX project's `modelId`, and trigger a backfill. Do **not** use `ax evaluators create` or `ax tasks create` — those only support TEMPLATE / CODE. Do **not** POST to `/api/graphql/v1` (cookie / session UI schema).
 
 There is no committed runner script. Follow this file exactly.
 
 ## Inputs
 
-- `PROJECT_DIR` — default: repo `ax/langchain-py`
-- From `$PROJECT_DIR/.env.local` (never print values): `ARIZE_SPACE_ID`, `ARIZE_API_KEY`, `ARIZE_PROJECT_NAME` (default `wonder-toys-langchain-py`)
+- `PROJECT_DIR` — default: repo `ax/langchain-py`. **Any** `ax/<framework>` with `.env.local` works (`ARIZE_SPACE_ID`, `ARIZE_API_KEY`, `ARIZE_PROJECT_NAME`). Phoenix and `no-observability` are out of scope.
+- From `$PROJECT_DIR/.env.local` (never print values): `ARIZE_SPACE_ID`, `ARIZE_API_KEY`, `ARIZE_PROJECT_NAME` (required — each tier's `env.example` has its own default, e.g. `wonder-toys-langchain-py` for langchain-py). Do not hardcode a project name.
 - Optional: `ARIZE_GRAPHQL_URL` (default `https://app.arize.com/graphql`)
 
-Phoenix is out of scope. If the user is on `phoenix/<framework>`, stop and say AaaJ is AX-only.
+Phoenix is out of scope. If the user is on `phoenix/<framework>` (or `no-observability/`), stop and say AaaJ is AX-only.
 
-Traces must already exist (typically `npm run synthetic-requests` in `ax/langchain-py`). If they do not, run synthetic requests first (and keep `EVAL_SECRET` in `.env.local` so Next.js tags `eval-user-001`).
+Traces must already exist in that project's `ARIZE_PROJECT_NAME`. Typically `npm run synthetic-requests` in `$PROJECT_DIR` (most AX apps already have this script). If they do not, run synthetic requests first (and keep `EVAL_SECRET` in `.env.local` so Next.js tags `eval-user-001`).
 
 ## Stable names
 
 Source of truth for scoring text is the markdown files — `cat` them into `harnessEvaluator.template`. Do not rewrite the rubrics.
+
+Evaluators are **space-level** (one set of three, reused across frameworks). Tasks are **per AX project** (`modelId`).
 
 | Evaluator display name | Column (`harnessEvaluator.name`) | Rubric file | Labels (score) |
 |---|---|---|---|
@@ -35,7 +37,9 @@ Matching **task** names (one evaluator per task):
 - `rosetta-aaaj-tool-grounding`
 - `rosetta-aaaj-purchase-cancel`
 
-Idempotency: reuse an evaluator if the space already has that **display name** or the older ad-hoc names `aaaj_trajectory_completion` / `aaaj_tool_grounding` / `aaaj_purchase_cancel`. Reuse a task if one with the stable task name already exists on this project. Still trigger `runOnlineTask` unless the user asked create-only.
+Idempotency: reuse an evaluator if the space already has that **display name** or the older ad-hoc names `aaaj_trajectory_completion` / `aaaj_tool_grounding` / `aaaj_purchase_cancel`. Reuse a task if one with the stable name already exists **on this project/model**. Same display names across projects are OK — tasks are per `modelId`. Still trigger `runOnlineTask` unless the user asked create-only.
+
+If looping **multiple** `ax/<framework>` dirs: reuse the three evaluators; create or reuse the three tasks on each project's `modelId`; trigger `runOnlineTask` per task.
 
 `strictChoices: true`, `direction: maximize` on every evaluator.
 
@@ -59,8 +63,7 @@ set -a
 # shellcheck disable=SC1091
 source "$PROJECT_DIR/.env.local"
 set +a
-: "${ARIZE_SPACE_ID:?}" "${ARIZE_API_KEY:?}"
-ARIZE_PROJECT_NAME="${ARIZE_PROJECT_NAME:-wonder-toys-langchain-py}"
+: "${ARIZE_SPACE_ID:?}" "${ARIZE_API_KEY:?}" "${ARIZE_PROJECT_NAME:?set ARIZE_PROJECT_NAME in $PROJECT_DIR/.env.local}"
 GQL="${ARIZE_GRAPHQL_URL:-https://app.arize.com/graphql}"
 
 gql() {
@@ -220,3 +223,4 @@ Full click-path: `evals/aaaj/README.md`.
 - Do not call this from `rosetta-test` / `rosetta-test-evals` (sandbox time + `enableManagedAgents`)
 - Do not mix TEMPLATE evaluators onto a harness task
 - Do not print API keys, integration secrets, or `.env.local`
+- Do not clone evaluators per framework — they stay space-level

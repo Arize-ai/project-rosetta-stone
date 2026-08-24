@@ -4,9 +4,9 @@ These scoring instructions are for **Arize AX Agent-as-a-Judge** tasks on the Wo
 
 **Preferred path:** invoke the `rosetta-aaaj` skill (`.claude/skills/rosetta-aaaj/SKILL.md`). It reads the files in this directory and creates evaluators + tasks via GraphQL (`POST /graphql` + API key). `ax` / REST cannot create harness evals. UI steps below are the fallback if GraphQL is blocked (non-enterprise, missing `enableManagedAgents`, or no Anthropic integration).
 
-LLM-as-a-Judge maps `{input}` / `{output}` and scores one row per call. Agent-as-a-Judge runs a Claude Code sandbox that **exports the trace and inspects TOOL / LLM / CHAIN spans before scoring**, so it can catch trajectory failures that never show up in the final message.
+LLM-as-a-Judge maps `{input}` / `{output}` and scores one row per call. Agent-as-a-Judge runs a Claude Code sandbox that **exports the trace and inspects TOOL / LLM / CHAIN (or AGENT / AUDIO) spans before scoring**, so it can catch trajectory failures that never show up in the final message.
 
-Use them on `ax/langchain-py` first: that tier already has OpenInference LangChain instrumentation, so synthetic requests produce the CHAIN → LLM → TOOL tree the judge needs.
+Use them on **any** `ax/<framework>` after traces exist in that project's `ARIZE_PROJECT_NAME`. Evaluators are space-level (`rosetta-aaaj-*`); tasks are per AX project. Phoenix is out of scope (AaaJ is AX-only / managed-agents).
 
 AaaJ is AX-only (requires the Agent-as-a-Judge / managed-agents feature). Phoenix keeps the programmatic six-eval harness.
 
@@ -25,20 +25,36 @@ AaaJ is AX-only (requires the Agent-as-a-Judge / managed-agents feature). Phoeni
 ## Prerequisites
 
 1. Anthropic AI integration in the AX space (AaaJ sandboxes are Anthropic / Claude Code only).
-2. Traces in an AX project. For LangChain Python:
+2. Traces in an AX project. Pick any `ax/<framework>`:
 
    ```bash
-   cd ax/langchain-py
+   cd ax/<framework>
    cp env.example .env.local   # ARIZE_SPACE_ID, ARIZE_API_KEY, ARIZE_PROJECT_NAME, ANTHROPIC_API_KEY, EVAL_SECRET
    npm install
-   npm run synthetic-requests  # 25 Wonder Toys traces into the AX project
+   npm run synthetic-requests  # 25 Wonder Toys traces into that tier's ARIZE_PROJECT_NAME
    ```
 
-   Default project name: `wonder-toys-langchain-py` (see `backend/tracing.py`).
+   Then invoke `rosetta-aaaj` with `PROJECT_DIR` set to that directory (default is `ax/langchain-py` as a convenience).
 
    If Next.js is already running, it must already have the same `EVAL_SECRET` as `.env.local`. Otherwise stop it and let `npm run synthetic-requests` start the app so traces are tagged `eval-user-001` instead of `anonymous`.
 
-3. In AX, confirm traces show OpenInference span kinds (`CHAIN` / `AGENT`, `LLM`, `TOOL`) with tool name, input, and output on TOOL spans. Root `attributes.input.value` should start with the unique user query (the user-id note is appended to that same human message).
+3. In AX, confirm traces show OpenInference **TOOL** spans (role/name, input, output) plus a final assistant message or voice transcript. Root span kind may be `CHAIN`, `AGENT`, or `AUDIO` (voice). Leave the task query filter empty.
+
+## Any AX tier
+
+The judge needs OpenInference TOOL spans and a final assistant output or transcript. Tool span **names** vary (`search-products`, `search_products`, `mcp__…__search_products`); the rubrics match by capability (search, get product, purchase, check order, cancel), not a single string.
+
+If a backfill scores 0 traces, the query filter is usually too tight (for example `span_kind = 'LLM'`). AaaJ needs the whole trace.
+
+### Example: LangChain Python span shape
+
+On `ax/langchain-py`, OpenInference LangChain instrumentation typically emits:
+
+- A root agent/chain span whose `attributes.input.value` is the LangGraph `{ messages: [...] }` payload (first human message is the user query) and `attributes.output.value` is the final reply. The 25 distinct prompts also appear on child `LLM` `llm.input_messages` and on `TOOL` span inputs.
+- Nested `LLM` spans for Claude turns
+- Nested `TOOL` spans named `search-products`, `get-product`, `purchase-product`, `check-order-status`, `cancel-order`
+
+Other AX tiers emit a similar TOOL tree under `AGENT` or (for `openai-voice`) `AUDIO`.
 
 ## Create an evaluator in AX (UI fallback)
 
@@ -60,12 +76,12 @@ No column mapping is required. The judge exports spans at run time and reads TOO
 ## Attach to a project task
 
 1. **Eval Tasks** → **New Eval Task** → **Agent-as-a-Judge**
-2. Pick the `wonder-toys-langchain-py` project (or whatever `ARIZE_PROJECT_NAME` you used)
+2. Pick the project matching `ARIZE_PROJECT_NAME` from that tier's `.env.local`
 3. Attach **one** AaaJ evaluator (AX Agent-as-a-Judge tasks support a single evaluator)
 4. Clear any span-kind query filter so the sandbox sees the full tree (do not restrict to `LLM` only)
 5. Enable a one-time backfill over the synthetic-request window, create the task, and run it
 
-Create a separate task per example evaluator if you want all three scores on the same traces.
+Create a separate task per example evaluator if you want all three scores on the same traces. Reusing the same evaluator display names across projects is fine — tasks are per project.
 
 ## Example evaluators
 
@@ -76,13 +92,3 @@ Create a separate task per example evaluator if you want all three scores on the
 | [`purchase-cancel-protocol.md`](./purchase-cancel-protocol.md) | `aaaj_purchase_cancel` | `safe` (1), `unsafe` (0), `not_applicable` (0.5) | Checkout/cancel without confirmation or with bad tool args |
 
 Results land as `trace_eval.<column>.label` / `.score` / `.explanation` on the root span.
-
-## LangChain Python span hints
-
-On `ax/langchain-py`, OpenInference LangChain instrumentation typically emits:
-
-- A root agent/chain span whose `attributes.input.value` is the LangGraph `{ messages: [...] }` payload (first human message is the user query) and `attributes.output.value` is the final reply. The 25 distinct prompts also appear on child `LLM` `llm.input_messages` and on `TOOL` span inputs.
-- Nested `LLM` spans for Claude turns
-- Nested `TOOL` spans named `search-products`, `get-product`, `purchase-product`, `check-order-status`, `cancel-order`
-
-If a backfill scores 0 traces, the query filter is usually too tight (for example `span_kind = 'LLM'`). AaaJ needs the whole trace.

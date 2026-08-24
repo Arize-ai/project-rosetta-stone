@@ -466,7 +466,7 @@ npm run synthetic-requests      # generate 25 traces
 
 Then configure the same 6 evaluators in the [Arize AX console](https://app.arize.com) using LLM-as-a-Judge and Code Evaluator task types. See [`evals/README.md`](./evals/README.md) for step-by-step setup with prompt templates and code — evaluators apply to all projects.
 
-On AX you can also attach **Agent-as-a-Judge** evaluators: a Claude Code sandbox reads the full trace (including TOOL spans) instead of a mapped `{input}`/`{output}` template. Scoring instructions live in [`evals/aaaj/`](./evals/aaaj/README.md). After traces exist, invoke the `rosetta-aaaj` skill to create them via GraphQL (REST/`ax` cannot). The intended first project is [`ax/langchain-py`](./ax/langchain-py/README.md) (`wonder-toys-langchain-py`).
+On AX you can also attach **Agent-as-a-Judge** evaluators: a Claude Code sandbox reads the full trace (including TOOL spans) instead of a mapped `{input}`/`{output}` template. Scoring instructions live in [`evals/aaaj/`](./evals/aaaj/README.md). After traces exist in any `ax/<framework>` project, invoke the `rosetta-aaaj` skill with `PROJECT_DIR` set to that directory (REST/`ax` cannot create harness evals). Evaluators are space-level; tasks are per project.
 
 ### Voice harness (openai-voice tier only)
 

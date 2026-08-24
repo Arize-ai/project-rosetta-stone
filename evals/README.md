@@ -2,7 +2,7 @@
 
 This guide walks through setting up 6 evaluators to assess the Wonder Toys shopping agent.
 
-For **Agent-as-a-Judge** (AX only — a Claude Code sandbox that reads the full trace, including TOOL spans), see [`evals/aaaj/`](./aaaj/README.md). Start with `ax/langchain-py`, which already has OpenInference tracing.
+For **Agent-as-a-Judge** (AX only — a Claude Code sandbox that reads the full trace, including TOOL spans), see [`evals/aaaj/`](./aaaj/README.md). Works on any `ax/<framework>` after traces exist; evaluators are space-level, tasks are per project.
 
 ## The 6 Evaluators
 
@@ -403,9 +403,9 @@ Requires AX Enterprise. Custom code evaluators are Python-only (JavaScript comin
 
 The six evaluators above are single-pass template or code judges. They need column mapping and cannot inspect a TOOL span that was never mapped into the prompt.
 
-**Agent-as-a-Judge** is a different AX task type: a Claude Code agent exports the project's traces at run time, walks the LangGraph CHAIN → LLM → TOOL tree, and scores against plain-language scoring instructions. No column mapping.
+**Agent-as-a-Judge** is a different AX task type: a Claude Code agent exports the project's traces at run time, walks TOOL / LLM spans under a `CHAIN`, `AGENT`, or `AUDIO` root, and scores against plain-language scoring instructions. No column mapping.
 
-Recommended first project: `ax/langchain-py` (`ARIZE_PROJECT_NAME` defaults to `wonder-toys-langchain-py`). Generate traces with `npm run synthetic-requests`, then invoke the **`rosetta-aaaj`** skill (`.claude/skills/rosetta-aaaj/SKILL.md`) to create the three harness evaluators via GraphQL. UI paste is the fallback in [`aaaj/README.md`](./aaaj/README.md).
+Works on any `ax/<framework>`. Generate traces with `npm run synthetic-requests` in that directory, then invoke the **`rosetta-aaaj`** skill (`.claude/skills/rosetta-aaaj/SKILL.md`) with `PROJECT_DIR` set to it (default `ax/langchain-py`). The skill reuses the three space-level `rosetta-aaaj-*` evaluators and creates or reuses tasks on that project's `ARIZE_PROJECT_NAME`. UI paste is the fallback in [`aaaj/README.md`](./aaaj/README.md).
 
 | Example | File | Labels |
 |---|---|---|

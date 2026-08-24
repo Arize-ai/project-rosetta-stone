@@ -55,4 +55,4 @@ npm run synthetic-requests   # 25 Wonder Toys chats → project wonder-toys-lang
 Then:
 
 1. **LLM-as-a-Judge / code evaluators** — the six shared templates in [`evals/README.md`](../../evals/README.md) (AX console or `rosetta-test-evals`)
-2. **Agent-as-a-Judge** — invoke the `rosetta-aaaj` skill. It creates harness evaluators from [`evals/aaaj/`](../../evals/aaaj/README.md) via GraphQL (REST/`ax` cannot). These need the LangChain OpenInference tree this tier already emits (`CHAIN`/`AGENT` → `LLM` → `TOOL`). UI paste steps are the fallback in that README.
+2. **Agent-as-a-Judge** — this is one of many AX targets. Invoke the `rosetta-aaaj` skill with `PROJECT_DIR` pointing here (or any other `ax/<framework>`). Rubrics: [`evals/aaaj/`](../../evals/aaaj/README.md). REST/`ax` cannot create harness evals. UI paste is the fallback in that README.

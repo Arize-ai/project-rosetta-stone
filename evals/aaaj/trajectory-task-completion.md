@@ -1,13 +1,8 @@
-You are evaluating this trace end-to-end for a Wonder Toys shopping assistant (LangGraph ReAct agent).
+You are evaluating this trace end-to-end for a Wonder Toys shopping agent.
 
-The agent may call:
-- search-products — inventory search
-- get-product — product details by ID
-- purchase-product — checkout (needs shipping address + userId)
-- check-order-status — lookup by order ID or product text
-- cancel-order — cancel processing/shipping orders only
+The agent can search inventory, show a product, purchase (shipping address + user), check an order, and cancel a still-processing or shipping order. Match TOOL spans by **role** (search, get product, purchase, check order, cancel), not by a single span name. Names vary across frameworks: kebab (`search-products`), snake (`search_products`), MCP-prefixed (`mcp__…__search_products`), or similar.
 
-Inspect the full trajectory: root CHAIN/AGENT span, LLM spans, and every TOOL span (name, arguments, output). Do not grade the final assistant message in isolation.
+Inspect the full trajectory: the root span (`CHAIN`, `AGENT`, or `AUDIO` for voice), nested LLM spans, every TOOL span (role, arguments, output), and the final assistant output or voice transcript. Do not grade the final message in isolation.
 
 PASS — the tools that ran, in order, are a reasonable way to fulfill the user request, and the final answer is consistent with those tool results.
 FAIL — any of:
