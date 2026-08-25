@@ -1,88 +1,93 @@
 # Wonder Toys — Vercel AI SDK (Arize AX Instrumented)
 
-This is the Vercel AI SDK (TypeScript) variant of the Wonder Toys shopping agent, instrumented with Arize AX for observability.
+This is the Vercel AI SDK (TypeScript) variant of the Wonder Toys shopping
+agent, instrumented with Arize AX for observability.
 
-## Observability Setup
+## Deploy to Vercel
 
-AX instrumentation is configured in `src/instrumentation.ts` via Next.js's instrumentation hook:
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FArize-ai%2Fproject-rosetta-stone%2Ftree%2Fmain%2Fax%2Fvercel-ai-sdk&env=ANTHROPIC_API_KEY%2CARIZE_SPACE_ID%2CARIZE_API_KEY%2CARIZE_PROJECT_NAME&envDefaults=%7B%22ARIZE_PROJECT_NAME%22%3A%22wonder-toys-vercel%22%7D&envDescription=Add%20your%20Anthropic%20API%20key%20and%20Arize%20AX%20space%20credentials.)
 
-```typescript
-import { registerOTel } from '@vercel/otel';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+The deployment form requests the four required variables:
 
-export function register() {
-  registerOTel({
-    serviceName: process.env.ARIZE_PROJECT_NAME ?? 'wonder-toys-vercel',
-    spanProcessors: [
-      new RootAwareOpenInferenceProcessor({
-        exporter: new OTLPTraceExporter({
-          url: 'https://otlp.arize.com/v1/traces',
-          headers: {
-            space_id: process.env.ARIZE_SPACE_ID ?? '',
-            api_key: process.env.ARIZE_API_KEY ?? '',
-          },
-        }),
-      }),
-    ],
-  });
-}
-```
+| Variable | Purpose |
+|---|---|
+| `ANTHROPIC_API_KEY` | Calls Claude through the Vercel AI SDK |
+| `ARIZE_SPACE_ID` | Selects the destination AX space |
+| `ARIZE_API_KEY` | Authenticates OTLP trace export to AX |
+| `ARIZE_PROJECT_NAME` | Names the AX project (`wonder-toys-vercel` by default) |
 
-Raw OpenTelemetry via `@vercel/otel` — no Arize-specific SDK package required, just OTLP export directly to `otlp.arize.com`.
+To import the repository manually, use these Vercel project settings:
 
-### Root-Aware Span Processor
+1. Set **Root Directory** to `ax/vercel-ai-sdk`.
+2. Enable **Include source files outside of the Root Directory in the Build Step**.
+   The app's `public/product-images` symlink points to the shared
+   `product-images` directory at the repository root. A fallback rewrite serves
+   the canonical repository images when a deployment method does not package
+   the external symlink.
+3. Use Node.js `22.x`. The version is also pinned in `package.json`.
+4. Add the four required variables above to Preview and Production.
+5. Keep the detected Next.js build settings; no custom build or output command
+   is required.
 
-The Vercel AI SDK emits spans for all operations including HTTP `POST`/`GET` requests, not just AI calls. The `@arizeai/openinference-vercel` package provides an `isOpenInferenceSpan` filter to drop these non-AI spans — but using it naively creates an orphaning problem: the HTTP spans are typically the trace root, so once they're filtered out the remaining AI spans have no parent and won't appear on the **Traces** tab (only on the **Spans** tab).
+After deployment, verify that the home page and a product image such as
+`/product-images/toy-001.png` load, then complete a chat turn and confirm its
+trace appears in the configured AX project.
 
-`src/root-aware-processor.ts` solves this with `RootAwareOpenInferenceProcessor`, which:
+## Stateless deployment
 
-1. Applies the `isOpenInferenceSpan` filter to drop HTTP/infrastructure spans
-2. Promotes the first top-level AI SDK span (e.g. `ai.streamText`) to be the actual trace root by clearing its parent span ID, using an LRU cache to ensure only the topmost span per trace is promoted
+`CHROMA_URL` is optional. Without it, product search immediately uses the
+in-repo keyword and filter fallback; Vercel does not need a Chroma service or an
+indexing job. Set `CHROMA_URL` only when connecting to an already-indexed Chroma
+deployment.
 
-See the [Arize docs on span filtering](https://arize.com/docs/ax/integrations/ts-js-agent-frameworks/vercel/vercel-ai-sdk-tracing#span-filter) for the full explanation.
+Orders and inventory mutations are intentionally held in process memory. On
+Vercel they can reset between invocations and are not shared reliably across
+instances. Purchasing, status, and cancellation flows are demonstration
+features, not durable commerce storage.
 
-## Differences from `no-observability/vercel-ai-sdk`
+Optional evaluation variables are `EVAL_SECRET` and `EVAL_BASE_URL`.
 
-Only observability-related files differ:
+## Observability setup
 
-| File | Change |
-|------|--------|
-| `src/instrumentation.ts` | **New** — `registerOTel` with OTLP exporter pointing at Arize AX |
-| `src/root-aware-processor.ts` | **New** — custom span processor that only exports root-level spans |
-| `src/app/api/chat/route.ts` | Session ID read from `x-session-id` header and set into OTel context via `context.with(setSession(...))` before calling `streamText` |
-| `src/components/Chat.tsx` | `sessionId` state persisted in `sessionStorage("chat-session-id")`; rotated to a new UUID when the user starts a new chat; sent as `x-session-id` header on every `/api/chat` request |
-| `next.config.ts` | `serverExternalPackages` for observability packages |
-| `package.json` | `@vercel/otel`, `@opentelemetry/*`, `@arizeai/openinference-*` added |
-| `env.example` | AX env vars added |
+Next.js loads `src/instrumentation.ts` through its instrumentation hook. The
+hook:
+
+1. Enables AI SDK v7 telemetry with `registerTelemetry` and `@ai-sdk/otel`.
+2. Registers OpenTelemetry with `@vercel/otel`.
+3. Exports spans to `https://otlp.arize.com/v1/traces` using the
+   `arize-space-id` and `arize-api-key` headers.
+4. Filters for OpenInference spans with `isOpenInferenceSpan`.
+5. Uses `OpenInferenceSimpleSpanProcessor` with
+   `reparentOrphanedSpans: true`, which promotes AI spans whose filtered
+   Next.js HTTP parent would otherwise leave them orphaned.
+
+If any AX variable is absent, instrumentation logs one actionable error and
+does not register an exporter with empty credentials. The chat endpoint also
+returns HTTP `503` with the names of missing required variables before calling
+Anthropic; secret values are never returned.
 
 ### Session tracking
 
-Each conversation is assigned a UUID that groups all its spans under a single session in Arize. The ID is generated in `Chat.tsx` on first load (or restored from `sessionStorage`) and replaced with a fresh UUID whenever the user clicks the logo to start a new chat. It is sent to the server as an `x-session-id` request header.
+Each browser conversation has a UUID stored in `sessionStorage`. The client
+sends it in the `x-session-id` header, and the chat route adds it to the active
+OpenTelemetry context with `setSession`. Context attributes propagate to the AI
+spans so all turns in a conversation appear under one AX session.
 
-In `route.ts`, the session ID is injected into the active OTel context using `setSession` from `@arizeai/openinference-core` before `streamText` is called, so every span created during that request automatically carries the `session.id` attribute:
+## Run locally
 
-```typescript
-import { context } from '@opentelemetry/api';
-import { setSession } from '@arizeai/openinference-core';
-
-const sessionId = req.headers.get('x-session-id') ?? crypto.randomUUID();
-
-const result = context.with(
-  setSession(context.active(), { sessionId }),
-  () => streamText({ ... }),
-);
-```
-
-The `RootAwareOpenInferenceProcessor` reads the session ID back out of the context in its `onStart` hook and stamps it onto each span as it is created.
-
-All other frontend code, tools, and agent logic are identical to the no-observability version.
-
-## Running
+Node.js 22 is required.
 
 ```bash
-cp env.example .env.local   # fill in your API keys + AX credentials
+cp env.example .env.local
 npm install
 npm run dev
 ```
 
-See the [root README](../../README.md) for full details.
+`npm run dev` starts and indexes a local Chroma instance before Next.js. To run
+the stateless configuration used by the Vercel deployment:
+
+```bash
+npm run dev:next
+```
+
+See the [root README](../../README.md) for full project details.

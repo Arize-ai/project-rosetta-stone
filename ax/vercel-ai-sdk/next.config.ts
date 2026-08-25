@@ -1,6 +1,19 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async rewrites() {
+    return {
+      beforeFiles: [],
+      afterFiles: [],
+      fallback: [
+        {
+          source: "/product-images/:path*",
+          destination:
+            "https://raw.githubusercontent.com/Arize-ai/project-rosetta-stone/main/product-images/:path*",
+        },
+      ],
+    };
+  },
   serverExternalPackages: [
     "chromadb",
     '@opentelemetry/api',

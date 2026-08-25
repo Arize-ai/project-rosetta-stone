@@ -3,8 +3,23 @@ import { model, tools, SYSTEM_PROMPT } from "@/ai/agent";
 import { NextResponse } from "next/server";
 import { context } from "@opentelemetry/api";
 import { setSession } from "@arizeai/openinference-core";
+import { missingRuntimeEnv } from "@/lib/env";
+
+export const runtime = "nodejs";
+export const maxDuration = 300;
 
 export async function POST(req: Request) {
+  const missing = missingRuntimeEnv();
+  if (missing.length > 0) {
+    return NextResponse.json(
+      {
+        error: "The server is missing required environment variables.",
+        missing,
+      },
+      { status: 503 },
+    );
+  }
+
   let userId: string;
 
   const evalSecret = req.headers.get("x-eval-secret");

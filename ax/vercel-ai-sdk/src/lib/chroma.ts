@@ -1,11 +1,14 @@
 import { ChromaClient, type Where } from "chromadb";
 
-const CHROMA_URL = process.env.CHROMA_URL || "http://localhost:8000";
+const CHROMA_URL = process.env.CHROMA_URL;
 const COLLECTION_NAME = "products";
 
 let client: ChromaClient | null = null;
 
 function getClient(): ChromaClient {
+  if (!CHROMA_URL) {
+    throw new Error("CHROMA_URL is not configured");
+  }
   if (!client) {
     const url = new URL(CHROMA_URL);
     client = new ChromaClient({
@@ -18,6 +21,8 @@ function getClient(): ChromaClient {
 }
 
 export async function getProductsCollection() {
+  if (!CHROMA_URL) return null;
+
   try {
     const c = getClient();
     return await c.getCollection({ name: COLLECTION_NAME });

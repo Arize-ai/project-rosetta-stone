@@ -11,11 +11,20 @@ import {
   DiagConsoleLogger,
   DiagLogLevel,
 } from '@opentelemetry/api';
+import { missingAxEnv } from './lib/env';
 
 // Captures OTLP export errors and OTel pipeline warnings
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.WARN);
 
 export function register() {
+  const missing = missingAxEnv();
+  if (missing.length > 0) {
+    console.error(
+      `[instrumentation] Arize AX tracing disabled; missing environment variables: ${missing.join(', ')}`,
+    );
+    return;
+  }
+
   // AI SDK v7 emits telemetry via @ai-sdk/otel. registerTelemetry turns it on
   // once at startup; per-call `telemetry` is then only needed for metadata.
   registerTelemetry(
@@ -32,9 +41,9 @@ export function register() {
   );
 
   registerOTel({
-    serviceName: process.env.ARIZE_PROJECT_NAME ?? 'vercel-ai-sdk',
+    serviceName: process.env.ARIZE_PROJECT_NAME!,
     attributes: {
-      model_id: process.env.ARIZE_PROJECT_NAME ?? 'vercel-ai-sdk',
+      model_id: process.env.ARIZE_PROJECT_NAME!,
     },
     spanProcessors: [
       // `reparentOrphanedSpans` re-roots AI spans whose non-AI parent (the
@@ -46,8 +55,8 @@ export function register() {
         exporter: new OTLPTraceExporter({
           url: 'https://otlp.arize.com/v1/traces',
           headers: {
-            'arize-space-id': process.env.ARIZE_SPACE_ID ?? '',
-            'arize-api-key': process.env.ARIZE_API_KEY ?? '',
+            'arize-space-id': process.env.ARIZE_SPACE_ID!,
+            'arize-api-key': process.env.ARIZE_API_KEY!,
           },
         }),
         spanFilter: isOpenInferenceSpan,

@@ -4,6 +4,7 @@ set -e
 REPO_ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
 APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 CHROMA_URL="${CHROMA_URL:-http://localhost:8000}"
+export CHROMA_URL
 CHROMA_DATA="$REPO_ROOT/chroma-data"
 VENV_DIR="$REPO_ROOT/.venv"
 
