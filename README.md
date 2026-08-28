@@ -17,6 +17,8 @@ Read the no-obs version to see the bare agent. Diff the phoenix or ax version ag
 | [Agno](https://docs.agno.com/) | ✅ | — | — |
 | [Arconia](https://github.com/arconia-io/arconia) | — | — | ✅ |
 | [AutoGen AgentChat](https://microsoft.github.io/autogen/stable/) | ✅ | — | — |
+| [AG2 (legacy AutoGen API)](https://docs.ag2.ai/) | ✅ | — | — |
+| Native LLM providers (Ollama, Together AI, Cohere) | ✅ | — | — |
 | [AWS Strands](https://strandsagents.com/) | ✅ | — | — |
 | [BeeAI](https://framework.beeai.dev/) | ✅ | ✅ | — |
 | [Claude Agent SDK](https://platform.claude.com/docs/en/agent-sdk/overview) | ✅ | — | — |
@@ -63,6 +65,10 @@ rosetta/
 │   ├── annotation-java/         OpenInference Annotation Tracing (Java + Next.js)
 │   ├── arconia-java/            Arconia (Java + Next.js)
 │   ├── autogen-py/              AutoGen AgentChat (Python + Next.js)
+│   ├── ag2-py/                  AG2 legacy AutoGen API (Python + Next.js)
+│   ├── ollama-py/               Native Ollama SDK (Python + Next.js)
+│   ├── together-ai-py/          Native Together AI SDK (Python + Next.js)
+│   ├── cohere-py/               Native Cohere v2 SDK (Python + Next.js)
 │   ├── aws-strands-py/          AWS Strands (Python + Next.js)
 │   ├── beeai-py/                BeeAI (Python + Next.js)
 │   ├── beeai-ts/                BeeAI framework (TypeScript)
@@ -213,6 +219,10 @@ If you're instrumenting your own app, find the framework you use, read what file
 - `env.example` — observability environment variables
 
 ### AutoGen AgentChat
+
+This entry uses Microsoft's modern `autogen_agentchat` package. The separate
+`ag2-py` entry uses AG2 0.14.x's legacy-compatible `autogen.ConversableAgent`
+API and its own OpenInference instrumentor.
 
 - `backend/tracing.py` — tracing initialization (new file, imported before `autogen_agentchat`). The instrumentation package is `openinference-instrumentation-autogen-agentchat` (AgentChat layer) — not `openinference-instrumentation-autogen` (low-level core).
 - `backend/agent.py` — wraps `agent.run_stream()` in `using_session(user_id)` + `using_user(user_id)` because the instrumentor doesn't auto-emit `session.id` / `user.id`. A `try/except ImportError` fallback keeps no-observability working without an `openinference.instrumentation` dependency.
@@ -416,6 +426,10 @@ If you're picking which framework to read first, this table is a quick compariso
 | **Agno** | `agno.agent.Agent` + `InMemoryDb` | `agno.models.anthropic.Claude` | `agent.arun(stream=True, stream_events=True)` over `RunContentEvent` / `ToolCallStartedEvent` | Python FastAPI backend + Next.js frontend |
 | **Arconia** | Spring AI `ChatClient` + `@Tool` methods (Spring Boot 4) | `spring-ai-starter-model-anthropic` | `chatClient.prompt().stream().chatResponse()` returns `Flux<ChatResponse>` | Spring Boot Java backend + Next.js frontend |
 | **AutoGen AgentChat** | `autogen_agentchat` AssistantAgent | `autogen_ext.models.anthropic.AnthropicChatCompletionClient` | `agent.run_stream()` over `ModelClientStreamingChunkEvent` (`model_client_stream=True`) | Python FastAPI backend + Next.js frontend |
+| **AG2 (legacy API)** | `autogen.ConversableAgent` | OpenAI (`gpt-5.4-mini`) | AG2 native reply/tool loop | Python FastAPI backend + Next.js frontend |
+| **Ollama** | Native `ollama.AsyncClient` tool loop | Local `llama3.2:1b` | `AsyncClient.chat(stream=True)` | Python FastAPI backend + Next.js frontend |
+| **Together AI** | Native `AsyncTogether` tool loop | `meta-llama/Llama-3.3-70B-Instruct-Turbo` | Chat Completions async stream | Python FastAPI backend + Next.js frontend |
+| **Cohere** | Native Cohere v2 tool loop | `command-a-03-2025` | `AsyncClientV2.chat_stream()` | Python FastAPI backend + Next.js frontend |
 | **AWS Strands** | `strands.Agent` with per-user instance + `@tool`-decorated functions | `strands.models.anthropic.AnthropicModel` (direct Anthropic API, not Bedrock) | `agent.stream_async(prompt)` over `{"data": ...}` text-delta events + `{"current_tool_use": ...}` tool events | Python FastAPI backend + Next.js frontend |
 | **BeeAI** | `beeai_framework` `RequirementAgent` + `UnconstrainedMemory` | `ChatModel.from_name("anthropic:claude-sonnet-4-6")` (litellm) | `agent.run(...).observe(...)` over `RequirementAgentFinalAnswerEvent.delta` | Python FastAPI backend + Next.js frontend |
 | **BeeAI (TypeScript)** | `beeai-framework` ReActAgent + UnconstrainedMemory | `AnthropicChatModel` (wraps `@ai-sdk/anthropic`) | `agent.run().observe(emitter)` — `partialUpdate` with `update.key === "final_answer"` | Next.js monolith |
