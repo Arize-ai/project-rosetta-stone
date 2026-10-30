@@ -10,23 +10,31 @@ Expects these environment variables:
 """
 
 import os
+from urllib.parse import urlparse
 
 from phoenix.otel import register
 from openinference.instrumentation.langchain import LangChainInstrumentor
 
-# Explicit HTTP endpoints also work with SDK versions that otherwise default to
-# the local gRPC collector. Preserve a Cloud or reverse-proxy path prefix.
-_collector_endpoint = os.environ.get(
-    "PHOENIX_COLLECTOR_ENDPOINT", "http://localhost:6006"
-).rstrip("/")
-if not _collector_endpoint.endswith("/v1/traces"):
-    _collector_endpoint += "/v1/traces"
+# Honor Phoenix or standard OTLP endpoints without forcing HTTP on gRPC users.
+# HTTP base URLs need their traces suffix; without either setting, leave endpoint
+# selection and the default local gRPC collector to the SDK.
+_endpoint_options = {}
+_collector_endpoint = os.environ.get("PHOENIX_COLLECTOR_ENDPOINT") or os.environ.get(
+    "OTEL_EXPORTER_OTLP_ENDPOINT"
+)
+if _collector_endpoint:
+    parsed = urlparse(_collector_endpoint)
+    grpc_port = int(os.environ.get("PHOENIX_GRPC_PORT", "4317"))
+    is_grpc = parsed.port == grpc_port and not parsed.path.rstrip("/")
+    if parsed.scheme in {"http", "https"} and not is_grpc:
+        endpoint = _collector_endpoint.rstrip("/")
+        if not endpoint.endswith("/v1/traces"):
+            endpoint += "/v1/traces"
+        _endpoint_options = {"endpoint": endpoint, "protocol": "http/protobuf"}
 
 _tracer_provider = register(
     project_name=os.environ.get("PHOENIX_PROJECT_NAME", "wonder-toys-langchain-py"),
-    endpoint=_collector_endpoint,
-    protocol="http/protobuf",
-    batch=True,
+    **_endpoint_options,
 )
 
 LangChainInstrumentor().instrument(tracer_provider=_tracer_provider)
