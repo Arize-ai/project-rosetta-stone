@@ -156,6 +156,10 @@ Every agent needs these in `.env.local`:
 
 See each directory's `env.example` for the full template.
 
+## Phoenix Academy
+
+The [Phoenix Academy exercises](academy/README.md) use the existing `phoenix/langchain-py` shopping assistant to teach tracing, evaluation, experiments, and release checks. Start with capturing a request, then use the same application throughout the learning path.
+
 ## Observability tiers
 
 | Tier | What it shows |

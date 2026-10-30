@@ -74,6 +74,15 @@ interface FeaturedProduct {
   ageRange: string;
 }
 
+// Conversation identifiers are trace metadata, not authentication tokens.
+// randomUUID is unavailable when a demo is opened over plain HTTP on a LAN.
+function createSessionId(): string {
+  if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  return Array.from(crypto.getRandomValues(new Uint8Array(16)), (byte) =>
+    byte.toString(16).padStart(2, "0")
+  ).join("");
+}
+
 export function Chat() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -86,6 +95,16 @@ export function Chat() {
       }
     }
     return [];
+  });
+  const [sessionId, setSessionId] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const saved = sessionStorage.getItem("chat-session-id");
+      if (saved) return saved;
+      const id = createSessionId();
+      sessionStorage.setItem("chat-session-id", id);
+      return id;
+    }
+    return createSessionId();
   });
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -147,7 +166,7 @@ export function Chat() {
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-session-id": sessionId },
         body: JSON.stringify({
           messages: updatedMessages.map((m) => ({
             role: m.role,
@@ -324,7 +343,7 @@ export function Chat() {
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2" onClick={() => { setMessages([]); setInput(""); sessionStorage.removeItem("chat-messages"); }}>
+        <Link href="/" className="flex items-center gap-2" onClick={() => { setMessages([]); setInput(""); sessionStorage.removeItem("chat-messages"); const newId = createSessionId(); sessionStorage.setItem("chat-session-id", newId); setSessionId(newId); }}>
           <img src="/product-images/wonder-toys-logo.png" alt="Wonder Toys" className="w-8 h-8" />
           <h1 className="text-xl font-bold text-purple-800">Wonder Toys</h1>
         </Link>
