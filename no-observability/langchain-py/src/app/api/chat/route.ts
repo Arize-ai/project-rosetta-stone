@@ -6,6 +6,7 @@ const BACKEND_SECRET = process.env.BACKEND_SECRET || "";
 export async function POST(req: Request) {
   const userId = "anonymous";
   const { messages } = await req.json();
+  const sessionId = req.headers.get("x-session-id") || crypto.randomUUID();
 
   const backendResponse = await fetch(`${BACKEND_URL}/chat`, {
     method: "POST",
@@ -13,6 +14,7 @@ export async function POST(req: Request) {
       "Content-Type": "application/json",
       "X-API-Key": BACKEND_SECRET,
       "X-User-ID": userId,
+      "X-Session-ID": sessionId,
     },
     body: JSON.stringify({ messages }),
   });

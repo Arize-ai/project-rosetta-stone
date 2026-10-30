@@ -1,4 +1,5 @@
 import os
+from uuid import uuid4
 
 import backend.tracing  # noqa: F401 — must be imported before LangChain
 
@@ -10,7 +11,11 @@ from backend.agent import stream_agent
 
 BACKEND_SECRET = os.environ.get("BACKEND_SECRET", "")
 
-app = FastAPI(title="Wonder Toys LangChain Backend")
+# Keep tracing focused on agent operations rather than HTTP wrapper spans.
+app = FastAPI(
+    title="Wonder Toys LangChain Backend",
+    telemetry={"tracing": False},
+)
 
 
 def _verify_api_key(request: Request) -> None:
@@ -26,11 +31,12 @@ async def chat(request: Request):
     _verify_api_key(request)
 
     user_id = request.headers.get("x-user-id", "anonymous")
+    session_id = request.headers.get("x-session-id") or str(uuid4())
     body = await request.json()
     messages = body.get("messages", [])
 
     return StreamingResponse(
-        stream_agent(messages, user_id),
+        stream_agent(messages, user_id, session_id=session_id),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",

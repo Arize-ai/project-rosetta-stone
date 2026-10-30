@@ -1,0 +1,43 @@
+name: Wonder Toys Academy checks
+
+on:
+  pull_request:
+    paths:
+      - 'academy/evaluations/**'
+      - 'phoenix/langchain-py/backend/**'
+      - '.github/workflows/academy-checks.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  purchase-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.11'
+      - name: Install uv
+        run: python -m pip install uv==0.12.19
+      - name: Check the purchase outcome and evaluator boundaries
+        run: >-
+          uv run --python 3.11
+          --with-requirements phoenix/langchain-py/backend/requirements.txt
+          --with 'arize-phoenix-evals>=3.9.5'
+          --with pytest
+          python -m pytest academy/evaluations/tests -q
+      - name: Record the Phoenix eval test
+        env:
+          PHOENIX_ENDPOINT: ${{ secrets.PHOENIX_ENDPOINT }}
+          PHOENIX_API_KEY: ${{ secrets.PHOENIX_API_KEY }}
+          PHOENIX_TEST_TRACKING: ${{ secrets.PHOENIX_ENDPOINT != '' && '1' || '0' }}
+        run: >-
+          uv run --python 3.11
+          --with-requirements phoenix/langchain-py/backend/requirements.txt
+          --with 'arize-phoenix-client[pytest]'
+          --with 'arize-phoenix-evals>=3.9.5'
+          --with pytest
+          python -m pytest academy/evaluations/ci -q
