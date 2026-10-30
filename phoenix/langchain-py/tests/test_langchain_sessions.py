@@ -4,6 +4,7 @@ Run from phoenix/langchain-py:
     python -m unittest discover -s tests -p 'test_langchain_sessions.py'
 """
 import asyncio
+import os
 import unittest
 from contextlib import nullcontext
 from types import SimpleNamespace
@@ -75,6 +76,36 @@ class ConversationSessionTests(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("[DONE]", response.text)
+
+    def test_agent_factory_keeps_the_existing_defaults(self):
+        with (
+            patch.dict(os.environ, {"ANTHROPIC_API_KEY": "test-key"}),
+            patch.object(agent, "ChatAnthropic") as model,
+            patch.object(agent, "create_react_agent") as build,
+        ):
+            agent._build_agent()
+        model.assert_called_once_with(model="claude-sonnet-4-6", api_key="test-key")
+        build.assert_called_once_with(
+            model.return_value, agent.all_tools, prompt=agent.SYSTEM_PROMPT,
+        )
+
+    def test_experiment_overrides_do_not_replace_application_defaults(self):
+        original_tools = list(agent.all_tools)
+        original_prompt = agent.SYSTEM_PROMPT
+        with (
+            patch.dict(os.environ, {"ANTHROPIC_API_KEY": "test-key"}),
+            patch.object(agent, "ChatAnthropic"),
+            patch.object(agent, "create_react_agent") as build,
+        ):
+            agent._build_agent(system_prompt="Candidate instruction", tools_override=[])
+            self.assertEqual(build.call_args.args[1], [])
+            self.assertEqual(build.call_args.kwargs["prompt"], "Candidate instruction")
+            build.reset_mock()
+            agent._build_agent()
+        self.assertEqual(agent.all_tools, original_tools)
+        self.assertEqual(agent.SYSTEM_PROMPT, original_prompt)
+        self.assertIs(build.call_args.args[1], agent.all_tools)
+        self.assertEqual(build.call_args.kwargs["prompt"], original_prompt)
 
     def test_turns_group_by_conversation_not_shopper(self):
         self.send("conversation-a")
