@@ -1,10 +1,10 @@
-name: Wonder Toys Academy checks
+name: Phoenix Academy checks
 
 on:
   pull_request:
     paths:
-      - 'academy/evaluations/**'
-      - 'phoenix/langchain-py/backend/**'
+      - 'academy/**'
+      - 'phoenix/langchain-py/**'
       - '.github/workflows/academy-checks.yml'
   workflow_dispatch:
 
@@ -29,6 +29,13 @@ jobs:
           --with 'arize-phoenix-evals>=3.9.5'
           --with pytest
           python -m pytest academy/evaluations/tests -q
+      - name: Check conversation tracing
+        working-directory: phoenix/langchain-py
+        run: >-
+          uv run --python 3.11
+          --with-requirements backend/requirements.txt
+          --with httpx
+          python -m unittest discover -s tests -p 'test_langchain_sessions.py'
       - name: Record the Phoenix eval test
         env:
           PHOENIX_ENDPOINT: ${{ secrets.PHOENIX_ENDPOINT }}

@@ -1,6 +1,5 @@
 import os
 import json
-from uuid import uuid4
 from collections.abc import AsyncIterator
 
 from langchain_anthropic import ChatAnthropic
@@ -117,15 +116,12 @@ def _lc_messages(messages: list[dict], user_id: str) -> list:
     return lc_messages
 
 
-async def stream_agent(
-    messages: list[dict], user_id: str, session_id: str | None = None
-) -> AsyncIterator[str]:
+async def stream_agent(messages: list[dict], user_id: str) -> AsyncIterator[str]:
     """Stream agent response as SSE events.
 
     Yields strings in the format: 'data: {"text":"..."}\n\n'
     Ends with 'data: [DONE]\n\n'
     """
-    session_id = session_id or str(uuid4())
     agent = get_agent()
     lc_messages = _lc_messages(messages, user_id)
 
@@ -135,7 +131,7 @@ async def stream_agent(
     async for event in agent.astream_events(
         {"messages": lc_messages},
         version="v2",
-        config={"recursion_limit": 25, "metadata": {"session_id": session_id}},
+        config={"recursion_limit": 25},
     ):
         kind = event["event"]
 
