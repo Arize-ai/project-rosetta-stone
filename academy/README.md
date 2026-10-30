@@ -26,5 +26,6 @@ The Academy uses only `phoenix/langchain-py`. The AX and uninstrumented demos ke
 | [`backend/tracing.py`](../phoenix/langchain-py/backend/tracing.py) | Send traces over HTTP to the local or Cloud endpoint configured for the lesson. |
 | [`src/app/api/chat/route.ts`](../phoenix/langchain-py/src/app/api/chat/route.ts) | Forward the conversation ID through the existing streaming proxy. |
 | [`src/components/Chat.tsx`](../phoenix/langchain-py/src/components/Chat.tsx) | Keep one conversation ID per chat and replace it when the shopper starts a new chat. |
+| [`evals/run-phoenix-evals.ts`](../evals/run-phoenix-evals.ts) | Keep the existing shared evaluation runner compatible with plain-text agent roots, including short replies such as `25`, while retaining its existing framework-message parsing. |
 
 The purchase tools, inventory, catalogue, base system prompt, and demo dependency files are unchanged. The exercises run separately; starting the normal application does not run evaluations or Harbor tasks. Purchase-check processes and Harbor containers have their own in-memory order state.
