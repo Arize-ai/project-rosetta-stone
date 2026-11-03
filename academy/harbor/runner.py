@@ -9,8 +9,7 @@ p = argparse.ArgumentParser()
 p.add_argument('--instruction')
 p.add_argument('--oracle', action='store_true')
 args = p.parse_args()
-from backend import tracing
-from backend.orders import get_orders_by_user
+from backend import orders, tracing
 from backend.tools import purchase_product
 
 if args.oracle:
@@ -52,5 +51,6 @@ else:
     Path('/logs/agent').mkdir(parents=True,exist_ok=True)
     Path('/logs/agent/trajectory.json').write_text(json.dumps(trajectory,indent=2))
 
-# This snapshot is written by the application runner, not supplied by the model.
-Path('/app/order-state.json').write_text(json.dumps({'orders': get_orders_by_user('academy-shopper')},indent=2))
+# Inspect the complete store in this isolated process, including other owners.
+# Filtering by shopper here would hide extra purchases from the verifier.
+Path('/app/order-state.json').write_text(json.dumps({'orders': list(orders._orders.values())},indent=2))
