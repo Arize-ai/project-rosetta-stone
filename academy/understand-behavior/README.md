@@ -1,6 +1,6 @@
 # Understand Wonder Toys with Phoenix
 
-Use the existing LangChain Python shopping assistant to capture a request, read its model and tool steps, and follow a conversation across 3 traces.
+This quickstart uses the already-instrumented Phoenix version of Wonder Toys to capture a request and follow a conversation across 3 traces. To learn how to add instrumentation yourself, start with [Capture your first agent run](https://arize.com/docs/phoenix/learn/capture-first-run), which uses the uninstrumented version.
 
 ## Start the application
 

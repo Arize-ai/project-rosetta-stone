@@ -1,6 +1,8 @@
 # Phoenix Academy exercises
 
-These exercises accompany [Phoenix Academy](https://arize.com/docs/phoenix/learn). They reuse the existing Wonder Toys shopping assistant in `phoenix/langchain-py`.
+These exercises accompany [Phoenix Academy](https://arize.com/docs/phoenix/learn). The first lessons start with [uninstrumented Wonder Toys](../no-observability/langchain-py), where you add tracing yourself. The [Phoenix-instrumented version](../phoenix/langchain-py) provides a reference implementation, and the companion exercise scripts reuse its backend.
+
+Continue using the API key you configured in `no-observability/langchain-py/.env.local`. The model-based exercise commands use that file with `--env-file`. If you used the pre-instrumented demo's quickstart instead, pass `phoenix/langchain-py/.env.local` or the path to your own environment file.
 
 | Part of the learning path | Companion code |
 | --- | --- |
@@ -17,7 +19,7 @@ Keep credentials in your local environment or the ignored application `.env.loca
 
 ## Changes to the existing demo
 
-The Academy uses only `phoenix/langchain-py`. The AX and uninstrumented demos keep their existing behavior. The changes to the Phoenix demo support these lessons:
+The companion scripts reuse `phoenix/langchain-py`. The AX and uninstrumented demo files are unchanged; the instrumentation lessons ask readers to add tracing locally. The changes to the Phoenix demo support these lessons:
 
 | Existing file | Purpose |
 | --- | --- |
