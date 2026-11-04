@@ -40,6 +40,8 @@ def main():
     if args.repetitions < 1:
         p.error("repetitions must be positive")
     load_model_key(args.env_file)
+    # LangChain records model calls; native Anthropic tracing would count them twice.
+    os.environ["ANTHROPIC_OPEN_TELEMETRY"] = "false"
     os.environ["PHOENIX_COLLECTOR_ENDPOINT"] = args.phoenix_url
     os.environ["PHOENIX_PROJECT_NAME"] = "wonder-toys"
     os.environ["CHROMA_URL"] = args.chroma_url
