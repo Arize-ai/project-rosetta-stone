@@ -156,6 +156,10 @@ Every agent needs these in `.env.local`:
 
 See each directory's `env.example` for the full template.
 
+## Phoenix Academy
+
+The [Phoenix Academy exercises](academy/README.md) use Wonder Toys to teach tracing, evaluation, experiments, and release checks. The instrumentation lessons start with `no-observability/langchain-py`; the companion exercise scripts reuse the backend in `phoenix/langchain-py`.
+
 ## Observability tiers
 
 | Tier | What it shows |

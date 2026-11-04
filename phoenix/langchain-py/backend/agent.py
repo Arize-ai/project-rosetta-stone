@@ -1,13 +1,18 @@
 import os
 import json
+from uuid import uuid4
 from collections.abc import AsyncIterator
 from contextlib import nullcontext
 
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langgraph.prebuilt import create_react_agent
+from opentelemetry.trace import StatusCode
 
 from backend.tools import all_tools
+from backend.tracing import _tracer_provider
+
+_tracer = _tracer_provider.get_tracer(__name__)
 
 # The openinference langchain instrumentor does not auto-emit
 # ``session.id`` / ``user.id`` span attributes, so we wrap the agent call in
@@ -79,7 +84,7 @@ Description or marketing copy
 7. **Important**: You have a userId available in the conversation context. Always use it when making purchases or checking orders. The userId will be provided in the system context."""
 
 
-def _build_agent():
+def _build_agent(system_prompt: str = SYSTEM_PROMPT, tools_override=None):
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         raise EnvironmentError(
@@ -87,7 +92,7 @@ def _build_agent():
             "Set it before starting the server (see env.example)."
         )
     model = ChatAnthropic(model="claude-sonnet-4-6", api_key=api_key)
-    return create_react_agent(model, all_tools, prompt=SYSTEM_PROMPT)
+    return create_react_agent(model, all_tools if tools_override is None else tools_override, prompt=system_prompt)
 
 
 _agent = None
@@ -131,26 +136,48 @@ def _lc_messages(messages: list[dict], user_id: str) -> list:
     return lc_messages
 
 
-async def stream_agent(messages: list[dict], user_id: str) -> AsyncIterator[str]:
+async def stream_agent(
+    messages: list[dict], user_id: str, session_id: str | None = None
+) -> AsyncIterator[str]:
     """Stream agent response as SSE events.
 
     Yields strings in the format: 'data: {"text":"..."}\n\n'
     Ends with 'data: [DONE]\n\n'
     """
+    session_id = session_id or str(uuid4())
     agent = get_agent()
     lc_messages = _lc_messages(messages, user_id)
 
     had_text_before = False
     in_tool_call = False
+    response_parts: list[str] = []
+    query = next(
+        (
+            message.get("content", "")
+            for message in reversed(messages)
+            if message.get("role") == "user"
+        ),
+        "",
+    )
 
-    # using_session/using_user tag every span produced inside this block with
-    # ``session.id`` / ``user.id`` attributes. Without this wrap, Phoenix sees
-    # the spans as orphans with no way to group them into sessions.
-    with using_session(user_id), using_user(user_id):
+    # Keep a readable request/response on the root for conversation views.
+    # LangGraph's own spans retain the complete framework message structures.
+    with (
+        using_session(session_id),
+        using_user(user_id),
+        _tracer.start_as_current_span(
+            "Wonder Toys",
+            attributes={
+                "openinference.span.kind": "AGENT",
+                "input.value": query,
+                "input.mime_type": "text/plain",
+            },
+        ) as root_span,
+    ):
         async for event in agent.astream_events(
             {"messages": lc_messages},
             version="v2",
-            config={"recursion_limit": 25},
+            config={"recursion_limit": 25, "metadata": {"session_id": session_id}},
         ):
             kind = event["event"]
 
@@ -172,12 +199,18 @@ async def stream_agent(messages: list[dict], user_id: str) -> AsyncIterator[str]
 
                 if text:
                     if in_tool_call and had_text_before:
+                        response_parts.append("\n\n")
                         yield f"data: {json.dumps({'text': chr(10) + chr(10)})}\n\n"
                     in_tool_call = False
                     had_text_before = True
+                    response_parts.append(text)
                     yield f"data: {json.dumps({'text': text})}\n\n"
 
             elif kind == "on_tool_start":
                 in_tool_call = True
+
+        root_span.set_attribute("output.value", "".join(response_parts))
+        root_span.set_attribute("output.mime_type", "text/plain")
+        root_span.set_status(StatusCode.OK)
 
     yield "data: [DONE]\n\n"

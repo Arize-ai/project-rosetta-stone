@@ -1,0 +1,6 @@
+jobs/
+purchase-confirmed/environment/backend/
+purchase-confirmed/environment/requirements.txt
+purchase-confirmed/environment/runner.py
+__pycache__/
+code-budget-filter/environment/products.json

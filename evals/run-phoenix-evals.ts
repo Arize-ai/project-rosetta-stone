@@ -260,6 +260,15 @@ function extractRootData(span: any, allSpans: any[]): { userQuery: string; agent
     }
   }
 
+  // Plain text can itself be valid JSON (for example, a shopper replying "25").
+  // Respect the recorded format instead of treating it as a message object.
+  if (attrs["input.mime_type"] === "text/plain" && attrs["output.mime_type"] === "text/plain") {
+    return {
+      userQuery: String(attrs["input.value"] ?? ""),
+      agentResponse: String(attrs["output.value"] ?? ""),
+    };
+  }
+
   // Extract text from a content field that may be a string or array of blocks.
   function extractContent(content: any): string {
     if (typeof content === "string") return content;
