@@ -14,6 +14,10 @@ import os
 from arize.otel import register
 from openinference.instrumentation.agno import AgnoInstrumentor
 
+# Framework instrumentation already records each Anthropic model call.
+# Disable native SDK spans before any clients are constructed.
+os.environ["ANTHROPIC_OPEN_TELEMETRY"] = "false"
+
 _tracer_provider = register(
     space_id=os.environ["ARIZE_SPACE_ID"],
     api_key=os.environ["ARIZE_API_KEY"],
