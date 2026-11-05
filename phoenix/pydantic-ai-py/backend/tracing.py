@@ -25,6 +25,10 @@ from pydantic_ai import Agent, InstrumentationSettings
 
 from openinference.instrumentation.pydantic_ai import OpenInferenceSpanProcessor
 
+# Framework instrumentation already records each Anthropic model call.
+# Disable native SDK spans before any clients are constructed.
+os.environ["ANTHROPIC_OPEN_TELEMETRY"] = "false"
+
 tracer_provider = TracerProvider(
     resource=Resource.create(
         {PROJECT_NAME: os.getenv("PHOENIX_PROJECT_NAME", "pydantic-ai")}

@@ -17,6 +17,10 @@ import os
 from openinference.instrumentation.agno import AgnoInstrumentor
 from phoenix.otel import register
 
+# Framework instrumentation already records each Anthropic model call.
+# Disable native SDK spans before any clients are constructed.
+os.environ["ANTHROPIC_OPEN_TELEMETRY"] = "false"
+
 _tracer_provider = register(
     endpoint=os.environ.get("PHOENIX_COLLECTOR_ENDPOINT"),
     project_name=os.environ.get("PHOENIX_PROJECT_NAME", "wonder-toys-agno"),

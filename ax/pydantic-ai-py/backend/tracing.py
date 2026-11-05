@@ -21,6 +21,10 @@ from opentelemetry import trace as otel_trace
 from opentelemetry.sdk.trace import TracerProvider
 from pydantic_ai import Agent, InstrumentationSettings
 
+# Framework instrumentation already records each Anthropic model call.
+# Disable native SDK spans before any clients are constructed.
+os.environ["ANTHROPIC_OPEN_TELEMETRY"] = "false"
+
 resource = Resource.create({
     PROJECT_NAME: os.environ["ARIZE_PROJECT_NAME"],
 })

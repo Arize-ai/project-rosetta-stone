@@ -15,6 +15,10 @@ from urllib.parse import urlparse
 from phoenix.otel import register
 from openinference.instrumentation.langchain import LangChainInstrumentor
 
+# Framework instrumentation already records each Anthropic model call.
+# Disable native SDK spans before any clients are constructed.
+os.environ["ANTHROPIC_OPEN_TELEMETRY"] = "false"
+
 # Honor Phoenix or standard OTLP endpoints without forcing HTTP on gRPC users.
 # HTTP base URLs need their traces suffix; without either setting, leave endpoint
 # selection and the default local gRPC collector to the SDK.
